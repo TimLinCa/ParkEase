@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ParkEase.Page.LogInPage"
+             xmlns:vm="clr-namespace:ParkEase.ViewModel"
+             xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+             xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             x:DataType="vm:LogInViewModel"
+             Title="">
+    <VerticalStackLayout>
+
+        <input:FormView SubmitCommand="{Binding LogInCommand}" Spacing="20">
+
+            <material:TextField Margin="20,0" IsReadOnly="False" Title="Email" Text="{Binding Password}">
+                <validation:RequiredValidation />
+                <validation:RegexValidation Message="Please type a valid e-mail address." Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
+            </material:TextField>
+            <Button 
+            MinimumWidthRequest="100"
+            Text="Sign Up"
+            Command="{Binding SignUpCommand}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+            
+            <Button Text="Submit"
+             MinimumWidthRequest="100"
+            input:FormView.IsSubmitButton="True"
+            VerticalOptions="Center"
+            HorizontalOptions="Center"/>
+
+        </input:FormView>
+
+    </VerticalStackLayout>
+</ContentPage>

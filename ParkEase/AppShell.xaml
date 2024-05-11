@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ParkEase.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ParkEase"
+    xmlns:page="clr-namespace:ParkEase.Page"
+    Shell.FlyoutBehavior="Disabled"
+    Title="ParkEase">
+
+    <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate page:LogInPage}"
+        Route="LogInPage" />
+
+</Shell>
