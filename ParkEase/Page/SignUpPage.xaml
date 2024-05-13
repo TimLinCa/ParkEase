@@ -36,14 +36,22 @@
                 <validation:RegexValidation Message="Please type a valid e-mail address." Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
             </material:TextField>
 
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Create Password" Text="{Binding Password}">
+            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Create Password" Text="{Binding Password}" IsPassword="True">
+                <material:TextField.Attachments>
+                    <material:TextFieldPasswordShowHideAttachment />
+                </material:TextField.Attachments>
                 <validation:RequiredValidation />
                 <validation:RegexValidation Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 12 characters long." Pattern="{x:Static input:AdvancedEntry.REGEX_PASSWORD}"/>
             </material:TextField>
 
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}">
+            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" >
+                <material:TextField.Attachments>
+                    <material:TextFieldPasswordShowHideAttachment />
+                </material:TextField.Attachments>
                 <validation:RequiredValidation />
+                <validation:RegexValidation BindingContext="{Binding UnMatchingPasswordMessage}" /> 
             </material:TextField>
+
 
             <material:CheckBox  WidthRequest="350"  
                                Text="I Accept Terms &amp; Conditions"

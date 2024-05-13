@@ -109,6 +109,7 @@ namespace ParkEase.ViewModel
                 if (Password != RepeatPassword)
                 {
                     UnMatchingPasswordMessage = "Password does not match!";
+                    
                 }
             }
         });
