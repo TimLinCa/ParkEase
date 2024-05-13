@@ -113,9 +113,14 @@ namespace ParkEase.ViewModel
                 }
                 else
                 {
-                    UnMatchingPasswordMessage = "";
+                    UnMatchingPasswordMessage = string.Empty;
                 }
             }
+        });
+
+        public ICommand BackToLogInPage => new RelayCommand(async () =>
+        {
+            await Shell.Current.GoToAsync(nameof(LogInPage));
         });
     }
 }
