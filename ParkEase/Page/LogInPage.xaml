@@ -7,27 +7,88 @@
              xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              x:DataType="vm:LogInViewModel"
-             Title="">
-    <VerticalStackLayout>
+             Title=" ">
+    <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
 
         <input:FormView SubmitCommand="{Binding LogInCommand}" Spacing="20">
 
-            <material:TextField Margin="20,0" IsReadOnly="False" Title="Email" Text="{Binding Password}">
+            <Image Source="parkease_logo.png"
+                   HorizontalOptions="Center"
+                   WidthRequest="180" 
+                   HeightRequest="180"
+                   Aspect="AspectFit"/>
+
+            <Label
+                Text="Welcome to ParkEase"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <Label 
+                Text="Please enter the details below to continue" 
+                FontSize="Micro" 
+                TextColor="Gray" 
+                Margin="0,5,0,10"
+                HorizontalOptions="Center"/>
+
+            <material:TextField 
+                Margin="20,0" 
+                IsReadOnly="False" 
+                Title="Email" 
+                AllowClear="True"
+                Text="{Binding Email}"
+                WidthRequest="350">
                 <validation:RequiredValidation />
-                <validation:RegexValidation Message="Please type a valid e-mail address." Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
+                <validation:RegexValidation 
+                    Message="Please type a valid e-mail address." 
+                    Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
             </material:TextField>
-            <Button 
-            MinimumWidthRequest="100"
-            Text="Sign Up"
-            Command="{Binding SignUpCommand}"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+
+            <material:TextField 
+                Margin="20,0" 
+                IsReadOnly="False" 
+                Title="Password" 
+                IsPassword="True" 
+                Text="{Binding Password}"
+                WidthRequest="350">
+                <material:TextField.Attachments>
+                    <material:TextFieldPasswordShowHideAttachment />
+                </material:TextField.Attachments>
+                <validation:RequiredValidation />
+                <validation:RegexValidation 
+                    Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 12 characters long." 
+                    Pattern="{x:Static input:AdvancedEntry.REGEX_PASSWORD}"/>
+            </material:TextField>
+
             
-            <Button Text="Submit"
-             MinimumWidthRequest="100"
-            input:FormView.IsSubmitButton="True"
-            VerticalOptions="Center"
-            HorizontalOptions="Center"/>
+            <HorizontalStackLayout Spacing="53" MaximumWidthRequest="350">
+                <material:CheckBox Text="Remember Me"
+                       IsChecked="{Binding RememberMe}"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Start"/>
+                <BoxView HorizontalOptions="FillAndExpand" />
+                <Label Text="Forgot Password?"
+                       HorizontalOptions="End" 
+                       VerticalOptions="Center"
+                       TextColor="Blue">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20" Margin="0,30,0,0">
+                <Button Text="Log in"
+                     MinimumWidthRequest="165"
+                     input:FormView.IsSubmitButton="True"
+                     VerticalOptions="Center" />
+
+                <Button Text="Register"
+                     Style="{StaticResource SecondaryButtonStyle}"
+                     MinimumWidthRequest="165"
+                     Command="{Binding SignUpCommand}"
+                     VerticalOptions="Center" />
+            </HorizontalStackLayout>
 
         </input:FormView>
 
