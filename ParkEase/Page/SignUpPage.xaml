@@ -19,12 +19,16 @@
                Aspect="AspectFit" />
 
         <Label Text="Welcome to Sign up page"
-               FontSize="Medium"  
-               TextColor="DarkBlue"
-               VerticalOptions="Center" 
-               HorizontalOptions="Center" />
+               Style="{StaticResource Headline}"
+               SemanticProperties.HeadingLevel="Level1"  />
+        
+        <Label Text="Please enter the details below to continue" 
+                FontSize="Micro" 
+                TextColor="Gray" 
+                Margin="0,5,0,10"
+                HorizontalOptions="Center"/>
 
-        <input:FormView SubmitCommand="{Binding SignUpCommand}" Spacing="15">
+        <input:FormView SubmitCommand="{Binding SignUpCommand}" Spacing="20">
 
             <material:TextField  WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Fullname" Text="{Binding FullName}">
                 <validation:RequiredValidation />
