@@ -19,7 +19,7 @@
                    Aspect="AspectFit"/>
 
             <Label
-                Text="Welcome to ParkEase"
+                Text="Welcome back!"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
 
