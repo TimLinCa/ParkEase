@@ -102,14 +102,18 @@ namespace ParkEase.ViewModel
             }
         });
 
-        public ICommand ConfirmPasswordCommand => new RelayCommand(async () =>
+        public ICommand ConfirmPasswordCommand => new RelayCommand(() =>
         {
             if (!string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(RepeatPassword))
             {
                 if (Password != RepeatPassword)
                 {
                     UnMatchingPasswordMessage = "Password does not match!";
-                    
+
+                }
+                else
+                {
+                    UnMatchingPasswordMessage = "";
                 }
             }
         });
