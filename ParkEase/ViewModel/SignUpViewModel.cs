@@ -35,10 +35,11 @@ namespace ParkEase.ViewModel
         private string emailExistsMessage;
 
         [ObservableProperty]
-        private string matchingPasswordMessage;
+        private string unMatchingPasswordMessage;
 
         [ObservableProperty]
-        private string unMatchingPasswordMessage;
+        private bool isTermsAndConditionsAccepted;
+
 
         private readonly IMongoDBService mongoDBService;
 
@@ -52,9 +53,9 @@ namespace ParkEase.ViewModel
             Email = "";
             Password = "";
             RepeatPassword = "";
-            MatchingPasswordMessage = "";
             UnMatchingPasswordMessage = "";
             EmailExistsMessage = "";
+            IsTermsAndConditionsAccepted = false;
         }
 
         // Check if the email user register exists or not
@@ -76,7 +77,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password))
+                if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password) && !IsTermsAndConditionsAccepted)
                 {
                     bool emailExists = await EmailExists(Email);
                     if (emailExists)
