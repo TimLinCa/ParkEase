@@ -36,7 +36,7 @@
                     <validation:LettersOnlyValidation AllowSpaces="True"/>
                 </material:TextField>
 
-                <material:TextField WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Email" Text="{Binding Email}" TextChanged="EmailExists">
+                <material:TextField WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Email" Text="{Binding Email}" >
                     <validation:RequiredValidation />
                     <validation:RegexValidation Message="Please type a valid e-mail address." Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
                 </material:TextField>
@@ -52,7 +52,7 @@
                     <validation:RegexValidation Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 12 characters long." Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{12,}$"/>
                 </material:TextField>
 
-                <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" IsPassword="True" Unfocused="ConfirmPasswordCommand">
+                <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" IsPassword="True">
                     <material:TextField.Attachments>
                         <material:TextFieldPasswordShowHideAttachment />
                     </material:TextField.Attachments>

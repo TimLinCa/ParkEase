@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
@@ -58,24 +59,25 @@ namespace ParkEase.ViewModel
             IsTermsAndConditionsAccepted = false;
         }
 
-        // Check if the email user register exists or not
-        public ICommand EmailExists => new RelayCommand(async () =>
+        partial void OnEmailChanged(string? value)
+        {
+            EmailExists();
+        }
+
+        private async Task EmailExists()
         {
             try
             {
                 List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
                 if (!string.IsNullOrEmpty(Email))
                 {
-                    foreach (User user in users)
+                    if(users.Any(u => u.Email == Email))
                     {
-                        if (user.Email == Email)
-                        {
-                            EmailExistsMessage = "This email address already exists";
-                        }
-                        else
-                        {
-                            EmailExistsMessage = string.Empty;
-                        }
+                        EmailExistsMessage = "This email address already exists";
+                    }
+                    else
+                    {
+                        EmailExistsMessage = string.Empty;
                     }
                 }
                 else
@@ -87,7 +89,8 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        });
+        }
+
 
         public ICommand SignUpCommand => new RelayCommand(async () =>
         {
@@ -114,7 +117,12 @@ namespace ParkEase.ViewModel
             }
         });
 
-        public ICommand ConfirmPasswordCommand => new RelayCommand(() =>
+        partial void OnRepeatPasswordChanged(string? oldValue, string? value)
+        {
+            ConfirmPasswordCommand();
+        }
+
+        private async Task ConfirmPasswordCommand()
         {
             try
             {
@@ -133,9 +141,9 @@ namespace ParkEase.ViewModel
             }
             catch (Exception ex)
             {
-                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        });
+        }
 
         public ICommand BackToLogInPage => new RelayCommand(async () =>
         {
