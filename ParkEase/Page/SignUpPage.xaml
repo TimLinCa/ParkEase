@@ -8,77 +8,97 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              x:DataType="vm:SignUpViewModel">
 
-
-    <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
-        <Image Source="parkease_logo.png"
-               HorizontalOptions="Center"
-               BackgroundColor="Transparent"
-               WidthRequest="180"
-               HeightRequest="180"
-               Aspect="AspectFit" />
-
-        <Label Text="Welcome to Sign up page"
-               Style="{StaticResource Headline}"
-               SemanticProperties.HeadingLevel="Level1"  />
-        
-        <Label Text="Please enter the details below to continue" 
-                FontSize="Micro" 
-                TextColor="Gray" 
-                Margin="0,5,0,10"
-                HorizontalOptions="Center"/>
-
-        <input:FormView SubmitCommand="{Binding SignUpCommand}" Spacing="20">
-
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Fullname" Text="{Binding FullName}">
-                <validation:RequiredValidation />
-                <validation:LettersOnlyValidation AllowSpaces="True"/>
-            </material:TextField>
-
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Email" Text="{Binding Email}" TextChanged="EmailExists">
-                <validation:RequiredValidation />
-                <validation:RegexValidation Message="Please type a valid e-mail address." Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
-            </material:TextField>
-
-            <Label Text="{Binding EmailExistsMessage}" IsVisible="{Binding EmailExistsMessage.Length, Converter={StaticResource NonEmptyStringToBoolConverter}}"
-                TextColor="Red" Margin="10" />
-
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Create Password" Text="{Binding Password}" IsPassword="True">
-                <material:TextField.Attachments>
-                    <material:TextFieldPasswordShowHideAttachment />
-                </material:TextField.Attachments>
-                <validation:RequiredValidation />
-                <validation:RegexValidation Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 12 characters long." Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{12,}$"/>
-            </material:TextField>
-
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" IsPassword="True" Unfocused="ConfirmPasswordCommand">
-                <material:TextField.Attachments>
-                    <material:TextFieldPasswordShowHideAttachment />
-                </material:TextField.Attachments>
-                <validation:RequiredValidation />
-                <validation:RegexValidation /> 
-            </material:TextField>
-
-            <Label Text="{Binding UnMatchingPasswordMessage}" IsVisible="{Binding UnMatchingPasswordMessage.Length, Converter={StaticResource NonEmptyStringToBoolConverter}}"
-               TextColor="Red" Margin="10" />
+    <ScrollView>
 
 
-            <material:CheckBox  WidthRequest="350"  
-                               Text="I Accept Terms &amp; Conditions"
-                               IsChecked="{Binding IsTermsAndConditionsAccepted}">
-                <validation:RequiredValidation />
-            </material:CheckBox>
+        <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" Spacing="20">
 
+            <Image Source="parkease_logo.png"
+                   HorizontalOptions="Center"
+                   WidthRequest="180"
+                   HeightRequest="180"
+                   Aspect="AspectFit" />
 
-            <Button Text="Sign Up"
-                    MinimumWidthRequest="150"
-                    input:FormView.IsSubmitButton="True"
-                    CornerRadius="10"
-                    VerticalOptions="Center"
+            <Label Text="Welcome to Sign up page"
+                   Style="{StaticResource Headline}"
+                   SemanticProperties.HeadingLevel="Level1"  />
+
+            <Label Text="Please enter the details below to continue" 
+                    FontSize="Micro" 
+                    TextColor="Gray" 
+                    Margin="0,5,0,10"
                     HorizontalOptions="Center"/>
 
+            <input:FormView SubmitCommand="{Binding SignUpCommand}" Spacing="20">
 
-        </input:FormView>
+                <material:TextField WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Fullname" Text="{Binding FullName}">
+                    <validation:RequiredValidation />
+                    <validation:LettersOnlyValidation AllowSpaces="True"/>
+                </material:TextField>
 
-    </VerticalStackLayout>
+                <material:TextField WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Email" Text="{Binding Email}" TextChanged="EmailExists">
+                    <validation:RequiredValidation />
+                    <validation:RegexValidation Message="Please type a valid e-mail address." Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
+                </material:TextField>
+
+                <Label Text="{Binding EmailExistsMessage}" IsVisible="{Binding EmailExistsMessage.Length, Converter={StaticResource NonEmptyStringToBoolConverter}}"
+                    TextColor="Red" Margin="12,0,0,0" />
+
+                <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Create Password" Text="{Binding Password}" IsPassword="True">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment />
+                    </material:TextField.Attachments>
+                    <validation:RequiredValidation />
+                    <validation:RegexValidation Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 12 characters long." Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{12,}$"/>
+                </material:TextField>
+
+                <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" IsPassword="True" Unfocused="ConfirmPasswordCommand">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment />
+                    </material:TextField.Attachments>
+                    <validation:RequiredValidation />
+                    <validation:RegexValidation />
+                </material:TextField>
+
+                <Label Text="{Binding UnMatchingPasswordMessage}" IsVisible="{Binding UnMatchingPasswordMessage.Length, Converter={StaticResource NonEmptyStringToBoolConverter}}"
+                   TextColor="Red" Margin="12,0,0,0" />
+
+
+                <material:CheckBox WidthRequest="350"  
+                                   Text="I Accept Terms &amp; Conditions"
+                                   IsChecked="{Binding IsTermsAndConditionsAccepted}">
+                    <validation:RequiredValidation />
+                </material:CheckBox>
+
+
+                <Button Text="Sign Up"
+                        MinimumWidthRequest="150"
+                        input:FormView.IsSubmitButton="True"
+                        CornerRadius="10"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"/>
+
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                    
+                    <Label Text="Already have an account!"
+                           FontSize="Micro" 
+                           TextColor="Gray"  
+                           Margin="0,12,0,10"/>
+
+                    <Button Text="Log In"
+                            FontSize="Micro"
+                            BackgroundColor="Transparent"  
+                            BorderColor="Transparent"
+                            TextColor="Blue"
+                            Padding="0"
+                            Command="{Binding BackToLogInPage}"/>
+
+                </HorizontalStackLayout>
+
+            </input:FormView>
+
+        </VerticalStackLayout>
+
+    </ScrollView>
 
 </ContentPage>

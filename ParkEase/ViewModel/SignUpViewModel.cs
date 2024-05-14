@@ -129,5 +129,8 @@ namespace ParkEase.ViewModel
         {
             await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
         });
+
+       
+
     }
 }
