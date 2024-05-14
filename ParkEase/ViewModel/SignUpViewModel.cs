@@ -77,7 +77,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password) && !IsTermsAndConditionsAccepted)
+                if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password) && IsTermsAndConditionsAccepted)
                 {
                     bool emailExists = await EmailExists(Email);
                     if (emailExists)
@@ -94,6 +94,10 @@ namespace ParkEase.ViewModel
                         await dialogService.ShowAlertAsync("", "Your account is created. Please sign in.", "OK");
                         await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
                     }
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("", "cannot click button", "OK");
                 }
             }
             catch (Exception ex)
@@ -120,7 +124,7 @@ namespace ParkEase.ViewModel
 
         public ICommand BackToLogInPage => new RelayCommand(async () =>
         {
-            await Shell.Current.GoToAsync(nameof(LogInPage));
+            await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
         });
     }
 }

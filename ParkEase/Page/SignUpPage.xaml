@@ -47,7 +47,7 @@
                 <validation:RegexValidation Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 12 characters long." Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{12,}$"/>
             </material:TextField>
 
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" IsPassword="True" >
+            <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" IsPassword="True" Unfocused="ConfirmPasswordCommand">
                 <material:TextField.Attachments>
                     <material:TextFieldPasswordShowHideAttachment />
                 </material:TextField.Attachments>
@@ -69,7 +69,6 @@
             <Button Text="Sign Up"
                     MinimumWidthRequest="150"
                     input:FormView.IsSubmitButton="True"
-                    
                     CornerRadius="10"
                     VerticalOptions="Center"
                     HorizontalOptions="Center"/>
