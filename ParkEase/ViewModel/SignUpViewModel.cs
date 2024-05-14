@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
@@ -58,20 +59,38 @@ namespace ParkEase.ViewModel
             IsTermsAndConditionsAccepted = false;
         }
 
-        // Check if the email user register exists or not
-        public async Task<bool> EmailExists(string email)
+        partial void OnEmailChanged(string? value)
         {
-            List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
-            foreach (User user in users)
+            EmailExists();
+        }
+
+        private async Task EmailExists()
+        {
+            try
             {
-                if (user.Email == email)
+                List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
+                if (!string.IsNullOrEmpty(Email))
                 {
-                    return true;
+                    if(users.Any(u => u.Email == Email))
+                    {
+                        EmailExistsMessage = "This email address already exists";
+                    }
+                    else
+                    {
+                        EmailExistsMessage = string.Empty;
+                    }
+                }
+                else
+                {
+                    EmailExistsMessage = string.Empty;
                 }
             }
-
-            return false;
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
         }
+
 
         public ICommand SignUpCommand => new RelayCommand(async () =>
         {
@@ -79,21 +98,13 @@ namespace ParkEase.ViewModel
             {
                 if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password) && IsTermsAndConditionsAccepted)
                 {
-                    bool emailExists = await EmailExists(Email);
-                    if (emailExists)
-                    {
-                        EmailExistsMessage = "This email address already exists";
-                        await dialogService.ShowAlertAsync("", "This email address already exists", "OK");
-                    }
-                    else
-                    {
-                        string hashedPassword = PasswordHasher.HashPassword(Password);
+                    string hashedPassword = PasswordHasher.HashPassword(Password);
 
-                        await mongoDBService.InsertData<User>(CollectionName.Users, new User { FullName = FullName, Email = Email, Password = hashedPassword }); ;
+                    await mongoDBService.InsertData<User>(CollectionName.Users, new User { FullName = FullName, Email = Email, Password = hashedPassword }); ;
 
-                        await dialogService.ShowAlertAsync("", "Your account is created. Please sign in.", "OK");
-                        await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
-                    }
+                    await dialogService.ShowAlertAsync("", "Your account is created. Please sign in.", "OK");
+                    await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
+                    
                 }
                 else
                 {
@@ -106,25 +117,47 @@ namespace ParkEase.ViewModel
             }
         });
 
-        public ICommand ConfirmPasswordCommand => new RelayCommand(() =>
+        partial void OnRepeatPasswordChanged(string? oldValue, string? value)
         {
-            if (!string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(RepeatPassword))
-            {
-                if (Password != RepeatPassword)
-                {
-                    UnMatchingPasswordMessage = "Password does not match!";
+            ConfirmPasswordCommand();
+        }
 
-                }
-                else
+        private async Task ConfirmPasswordCommand()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(RepeatPassword))
                 {
-                    UnMatchingPasswordMessage = string.Empty;
+                    if (Password != RepeatPassword)
+                    {
+                        UnMatchingPasswordMessage = "Password does not match!";
+
+                    }
+                    else
+                    {
+                        UnMatchingPasswordMessage = string.Empty;
+                    }
                 }
             }
-        });
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
 
         public ICommand BackToLogInPage => new RelayCommand(async () =>
         {
-            await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
+            try
+            {
+                await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync(ex.Message, "OK");
+            }
         });
+
+       
+
     }
 }
