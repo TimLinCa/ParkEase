@@ -9,7 +9,6 @@
     Title="ParkEase">
 
     <ShellContent
-        Title="Home"
         ContentTemplate="{DataTemplate page:LogInPage}"
         Route="LogInPage" />
 

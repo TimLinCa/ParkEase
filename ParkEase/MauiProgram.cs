@@ -6,9 +6,11 @@ using ParkEase.Page;
 using ParkEase.Services;
 using ParkEase.ViewModel;
 using UraniumUI;
+using epj.RouteGenerator;
 
 namespace ParkEase
 {
+    [AutoRoutes("Page")]
     public static class MauiProgram
     {
         public static MauiApp CreateMauiApp()
@@ -28,10 +30,17 @@ namespace ParkEase
             {
                 BindingContext = provider.GetRequiredService<MainViewModel>()
             });
+
             builder.Services.AddTransient<SignUpViewModel>();
             builder.Services.AddTransient(provider => new SignUpPage
             {
                 BindingContext = provider.GetRequiredService<SignUpViewModel>()
+            });
+
+            builder.Services.AddTransient<ForgotPasswordViewModel>();
+            builder.Services.AddTransient(provider => new ForgotPasswordPage
+            {
+                BindingContext = provider.GetRequiredService<ForgotPasswordViewModel>()
             });
 
             builder.Services.AddSingleton<IMongoDBService, MongoDBService>();

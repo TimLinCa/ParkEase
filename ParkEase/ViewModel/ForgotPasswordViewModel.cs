@@ -37,8 +37,16 @@ namespace ParkEase.ViewModel
 
         public ICommand GoToLoginCommand => new RelayCommand(async () =>
         {
-            // Navigate to the Login Page using the route defined in AppShell.xaml
-            await Shell.Current.GoToAsync(nameof(LogInPage));
+            try
+            {
+                // Navigate to the Login Page using the route defined in AppShell.xaml
+                await Shell.Current.GoToAsync("..");
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync(ex.Message, "OK");
+            }
+            
         });
 
 

@@ -9,9 +9,10 @@ namespace ParkEase
         {
             InitializeComponent();
 
-            Routing.RegisterRoute(nameof(SignUpPage), typeof(SignUpPage));
-            Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
-            Routing.RegisterRoute(nameof(ForgotPasswordPage), typeof(ForgotPasswordPage));
+            Routing.RegisterRoute(Routes.SignUpPage, typeof(SignUpPage));
+            Routing.RegisterRoute(Routes.LogInPage, typeof(LogInPage));
+            Routing.RegisterRoute(Routes.MainPage, typeof(MainPage));
+            Routing.RegisterRoute(Routes.ForgotPasswordPage, typeof(ForgotPasswordPage));
             
         }
     }

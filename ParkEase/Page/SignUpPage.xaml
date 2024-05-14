@@ -6,11 +6,10 @@
              xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
              xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             x:DataType="vm:SignUpViewModel"
-             Title="Sign Up Page">
+             x:DataType="vm:SignUpViewModel">
 
 
-    <VerticalStackLayout Spacing="15">
+    <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
         <Image Source="parkease_logo.png"
                HorizontalOptions="Center"
                BackgroundColor="Transparent"

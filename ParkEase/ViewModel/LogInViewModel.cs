@@ -112,7 +112,11 @@ namespace ParkEase.ViewModel
                 RememberMe = remembered;
                 if (RememberMe)
                 {
-                    Email = await SecureStorage.GetAsync("Username");
+                    string? emailInStoreage = await SecureStorage.GetAsync("Username");
+                    if (emailInStoreage != string.Empty)
+                    {
+                        Email = emailInStoreage;
+                    }
                 }
             }
         }
