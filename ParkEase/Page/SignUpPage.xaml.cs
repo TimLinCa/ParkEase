@@ -16,4 +16,12 @@ public partial class SignUpPage : ContentPage
             viewModel.ConfirmPasswordCommand.Execute(null);
         }
     }
+
+    private void EmailExists(object sender, EventArgs e)
+    {
+        if (BindingContext is SignUpViewModel viewModel)
+        {
+            viewModel.EmailExists.Execute(null);
+        }
+    }
 }

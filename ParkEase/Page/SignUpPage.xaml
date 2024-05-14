@@ -34,10 +34,13 @@
                 <validation:LettersOnlyValidation AllowSpaces="True"/>
             </material:TextField>
 
-            <material:TextField  WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Email" Text="{Binding Email}">
+            <material:TextField  WidthRequest="350"  HorizontalOptions="Center" IsReadOnly="False" Title="Email" Text="{Binding Email}" TextChanged="EmailExists">
                 <validation:RequiredValidation />
                 <validation:RegexValidation Message="Please type a valid e-mail address." Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
             </material:TextField>
+
+            <Label Text="{Binding EmailExistsMessage}" IsVisible="{Binding EmailExistsMessage.Length, Converter={StaticResource NonEmptyStringToBoolConverter}}"
+                TextColor="Red" Margin="10" />
 
             <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Create Password" Text="{Binding Password}" IsPassword="True">
                 <material:TextField.Attachments>

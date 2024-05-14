@@ -59,19 +59,30 @@ namespace ParkEase.ViewModel
         }
 
         // Check if the email user register exists or not
-        public async Task<bool> EmailExists(string email)
+        public ICommand EmailExists => new RelayCommand(async () =>
         {
             List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
-            foreach (User user in users)
+            if (!string.IsNullOrEmpty(email))
             {
-                if (user.Email == email)
+                foreach (User user in users)
                 {
-                    return true;
+                    if (user.Email == email)
+                    {
+                        EmailExistsMessage = "This email address already exists";
+                    }
+                    else
+                    {
+                        EmailExistsMessage = string.Empty;
+                    }
                 }
             }
+            else
+            {
+                EmailExistsMessage = string.Empty;
+            }
+            
 
-            return false;
-        }
+        });
 
         public ICommand SignUpCommand => new RelayCommand(async () =>
         {
@@ -79,21 +90,13 @@ namespace ParkEase.ViewModel
             {
                 if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password) && IsTermsAndConditionsAccepted)
                 {
-                    bool emailExists = await EmailExists(Email);
-                    if (emailExists)
-                    {
-                        EmailExistsMessage = "This email address already exists";
-                        await dialogService.ShowAlertAsync("", "This email address already exists", "OK");
-                    }
-                    else
-                    {
-                        string hashedPassword = PasswordHasher.HashPassword(Password);
+                    string hashedPassword = PasswordHasher.HashPassword(Password);
 
-                        await mongoDBService.InsertData<User>(CollectionName.Users, new User { FullName = FullName, Email = Email, Password = hashedPassword }); ;
+                    await mongoDBService.InsertData<User>(CollectionName.Users, new User { FullName = FullName, Email = Email, Password = hashedPassword }); ;
 
-                        await dialogService.ShowAlertAsync("", "Your account is created. Please sign in.", "OK");
-                        await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
-                    }
+                    await dialogService.ShowAlertAsync("", "Your account is created. Please sign in.", "OK");
+                    await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
+                    
                 }
                 else
                 {
