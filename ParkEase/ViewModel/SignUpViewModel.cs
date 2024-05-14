@@ -64,11 +64,11 @@ namespace ParkEase.ViewModel
             try
             {
                 List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
-                if (!string.IsNullOrEmpty(email))
+                if (!string.IsNullOrEmpty(Email))
                 {
                     foreach (User user in users)
                     {
-                        if (user.Email == email)
+                        if (user.Email == Email)
                         {
                             EmailExistsMessage = "This email address already exists";
                         }
