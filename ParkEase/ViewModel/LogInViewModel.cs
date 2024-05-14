@@ -34,6 +34,10 @@ namespace ParkEase.ViewModel
         private IDialogService dialogService;
 
 
+
+
+
+
         public LogInViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
         {
             this.dialogService = dialogService;
@@ -43,22 +47,43 @@ namespace ParkEase.ViewModel
             //ForgotPasswordCommand = new RelayCommand(async () => await ExecuteForgotPasswordCommand());
         }
 
+
+
+
+        public async Task<bool> AccountExists(string email, string password)
+        {
+           
+            List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
+            User user = users.FirstOrDefault(u => u.Email == email);
+
+            if (user == null) return false;
+            if (user.Email == email && PasswordHasher.VerifyPassword(password, user.Password)) return true;
+            return false;
+        }
+
         /// <summary>
         /// Example of a command that can be binded to a button in the UI
         /// </summary>
-        public ICommand TestCommand => new RelayCommand(async () =>
+        public ICommand LogInCommand => new RelayCommand(async () =>
         {
             //try catch block is nessary to catch any exception that might occur to prevent the app from crashing
             try
             {
-                //Hashing a password
-                string hashedPassword = PasswordHasher.HashPassword(Password);
-                //Inseting a user to the database
-                await mongoDBService.InsertData(CollectionName.Users, new User { Email = "Tim@gmail.com", Password = hashedPassword });
-                //Getting all users from the database
-                List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
-                //Verifying a password
-                bool test = PasswordHasher.VerifyPassword(Password, "test");
+                bool accountExists = await AccountExists(Email, Password);
+
+                if (accountExists)
+                {
+                    await Shell.Current.GoToAsync(nameof(MainPage),
+                                    new Dictionary<string, object>
+                                    {
+                    {"Email",Email }
+                                    });
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Error", $"Check your email or password!", "OK");
+                }
+
             }
             catch (Exception ex)
             {
@@ -67,15 +92,6 @@ namespace ParkEase.ViewModel
 
         });
 
-        public ICommand LogInCommand => new RelayCommand(async () =>
-        {
-            //Navigate to MainPage
-            await Shell.Current.GoToAsync(nameof(MainPage),
-                new Dictionary<string, object>
-                {
-                    {"Email",Email }
-                });
-        });
 
         public ICommand SignUpCommand => new RelayCommand(async () =>
         {
