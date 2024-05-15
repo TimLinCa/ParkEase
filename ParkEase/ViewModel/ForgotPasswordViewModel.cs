@@ -31,8 +31,7 @@ namespace ParkEase.ViewModel
         {
             this.dialogService = dialogService;
             this.mongoDBService = mongoDBService;
-            Email = "";
-            
+            Email = "";            
         }
 
         public ICommand GoToLoginCommand => new RelayCommand(async () =>

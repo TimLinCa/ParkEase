@@ -46,9 +46,9 @@ namespace ParkEase.Core.Services
         }
     }
 
-
     public class CollectionName
     {
         public static string Users = "Users";
+        
     }
 }

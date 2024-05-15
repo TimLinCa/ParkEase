@@ -7,6 +7,8 @@ using ParkEase.Services;
 using ParkEase.ViewModel;
 using UraniumUI;
 using epj.RouteGenerator;
+using ParkEase.Core.Model;
+using CommunityToolkit.Maui;
 
 namespace ParkEase
 {
@@ -15,21 +17,21 @@ namespace ParkEase
     {
         public static MauiApp CreateMauiApp()
         {
+            bool developerMode = true;
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-            builder.Services.AddSingleton<MainViewModel>();
-            builder.Services.AddSingleton(provider => new MainPage
-            {
-                BindingContext = provider.GetRequiredService<MainViewModel>()
-            });
+
+            #region page
 
             builder.Services.AddTransient<SignUpViewModel>();
             builder.Services.AddTransient(provider => new SignUpPage
@@ -43,15 +45,32 @@ namespace ParkEase
                 BindingContext = provider.GetRequiredService<ForgotPasswordViewModel>()
             });
 
-            builder.Services.AddSingleton<IMongoDBService, MongoDBService>();
-
             builder.Services.AddSingleton<LogInViewModel>();
             builder.Services.AddSingleton(provider => new LogInPage
             {
                 BindingContext = provider.GetRequiredService<LogInViewModel>()
             });
 
+        
+            builder.Services.AddSingleton<MapViewModel>();
+            builder.Services.AddSingleton(provider => new MapPage
+            {
+                BindingContext = provider.GetRequiredService<MapViewModel>()
+            });
+
+            builder.Services.AddSingleton<CreateMapViewModel>();
+            builder.Services.AddSingleton(provider => new CreateMapPage
+            {
+                BindingContext = provider.GetRequiredService<CreateMapViewModel>()
+            });
+            #endregion
+
+            builder.Services.AddSingleton(provider => new ParkEaseModel(developerMode));
+
+            #region service
             builder.Services.AddSingleton<IDialogService, DialogService>();
+            builder.Services.AddSingleton<IMongoDBService, MongoDBService>();
+            #endregion
 
 #if DEBUG
             builder.Logging.AddDebug();

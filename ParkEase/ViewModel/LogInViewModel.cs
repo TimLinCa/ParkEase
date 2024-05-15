@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
+using ParkEase.Core.Model;
 using ParkEase.Core.Services;
 using ParkEase.Page;
 using ParkEase.Utilities;
@@ -33,15 +34,13 @@ namespace ParkEase.ViewModel
 
         private IDialogService dialogService;
 
+        private ParkEaseModel parkEaseModel;
 
-
-
-
-
-        public LogInViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
+        public LogInViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
             this.dialogService = dialogService;
             this.mongoDBService = mongoDBService;
+            this.parkEaseModel = model;
             Email = "";
             Password = "";
             //ForgotPasswordCommand = new RelayCommand(async () => await ExecuteForgotPasswordCommand());
@@ -61,6 +60,18 @@ namespace ParkEase.ViewModel
             return false;
         }
 
+        public ICommand InitCommand => new RelayCommand(async () =>
+        {
+            if (parkEaseModel.developerMode)
+            {
+                await Shell.Current.GoToAsync($"//{nameof(MapPage)}",
+                                new Dictionary<string, object>
+                                {
+                    {"Email",Email }
+                                });
+            }
+        });
+
         /// <summary>
         /// Example of a command that can be binded to a button in the UI
         /// </summary>
@@ -73,7 +84,7 @@ namespace ParkEase.ViewModel
 
                 if (accountExists)
                 {
-                    await Shell.Current.GoToAsync(nameof(MainPage),
+                    await Shell.Current.GoToAsync($"//{nameof(MapPage)}",
                                     new Dictionary<string, object>
                                     {
                     {"Email",Email }

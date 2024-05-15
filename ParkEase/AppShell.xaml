@@ -5,12 +5,36 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ParkEase"
     xmlns:page="clr-namespace:ParkEase.Page"
-    Shell.FlyoutBehavior="Disabled"
-    Title="ParkEase">
+    Title="ParkEase"
+    Shell.FlyoutBehavior="Flyout">
 
-    <ShellContent
-        ContentTemplate="{DataTemplate page:LogInPage}"
-        Route="LogInPage" />
+
+    <ShellItem Route="LogInPage">
+        <ShellContent
+       ContentTemplate="{DataTemplate page:LogInPage}"
+       FlyoutItemIsVisible="False"
+       NavigationPage.HasNavigationBar="False"
+       Shell.FlyoutBehavior="Disabled"/>
+    </ShellItem>
+
+    <Shell.FlyoutHeader>
+        <Image Source="parkease_logo.png"
+        HorizontalOptions="Center"
+        WidthRequest="100" 
+        Aspect="AspectFit"/>
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Title="Map">
+        <ShellContent  ContentTemplate="{DataTemplate page:MapPage}" Route="MapPage"></ShellContent>
+    </FlyoutItem>
+
+    <FlyoutItem Title="CreateMap">
+        <ShellContent  ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap"></ShellContent>
+    </FlyoutItem>
+
+    <MenuFlyoutSubItem>
+        
+    </MenuFlyoutSubItem>
 
 
 </Shell>

@@ -6,7 +6,9 @@
              xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
              xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             x:DataType="vm:SignUpViewModel">
+             x:DataType="vm:SignUpViewModel"
+             Shell.FlyoutBehavior="Disabled"
+Shell.NavBarIsVisible="False">
 
     <ScrollView>
 
@@ -49,7 +51,7 @@
                         <material:TextFieldPasswordShowHideAttachment />
                     </material:TextField.Attachments>
                     <validation:RequiredValidation />
-                    <validation:RegexValidation Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 12 characters long." Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{12,}$"/>
+                    <validation:RegexValidation Message="A valid password must include at least one uppercase letter, one lowercase letter, one number and must be at least 8 characters long." Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$"/>
                 </material:TextField>
 
                 <material:TextField  WidthRequest="350"  HorizontalOptions="Center"  IsReadOnly="False" Title="Repeat Password" Text="{Binding RepeatPassword}" IsPassword="True">
