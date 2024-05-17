@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
              x:Class="ParkEase.Page.MapPage"
              Title="MapPage">
@@ -9,12 +10,51 @@
         <vm:MapViewModel />
     </ContentPage.BindingContext>
 
-    <StackLayout Margin="10" Orientation="Vertical">
-        <Label 
-             Text="{Binding LocationInfo}" 
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-        <maps:Map x:Name="myMap" MapType="Street" IsShowingUser="true" IsTrafficEnabled="True" />
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-    </StackLayout>
+        <!-- Side Menu Section -->
+        <StackLayout Grid.Column="0" BackgroundColor="LightGray" Padding="10">
+            <Label Text="Map Editor" 
+                   FontSize="20" 
+                   HorizontalOptions="Center" 
+                   Margin="10" />
+
+            <Button Text="Draw Line"
+                    Margin="50,50,50,0"
+                    Command="{Binding DrawLineCommand}"
+                    VerticalOptions="Center" />
+
+            <Button Text="Clear Line"
+                         Style="{StaticResource SecondaryButtonStyle}"
+                         Margin="50,10,50,50"
+                         Command="{Binding ClearLineCommand}"
+                         VerticalOptions="Center" />
+
+            <material:TextField 
+                    Text="{Binding ParkingTime}" 
+                    Margin="10,3" 
+                    Title="Enforcement Time" />
+
+            <material:TextField 
+                    Text="{Binding ParkingFee}" 
+                    Margin="10,3" 
+                    Title="Parking Fee"  />
+
+            <material:TextField 
+                    Text="{Binding ParkingCapacity}" 
+                    Margin="10,3" 
+                    Title="Parking Capacity"  />
+
+            <Label Text="{Binding LocationInfo}" 
+                   VerticalOptions="Center" 
+                   HorizontalOptions="Center" />
+        </StackLayout>
+
+        <!-- Map Section -->
+        <maps:Map x:Name="myMap" Grid.Column="1" MapType="Street" IsShowingUser="True" IsTrafficEnabled="false"/>
+    </Grid>
 </ContentPage>
