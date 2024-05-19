@@ -2,7 +2,13 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkEase.Page.CreateMapPage"
+             xmlns:vm="clr-namespace:ParkEase.ViewModel"
              Title="CreateMapPage">
+
+    <!-- <ContentPage.BindingContext> -->
+        <!-- <vm:CreateMapViewModel /> -->
+    <!-- </ContentPage.BindingContext> -->
+    
     <VerticalStackLayout>
         <Label 
             Text="Welcome to .NET MAUI!!!!!"
@@ -23,5 +29,20 @@
             Aspect="AspectFit"/>
 
         <!--Sang-->
+
+        <GraphicsView Drawable="{StaticResource Drawable}"
+                          x:Name="graphicsView"
+                          HeightRequest="300"
+                          WidthRequest="400"
+                          StartInteraction="StartInteractionCommand"/>
+        <GraphicsView.GestureRecognizers>
+            <!-- <TapGestureRecognizer Tapped="OnTapGestureRecognizerTapped" -->
+            <!-- Buttons="Primary" /> -->
+
+            <TapGestureRecognizer Tapped="OnTapGestureRecognizerTapped"
+                                      CommandParameter="{Binding Source={x:Reference graphicsView}}" />
+
+        </GraphicsView.GestureRecognizers>
+
     </VerticalStackLayout>
 </ContentPage>

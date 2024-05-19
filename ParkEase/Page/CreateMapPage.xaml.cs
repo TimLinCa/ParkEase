@@ -10,6 +10,9 @@ public partial class CreateMapPage : ContentPage
     public CreateMapPage()
     {
         InitializeComponent();
+
+        //var viewModel = BindingContext as CreateMapViewModel;
+        //viewModel?.SetGraphicsView(graphicsView);
     }
     //Sang
     private async void UploadImageClicked(object sender, EventArgs e)
@@ -30,6 +33,17 @@ public partial class CreateMapPage : ContentPage
         }
     }
     //Sang
+
+    /*private void OnTapGestureRecognizerTapped(object sender, TappedEventArgs e)
+    {
+        Console.WriteLine("OnTapGestureRecognizerTapped");
+        if (sender is GraphicsView graphicsView)
+        {
+            var touchPoint = e.GetPosition(graphicsView);
+            var viewModel = BindingContext as CreateMapViewModel;
+            viewModel?.StartInteractionCommand.Execute(touchPoint);
+        }
+    }*/
 
 }
 
