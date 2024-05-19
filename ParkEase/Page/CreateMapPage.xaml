@@ -5,8 +5,23 @@
              Title="CreateMapPage">
     <VerticalStackLayout>
         <Label 
-            Text="Welcome to .NET MAUI!"
+            Text="Welcome to .NET MAUI!!!!!"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
+        <!--Sang-->
+        <Button
+            x:Name="UploadBtn"
+            Text="Upload Image"
+            Clicked="UploadImageClicked"
+            HorizontalOptions="Center"/>
+        <Image
+            x:Name="UploadedImage"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            WidthRequest="700"
+            HeightRequest="700"
+            Aspect="AspectFit"/>
+
+        <!--Sang-->
     </VerticalStackLayout>
 </ContentPage>
