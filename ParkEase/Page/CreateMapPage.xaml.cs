@@ -1,3 +1,5 @@
+using ParkEase.ViewModel;
+
 namespace ParkEase.Page;
 
 public partial class CreateMapPage : ContentPage
@@ -33,6 +35,21 @@ public partial class CreateMapPage : ContentPage
         }
     }
     //Sang
+
+    public async void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
+    {
+        await Shell.Current.DisplayAlert("Tap", "Clicked image", "OK");
+
+        var viewModel = BindingContext as CreateMapViewModel;
+        var touchPosition = args.GetPosition(UploadedImage);
+
+        if (viewModel != null && touchPosition.HasValue)
+        {
+            viewModel.AddPoint(touchPosition.Value);
+        }
+    }
+
+    // https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/tap?view=net-maui-8.0#get-the-gesture-position
 
     /*private void OnTapGestureRecognizerTapped(object sender, TappedEventArgs e)
     {

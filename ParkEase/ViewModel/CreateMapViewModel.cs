@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -93,6 +94,68 @@ namespace ParkEase.ViewModel
 
         //Hazel
 
+        private ObservableCollection<RectF> rectangles;
+        private ObservableCollection<PointF> points;
+        private int nextId;
+
+        [ObservableProperty]
+        private GraphicsDrawable drawable;
+
+        public ObservableCollection<RectF> Rectangles => rectangles;
+        public ObservableCollection<PointF> Points => points;
+
+        public CreateMapViewModel()
+        {
+            rectangles = new ObservableCollection<RectF>();
+            points = new ObservableCollection<PointF>();
+            drawable = new GraphicsDrawable(rectangles);
+            nextId = 1;
+        }
+
+        public void AddPoint(PointF point)
+        {
+            points.Add(point);
+
+            if (points.Count % 2 == 0)
+            {
+                var startPoint = points[points.Count - 2];
+                var endPoint = points.Last();
+                var rect = new RectF(
+                    Math.Min(startPoint.X, endPoint.X),
+                    Math.Min(startPoint.Y, endPoint.Y),
+                    Math.Abs(startPoint.X - endPoint.X),
+                    Math.Abs(startPoint.Y - endPoint.Y));
+
+                rectangles.Add(rect);
+                drawable.UpdateRectangles(rectangles);
+                OnPropertyChanged(nameof(Rectangles));
+            }
+        }
+    }
+
+    public class GraphicsDrawable : IDrawable
+    {
+        private ObservableCollection<RectF> rectangles;
+
+        public GraphicsDrawable(ObservableCollection<RectF> rectangles)
+        {
+            this.rectangles = rectangles;
+        }
+
+        public void UpdateRectangles(ObservableCollection<RectF> newRectangles)
+        {
+            rectangles = newRectangles;
+        }
+
+        public void Draw(ICanvas canvas, RectF dirtyRect)
+        {
+            foreach (var rect in rectangles)
+            {
+                canvas.StrokeColor = Colors.Red;
+                canvas.StrokeSize = 2;
+                canvas.DrawRectangle(rect);
+            }
+        }
     }
     
 }
