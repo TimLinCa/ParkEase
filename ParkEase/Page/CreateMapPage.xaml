@@ -3,30 +3,44 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkEase.Page.CreateMapPage"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
+             xmlns:drawables="clr-namespace:ParkEase.Core.Utilities;assembly=ParkEase.Core"
              Title="CreateMapPage">
 
-    <!-- <ContentPage.BindingContext> -->
-        <!-- <vm:CreateMapViewModel /> -->
-    <!-- </ContentPage.BindingContext> -->
-    <ScrollView>
+    <ContentPage.BindingContext>
+        <vm:CreateMapViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView Background="Black">
         <VerticalStackLayout>
             <Label 
             Text="Welcome to .NET MAUI!!!!!"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
-            <!--Sang-->
+
             <Button
             x:Name="UploadBtn"
             Text="Upload Image"
-            Clicked="UploadImageClicked"
+            Command="{Binding UploadImageClicked}"
             HorizontalOptions="Center"/>
+            <Grid>
+                <GraphicsView x:Name="RectangleDrawableView"
+                Drawable="{Binding Drawable}"
+                HeightRequest="700"
+                WidthRequest="700"
+                BackgroundColor="White"
+                Background="White">
+
+                </GraphicsView>
+            </Grid>
+
+            <!-- https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/graphicsview?view=net-maui-8.0#position-and-size-graphical-objects -->
             <Image
-            x:Name="UploadedImage"
-            HorizontalOptions="Center"
-            VerticalOptions="Center"
-            WidthRequest="700"
-            HeightRequest="700"
-            Aspect="AspectFit">
+                x:Name="UploadedImage"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="700"
+                HeightRequest="700"
+                Aspect="AspectFit">
 
                 <Image.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnTapGestureRecognizerTapped"
@@ -34,9 +48,6 @@
                 </Image.GestureRecognizers>
 
             </Image>
-
-            <!--Sang-->
-
 
         </VerticalStackLayout>
     </ScrollView>
