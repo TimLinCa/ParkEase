@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Maui.Controls.Maps;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,6 +20,42 @@ namespace ParkEase.ViewModel
             set
             {
                 _locationInfo = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _draw; // Indicates whether the line is drawn or not
+
+        public bool Draw
+        {
+            get => _draw;
+            set
+            {
+                _draw = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Location? _startLocation; // The starting point of the line
+
+        public Location? StartLocation
+        {
+            get => _startLocation;
+            set
+            {
+                _startLocation = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Polyline? _selectedPolyline; // Selected line
+
+        public Polyline? SelectedPolyline
+        {
+            get => _selectedPolyline;
+            set
+            {
+                _selectedPolyline = value;
                 OnPropertyChanged();
             }
         }
