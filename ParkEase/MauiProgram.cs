@@ -9,7 +9,6 @@ using UraniumUI;
 using epj.RouteGenerator;
 using ParkEase.Core.Model;
 using CommunityToolkit.Maui;
-using CommunityToolkit.Maui.Maps;
 
 namespace ParkEase
 {
@@ -26,7 +25,6 @@ namespace ParkEase
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .UseMauiCommunityToolkit()
-                .UseMauiCommunityToolkitMaps("KbUfNlQw2o70HkiDN4pi~QvNMR64yw-7c0XXYGMKykg~AlBdFM6Klt1Rcu6sj95rKOG6If5MRaIYip0R04xBIKH85WhMfCSbhcR-zvsT0cc7")
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

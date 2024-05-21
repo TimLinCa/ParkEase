@@ -5,7 +5,9 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
              x:Class="ParkEase.Page.MapPage"
-             Title="MapPage">
+             Shell.FlyoutBehavior="Disabled"
+             Shell.NavBarIsVisible="False">
+    
     <ContentPage.BindingContext>
         <vm:MapViewModel />
     </ContentPage.BindingContext>
