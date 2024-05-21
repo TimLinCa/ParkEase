@@ -6,11 +6,9 @@
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
              x:Class="ParkEase.Page.MapPage"
              Shell.FlyoutBehavior="Disabled"
-             Shell.NavBarIsVisible="False">
+             Shell.NavBarIsVisible="False"
+             x:DataType="vm:MapViewModel">
     
-    <ContentPage.BindingContext>
-        <vm:MapViewModel />
-    </ContentPage.BindingContext>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -39,6 +37,11 @@
                     VerticalOptions="Center" />
 
             <material:TextField 
+                    Text="{Binding ParkingSpot}" 
+                    Margin="10,3" 
+                    Title="Parking Spot" /> 
+
+            <material:TextField 
                     Text="{Binding ParkingTime}" 
                     Margin="10,3" 
                     Title="Enforcement Time" />
@@ -56,6 +59,14 @@
             <Label Text="{Binding LocationInfo}" 
                    VerticalOptions="Center" 
                    HorizontalOptions="Center" />
+
+            <Button Text="Submit"
+                MinimumWidthRequest="150"
+                Command="{Binding SubmitCommand}"
+                CornerRadius="10"
+                VerticalOptions="Center"
+                HorizontalOptions="Center" />
+
         </StackLayout>
 
         <!-- Map Section -->

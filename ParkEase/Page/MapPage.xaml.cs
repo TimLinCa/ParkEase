@@ -76,7 +76,7 @@ public partial class MapPage : ContentPage
                                 geodesic: true,
                                 strokeColor: ""#097969"",
                                 strokeOpacity: 1.0,
-                                strokeWeight: 2
+                                strokeWeight: 4
                             });
 
                             line.setMap(map);
@@ -128,7 +128,7 @@ public partial class MapPage : ContentPage
                             if (selectedLine != null) {
                                 selectedLine.setMap(null); // Removes the selected segment from the map
                                 lines.splice(lines.indexOf(selectedLine), 1); // Removes the selected segment from the array
-                                selectedLine = null;
+                                selectedLine = null; // Reset selectedLine
                             }
                         }
                     </script>

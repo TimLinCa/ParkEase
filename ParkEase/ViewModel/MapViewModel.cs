@@ -1,64 +1,116 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Maui.Controls.Maps;
-using System;
-using System.Collections.Generic;
+using CommunityToolkit.Mvvm.Input;
+using ParkEase.Contracts.Services;
+using ParkEase.Core.Contracts.Services;
+using ParkEase.Core.Data;
+using ParkEase.Core.Services;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ParkEase.ViewModel
 {
-    public class MapViewModel : INotifyPropertyChanged
+    public partial class MapViewModel : ObservableObject
     {
-        private string _locationInfo;
+        [ObservableProperty]
+        private string parkingId;
 
-        public string LocationInfo
+        [ObservableProperty]
+        private string parkingSpot;
+
+        [ObservableProperty]
+        private string parkingTime;
+
+        [ObservableProperty]
+        private string parkingFee;
+
+        [ObservableProperty]
+        private string parkingCapacity;
+
+        [ObservableProperty]
+        private string locationInfo;
+
+        [ObservableProperty]
+        private bool draw; // Indicates whether the line is drawn or not
+
+        [ObservableProperty]
+        private Location? startLocation; // The starting point of the line
+
+        [ObservableProperty]
+        private Polyline? selectedPolyline; // Selected line
+
+        private readonly IMongoDBService mongoDBService;
+        private readonly IDialogService dialogService;
+
+        public class Polyline
         {
-            get => _locationInfo;
-            set
+            public List<Location> Points { get; set; }
+
+            public Polyline()
             {
-                _locationInfo = value;
-                OnPropertyChanged();
+                Points = new List<Location>();
             }
         }
 
-        private bool _draw; // Indicates whether the line is drawn or not
-
-        public bool Draw
+        public MapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
         {
-            get => _draw;
-            set
-            {
-                _draw = value;
-                OnPropertyChanged();
-            }
+            this.mongoDBService = mongoDBService;
+            this.dialogService = dialogService;
+            parkingId = "";
+            parkingSpot = "";
+            parkingTime = "";
+            parkingFee = "";
+            parkingCapacity = "";
+            locationInfo = "";
+            draw = false;
+            startLocation = null;
+            selectedPolyline = new Polyline();
         }
 
-        private Location? _startLocation; // The starting point of the line
-
-        public Location? StartLocation
+        public ICommand SubmitCommand => new RelayCommand(async () =>
         {
-            get => _startLocation;
-            set
+            try
             {
-                _startLocation = value;
-                OnPropertyChanged();
+                if (!string.IsNullOrEmpty(ParkingTime) && !string.IsNullOrEmpty(ParkingFee) && !string.IsNullOrEmpty(ParkingCapacity))
+                {
+                    var parkingData = new ParkingData
+                    {
+                        ParkingSpot = ParkingSpot,
+                        ParkingTime = ParkingTime,
+                        ParkingFee = ParkingFee,
+                        ParkingCapacity = ParkingCapacity
+                    };
+
+                    await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
+
+                    await dialogService.ShowAlertAsync("", "Your information is submitted.", "OK");
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("", "Please fill in all fields.", "OK");
+                }
             }
-        }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        });
 
-        private Polyline? _selectedPolyline; // Selected line
-
-        public Polyline? SelectedPolyline
+        public ICommand DrawLineCommand => new RelayCommand(() =>
         {
-            get => _selectedPolyline;
-            set
-            {
-                _selectedPolyline = value;
-                OnPropertyChanged();
-            }
-        }
+            // Communicate with the WebView to start drawing a line
+            DrawLineRequested?.Invoke(this, EventArgs.Empty);
+        });
+
+        public ICommand ClearLineCommand => new RelayCommand(() =>
+        {
+            // Communicate with the WebView to clear the selected line
+            ClearLineRequested?.Invoke(this, EventArgs.Empty);
+        });
+
+        // Events to communicate with the WebView
+        public event EventHandler DrawLineRequested;
+        public event EventHandler ClearLineRequested;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -68,3 +120,4 @@ namespace ParkEase.ViewModel
         }
     }
 }
+
