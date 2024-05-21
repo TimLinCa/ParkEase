@@ -579,14 +579,27 @@
          <string>ConfigPath</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="txt_configPath">
+       <widget class="QLineEdit" name="txt_testConfigPath">
         <property name="geometry">
          <rect>
           <x>90</x>
           <y>20</y>
-          <width>231</width>
+          <width>181</width>
           <height>20</height>
          </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bnt_importTestConfig">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>20</y>
+          <width>51</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Import</string>
         </property>
        </widget>
       </widget>

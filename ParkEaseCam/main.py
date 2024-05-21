@@ -11,8 +11,9 @@ from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
 import numpy as np
 from enum import Enum
 from functools import partial
-from polygon_ui import Ui_MainWindow
 import pickle
+from yolo import parkingLot_detect_video
+
 
 polyitems = []
 
@@ -60,7 +61,6 @@ class GripItem(QtWidgets.QGraphicsPathItem):
         if change == QtWidgets.QGraphicsItem.ItemPositionChange and self.isEnabled():
             self.m_annotation_item.movePoint(self.m_index, value)
         return super(GripItem, self).itemChange(change, value)
-
 
 class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
     def __init__(self, parent=None):
@@ -144,7 +144,6 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
     def setText(self, text):
         self._index = text
         self.text_item.setPlainText(text)
-
 
 class Instructions(Enum):
     No_Instruction = 0
@@ -292,7 +291,7 @@ class webcamThreadClass(QThread):
         self.quit()
             
 
-class MainWindow(QMainWindow,Ui_MainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         global IsDrawingMode
@@ -317,6 +316,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.bnt_saveconfig.clicked.connect(self.saveConfig)
         self.bnt_loadconfig.clicked.connect(self.loadConfig)
         self.bnt_importVideo.clicked.connect(self.importVideo)
+        self.bnt_importTestConfig.clicked.connect(self.importTestConfig)
         # Resource Usage
         self.resource_usage = boardInfoClass()
         self.resource_usage.start()
@@ -382,7 +382,23 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             IsDrawingMode = True
 
     def detectionTest(self):
-        print(polyitems[0].m_items[0].x())
+        if self.rab_cam.isChecked():
+            print("Camera")
+        else:
+            self.rab_video.isChecked()
+            global videoPath
+            if videoPath == '':
+                return
+            if self.txt_testConfigPath.text() == '':
+                return
+            parkingLot_detect_video(videoPath,self.txt_testConfigPath.text())
+            
+            
+    def importTestConfig(self):
+        path_temp = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
+        if path_temp[0] == '':
+            return
+        self.txt_testConfigPath.setText(path_temp[0])
 
     
     def getCPU_usage(self,cpu):
