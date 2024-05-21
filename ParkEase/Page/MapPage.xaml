@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
-             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             xmlns:vm="clr-namespace:ParkEase.ViewModel"
-             x:Class="ParkEase.Page.MapPage"
-             Shell.FlyoutBehavior="Disabled"
-             Shell.NavBarIsVisible="False"
-             x:DataType="vm:MapViewModel">
-    
+<ContentPage
+    x:Class="ParkEase.Page.MapPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:vm="clr-namespace:ParkEase.ViewModel"
+    x:DataType="vm:MapViewModel"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="False">
+
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -16,60 +17,76 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Side Menu Section -->
-        <StackLayout Grid.Column="0" BackgroundColor="LightGray" Padding="10">
-            <Label Text="Map Editor" 
-                   FontSize="20" 
-                   HorizontalOptions="Center" 
-                   Margin="10" />
+        <!--  Side Menu Section  -->
+        <StackLayout
+            Grid.Column="0"
+            Padding="10"
+            BackgroundColor="LightGray">
+            <Label
+                Margin="10"
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Map Editor" />
 
-            <Button Text="Draw Line"
-                    x:Name="btn_Draw"
-                    Margin="50,50,50,0"
-                    Command="{Binding DrawLineCommand}"
-                    VerticalOptions="Center" />
+            <Button
+                x:Name="btn_Draw"
+                Margin="50,50,50,0"
+                Clicked="btn_Draw_Clicked"
+                Text="Draw Line"
+                VerticalOptions="Center" />
 
-            <Button Text="Clear Line"
-                    x:Name="btn_Clear"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Margin="50,10,50,50"
-                    Command="{Binding ClearLineCommand}"
-                    VerticalOptions="Center" />
+            <Button
+                x:Name="btn_Clear"
+                Margin="50,10,50,50"
+                Clicked="btn_Clear_Clicked"
+                Style="{StaticResource SecondaryButtonStyle}"
+                Text="Clear Line"
+                VerticalOptions="Center" />
 
-            <material:TextField 
-                    Text="{Binding ParkingSpot}" 
-                    Margin="10,3" 
-                    Title="Parking Spot" /> 
+            <Button
+                x:Name="btn_Test"
+                Margin="50,10,50,50"
+                Clicked="btn_Test_Test"
+                Style="{StaticResource SecondaryButtonStyle}"
+                Text="Clear Line"
+                VerticalOptions="Center" />
 
-            <material:TextField 
-                    Text="{Binding ParkingTime}" 
-                    Margin="10,3" 
-                    Title="Enforcement Time" />
+            <material:TextField
+                Title="Parking Spot"
+                Margin="10,3"
+                Text="{Binding ParkingSpot}" />
 
-            <material:TextField 
-                    Text="{Binding ParkingFee}" 
-                    Margin="10,3" 
-                    Title="Parking Fee"  />
+            <material:TextField
+                Title="Enforcement Time"
+                Margin="10,3"
+                Text="{Binding ParkingTime}" />
 
-            <material:TextField 
-                    Text="{Binding ParkingCapacity}" 
-                    Margin="10,3" 
-                    Title="Parking Capacity"  />
+            <material:TextField
+                Title="Parking Fee"
+                Margin="10,3"
+                Text="{Binding ParkingFee}" />
 
-            <Label Text="{Binding LocationInfo}" 
-                   VerticalOptions="Center" 
-                   HorizontalOptions="Center" />
+            <material:TextField
+                Title="Parking Capacity"
+                Margin="10,3"
+                Text="{Binding ParkingCapacity}" />
 
-            <Button Text="Submit"
-                MinimumWidthRequest="150"
+            <Label
+                HorizontalOptions="Center"
+                Text="{Binding LocationInfo}"
+                VerticalOptions="Center" />
+
+            <Button
                 Command="{Binding SubmitCommand}"
                 CornerRadius="10"
-                VerticalOptions="Center"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center"
+                MinimumWidthRequest="150"
+                Text="Submit"
+                VerticalOptions="Center" />
 
         </StackLayout>
 
-        <!-- Map Section -->
+        <!--  Map Section  -->
         <!--<maps:Map x:Name="myMap" Grid.Column="1" MapType="Satellite" IsShowingUser="True" IsTrafficEnabled="false"/>-->
         <WebView x:Name="mapWebView" Grid.Column="1" />
     </Grid>

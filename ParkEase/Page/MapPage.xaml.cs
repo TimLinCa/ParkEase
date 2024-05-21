@@ -1,4 +1,6 @@
 using Microsoft.Maui.Controls.Maps;
+using MongoDB.Bson;
+using Newtonsoft.Json;
 using ParkEase.ViewModel;
 
 namespace ParkEase.Page;
@@ -62,6 +64,20 @@ public partial class MapPage : ContentPage
                                     findLine(event.latLng);
                                 }
                             });
+                        }
+
+                        function getLines(){
+                              let result = [];
+                              for (let i = 0; i < lines.length; i++) {
+                                  let lineData = [];
+                                  let path = lines[i].getPath();
+                                  for (let j = 0; j < path.length; j++) {
+                                      let point = path.getAt(j);
+                                      lineData.push({ lat: point.lat(), lng: point.lng() });
+                                  }
+                                  result.push({ line: i+1, points: lineData });
+                              }
+                              return JSON.stringify(result);
                         }
 
                         function drawLine(latitude1, longitude1, latitude2, longitude2) {
@@ -163,5 +179,24 @@ public partial class MapPage : ContentPage
     private void btn_Clear_Clicked(object sender, EventArgs e)
     {
         mapWebView.EvaluateJavaScriptAsync("deleteLine()");
+    }
+
+    private async void btn_Test_Test(object sender, EventArgs e)
+    {
+        var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
+        result = result.Replace("\\\"", "\"");
+        List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
+    }
+
+    private class mapPoint
+    {
+        public double lat { get; set; }
+        public double lng { get; set; }
+    }
+
+    private class Line
+    {
+        public int line { get; set; }
+        public List<mapPoint> points { get; set; }
     }
 }
