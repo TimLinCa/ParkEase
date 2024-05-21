@@ -12,7 +12,7 @@ import numpy as np
 from enum import Enum
 from functools import partial
 import pickle
-from yolo import parkingLot_detect_video
+from yolo import parkingLot_detect_video,parkingLot_detect_cam
 
 
 polyitems = []
@@ -265,6 +265,22 @@ class videoThreadClass(QThread):
         self.ThreadActive = False
         self.quit()
 
+class camTestThreadClass(QThread):
+    def run(self):
+        self.ThreadActive = True
+        parkingLot_detect_cam(camIndex,self.txt_testConfigPath.text())
+    def stop(self):
+        self.ThreadActive = False
+        self.quit()
+
+class videoTestThreadClass(QThread):
+    def run(self):
+        self.ThreadActive = True
+        parkingLot_detect_video(videoPath,self.txt_testConfigPath.text())
+    def stop(self):
+        self.ThreadActive = False
+        self.quit()
+
 class webcamThreadClass(QThread):
     ImageUpdate = pyqtSignal(np.ndarray)
     FPS = pyqtSignal(int)
@@ -294,7 +310,7 @@ class webcamThreadClass(QThread):
 class MainWindow(QMainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        global IsDrawingMode
+        global IsDrawingMode, camIndex
         IsDrawingMode = False
         #super().__init__()
         # Load the UI
@@ -374,6 +390,7 @@ class MainWindow(QMainWindow):
         if path_temp[0] == '':
             return
         videoPath = path_temp[0]
+        self.label_videoPath.setText(videoPath)
 
     def drawMode(self):
         global IsDrawingMode
@@ -382,8 +399,20 @@ class MainWindow(QMainWindow):
             IsDrawingMode = True
 
     def detectionTest(self):
+        if self.btn_stop.isEnabled() == True:
+            self.stopWebcam()
+        if hasattr(self, 'Worker_Test') and self.Worker_Test.isRunning():
+            self.Worker_Test.stop()
+
         if self.rab_cam.isChecked():
-            print("Camera")
+            global camIndex
+            camIndex = self.camlist.currentIndex()
+            if self.txt_testConfigPath.text() == '':
+                return
+            # parkingLot_detect_cam(camIndex,self.txt_testConfigPath.text())
+            self.Worker_Test = camTestThreadClass()
+            self.Worker_Test.txt_testConfigPath = self.txt_testConfigPath
+            self.Worker_Test.start()
         else:
             self.rab_video.isChecked()
             global videoPath
@@ -391,7 +420,9 @@ class MainWindow(QMainWindow):
                 return
             if self.txt_testConfigPath.text() == '':
                 return
-            parkingLot_detect_video(videoPath,self.txt_testConfigPath.text())
+            self.Worker_Test = videoTestThreadClass()
+            self.Worker_Test.txt_testConfigPath = self.txt_testConfigPath
+            self.Worker_Test.start()
             
             
     def importTestConfig(self):

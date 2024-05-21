@@ -5,7 +5,7 @@ import pandas as pd
 from ultralytics import YOLO
 import cvzone
 
-def parkingLot_detect_video(cam_index,config_file_path):
+def parkingLot_detect_cam(cam_index,config_file_path):
     with open(config_file_path,"rb") as f:
         data = pickle.load(f)
         polylines,area_names=data['polylines'],data['area_names']
