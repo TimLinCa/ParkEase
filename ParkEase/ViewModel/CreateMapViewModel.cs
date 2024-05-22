@@ -20,9 +20,6 @@ namespace ParkEase.ViewModel
         private ObservableCollection<RectF> rectangles;
 
         [ObservableProperty]
-        private ImageSource uploadedImage;
-
-        [ObservableProperty]
         private int recCount;
 
         [ObservableProperty]
@@ -41,7 +38,7 @@ namespace ParkEase.ViewModel
                 FileResult myPhoto = await MediaPicker.Default.PickPhotoAsync();
                 if (myPhoto != null)
                 {
-                    UploadedImage = ImageSource.FromFile(myPhoto.FullPath);
+                    ImgPath = myPhoto.FullPath;
                 }
             }
             else
@@ -49,12 +46,6 @@ namespace ParkEase.ViewModel
                 await Shell.Current.DisplayAlert("OOPS", "Your device isn't supported", "OK");
             }
         });
-
-        public ICommand OnGrapgicsViewClick => new RelayCommand<TappedEventArgs>(e =>
-        {
-
-        });
-
 
         public void AddRectangle(PointF point)
         {
