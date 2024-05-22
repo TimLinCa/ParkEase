@@ -108,7 +108,7 @@ namespace ParkEase.ViewModel
                 }
                 else
                 {
-                    await dialogService.ShowAlertAsync("", "cannot click button", "OK");
+                    await dialogService.ShowAlertAsync("", "Please check your input again.", "OK");
                 }
             }
             catch (Exception ex)
