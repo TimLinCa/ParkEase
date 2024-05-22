@@ -13,7 +13,7 @@ public partial class CreateMapPage : ContentPage
         var viewModel = BindingContext as CreateMapViewModel;
         viewModel?.SetGraphicsView(this.RectangleDrawableView);
     }
-    //Sang
+
     /*private async void UploadImageClicked(object sender, EventArgs e)
     {
         if (MediaPicker.Default.IsCaptureSupported)
@@ -31,7 +31,6 @@ public partial class CreateMapPage : ContentPage
             await Shell.Current.DisplayAlert("OOPS", "Your device isn't supported", "OK");
         }
     }*/
-    //Sang
 
     public async void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
     {

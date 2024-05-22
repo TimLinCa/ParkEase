@@ -3,14 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkEase.Page.CreateMapPage"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
-             xmlns:drawables="clr-namespace:ParkEase.Core.Utilities;assembly=ParkEase.Core"
+             xmlns:drawables="clr-namespace:ParkEase.Utilities;assembly=ParkEase"
              Title="CreateMapPage">
 
     <ContentPage.BindingContext>
         <vm:CreateMapViewModel />
     </ContentPage.BindingContext>
 
-    <ScrollView Background="Black">
+    <ScrollView>
         <VerticalStackLayout>
             <Label 
             Text="Welcome to .NET MAUI!!!!!"
@@ -22,6 +22,7 @@
             Text="Upload Image"
             Command="{Binding UploadImageClicked}"
             HorizontalOptions="Center"/>
+            
             <Grid>
                 <GraphicsView x:Name="RectangleDrawableView"
                 Drawable="{Binding Drawable}"
@@ -30,22 +31,24 @@
                 BackgroundColor="White"
                 Background="White">
 
+                    <GraphicsView.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnTapGestureRecognizerTapped"
+                                              Buttons="Primary" />
+                    </GraphicsView.GestureRecognizers>
+
                 </GraphicsView>
             </Grid>
 
             <!-- https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/graphicsview?view=net-maui-8.0#position-and-size-graphical-objects -->
             <Image
                 x:Name="UploadedImage"
+                Source="{Binding UploadedImage}"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"
                 WidthRequest="700"
                 HeightRequest="700"
                 Aspect="AspectFit">
 
-                <Image.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnTapGestureRecognizerTapped"
-                                      Buttons="Primary" />
-                </Image.GestureRecognizers>
 
             </Image>
 

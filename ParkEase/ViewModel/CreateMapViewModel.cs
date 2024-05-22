@@ -20,7 +20,7 @@ namespace ParkEase.ViewModel
         private ObservableCollection<RectF> rectangles;
 
         [ObservableProperty]
-        private IImage image;
+        private ImageSource uploadedImage;
 
         private GraphicsView graphicsView;
 
@@ -47,9 +47,7 @@ namespace ParkEase.ViewModel
                 FileResult myPhoto = await MediaPicker.Default.PickPhotoAsync();
                 if (myPhoto != null)
                 {
-                    // Display the image
-                    drawable.UpdateImage(myPhoto.FullPath);
-                    graphicsView?.Invalidate();
+                    UploadedImage = ImageSource.FromFile(myPhoto.FullPath);
                 }
             }
             else
