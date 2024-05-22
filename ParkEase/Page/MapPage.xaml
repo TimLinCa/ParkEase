@@ -6,9 +6,7 @@
     xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
-    x:DataType="vm:MapViewModel"
-    Shell.FlyoutBehavior="Disabled"
-    Shell.NavBarIsVisible="False">
+    x:DataType="vm:MapViewModel">
 
 
     <Grid>

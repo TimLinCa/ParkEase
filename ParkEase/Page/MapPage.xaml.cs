@@ -43,6 +43,7 @@ public partial class MapPage : ContentPage
                         let selectedPoints = [];
                         let lines = [];
                         let selectedLine = null;
+                        let hoverLine = null;
 
                         function initMap() {
                             map = new google.maps.Map(document.getElementById(""map""), {
@@ -61,7 +62,7 @@ public partial class MapPage : ContentPage
                                         start = false;
                                     }
                                 } else {
-                                    findLine(event.latLng);
+                                    //findLine(event.latLng);
                                 }
                             });
                         }
@@ -95,6 +96,26 @@ public partial class MapPage : ContentPage
                                 strokeWeight: 4
                             });
 
+                            // Add mouseover and mouseout event listeners to the polyline
+                            line.addListener('mouseover', function() {
+                                line.setOptions({ strokeColor: ""yellow"" }); // Change color to red on mouseover
+                            });
+
+                            line.addListener('mouseout', function() {
+                                if(line != selectedLine){
+                                    line.setOptions({ strokeColor: ""#097969"" }); // Change color back to original on mouseout
+                                }
+                            });
+
+                            line.addListener('click', function() {
+                                 // If there is a previously selected line, reset its color.
+                                if (selectedLine != null) {
+                                    selectedLine.setOptions({ strokeColor: ""#097969"" });
+                                }
+                                selectedLine = line; // Set the clicked line as the selected line
+                                selectedLine.setOptions({ strokeColor: ""red"" });
+                            });
+
                             line.setMap(map);
 
                             lines.push(line);
@@ -109,7 +130,11 @@ public partial class MapPage : ContentPage
                                     let p1 = linePath.getAt(j);
                                     let p2 = linePath.getAt(j + 1);
                                     if (isPointOnLine(latLng, p1, p2)) {
+                                        if (selectedLine != null) {
+                                            selectedLine.setOptions({ strokeColor: ""#097969"" });
+                                        }
                                         selectedLine = lines[i];
+                                        selectedLine.setOptions({ strokeColor: ""red"" });
                                         console.log('find');
                                         break;
                                     }
