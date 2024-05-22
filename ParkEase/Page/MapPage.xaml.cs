@@ -74,9 +74,9 @@ public partial class MapPage : ContentPage
                                   let path = lines[i].getPath();
                                   for (let j = 0; j < path.length; j++) {
                                       let point = path.getAt(j);
-                                      lineData.push({ lat: point.lat(), lng: point.lng() });
+                                      lineData.push({ Lat: point.lat(), Lng: point.lng() });
                                   }
-                                  result.push({ line: i+1, points: lineData });
+                                  result.push({ Index: i+1, Points: lineData });
                               }
                               return JSON.stringify(result);
                         }
@@ -105,6 +105,9 @@ public partial class MapPage : ContentPage
                                 if(line != selectedLine){
                                     line.setOptions({ strokeColor: ""#097969"" }); // Change color back to original on mouseout
                                 }
+                                if(selectedLine != null){
+                                    selectedLine.setOptions({ strokeColor: ""red"" }); // Change color of selectedLine to red
+                                }
                             });
 
                             line.addListener('click', function() {
@@ -114,6 +117,9 @@ public partial class MapPage : ContentPage
                                 }
                                 selectedLine = line; // Set the clicked line as the selected line
                                 selectedLine.setOptions({ strokeColor: ""red"" });
+
+                                let lineInfo = getLineInfo(line);
+                                window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
                             });
 
                             line.setMap(map);
@@ -121,6 +127,23 @@ public partial class MapPage : ContentPage
                             lines.push(line);
 
                             console.log('draw');
+                        }
+
+                        function getLineInfo(line) {
+                            // Get the line's path
+                            let path = line.getPath();
+                        
+                            // Convert the path to a string representation
+                            let pathStr = """";
+                            for (let i = 0; i < path.length; i++) {
+                                let point = path.getAt(i);
+                                pathStr += point.lat() + "","" + point.lng() + "";"";
+                            }
+                        
+                            // Remove the trailing semicolon
+                            pathStr = pathStr.slice(0, -1);
+                        
+                            return pathStr;
                         }
 
                         function findLine(latLng) {
@@ -179,12 +202,59 @@ public partial class MapPage : ContentPage
         };
 
         mapWebView.Source = htmlSource;
+        mapWebView.Navigating += OnWebViewNavigating;
+    }
+
+    private void OnWebViewNavigating(object sender, WebNavigatingEventArgs e)
+    {
+        if (e.Url.StartsWith("myapp://lineclicked"))
+        {
+            e.Cancel = true; // Cancel the navigation
+
+            // Extract the line index from the URL
+            var info =  e.Url.Split('=')[2];
+            info = System.Net.WebUtility.UrlDecode(info);
+            // Call your C# function
+            HandleLineClicked(info);
+        }
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
         _viewModel = (MapViewModel)BindingContext;
+    }
+
+    private async void HandleLineClicked(string info)
+    {
+        var points = info.Split(';');
+        List<MapPoint> mapPoints = new List<MapPoint>();
+
+        foreach (var point in points)
+        {
+            // Split the point into latitude and longitude
+            var latLng = point.Split(',');
+
+            // Create a new mapPoint object
+            MapPoint mp = new MapPoint
+            {
+                Lat = double.Parse(latLng[0]),
+                Lng = double.Parse(latLng[1])
+            };
+
+            // Add the mapPoint object to the list
+            mapPoints.Add(mp);
+        }
+
+        Line selectedLine = new Line();
+        selectedLine.Index = -1;
+        selectedLine.Points = mapPoints;
+
+        var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
+        result = result.Replace("\\\"", "\"");
+        List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
+
+        selectedLine = lines.FirstOrDefault(line => line.Equals(selectedLine));
     }
 
     private void OnMapClicked(object sender, MapClickedEventArgs e)
@@ -206,6 +276,8 @@ public partial class MapPage : ContentPage
         mapWebView.EvaluateJavaScriptAsync("deleteLine()");
     }
 
+
+
     private async void btn_Test_Test(object sender, EventArgs e)
     {
         var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
@@ -213,15 +285,33 @@ public partial class MapPage : ContentPage
         List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
     }
 
-    private class mapPoint
+    private class MapPoint : IEquatable<MapPoint>
     {
-        public double lat { get; set; }
-        public double lng { get; set; }
+        public double Lat { get; set; }
+        public double Lng { get; set; }
+
+        public bool Equals(MapPoint? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if(other.Lat == this.Lat && other.Lng == this.Lng) return true;
+            return false;
+        }
     }
 
-    private class Line
+    private class Line : IEquatable<Line>
     {
-        public int line { get; set; }
-        public List<mapPoint> points { get; set; }
+        public int Index { get; set; }
+        public List<MapPoint> Points { get; set; }
+
+        public bool Equals(Line? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            bool isEquals = true;
+            for(var i = 0; i < Points.Count; i++)
+            {
+                if (!this.Points[i].Equals(other.Points[i])) return false;
+            }
+            return isEquals;
+        }
     }
 }

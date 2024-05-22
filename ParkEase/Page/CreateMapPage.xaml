@@ -24,7 +24,7 @@
 
             <drawables:RecGraphicsView
                 x:Name="RectangleDrawableView"
-                ImgPath="{Binding imgPath}"
+                ImgPath="{Binding ImgPath}"
                 MinimumHeightRequest="700"
                 MinimumWidthRequest="700"
                 RecCount="{Binding RecCount}"
