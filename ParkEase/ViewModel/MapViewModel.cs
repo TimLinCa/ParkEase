@@ -4,6 +4,7 @@ using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Services;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -42,6 +43,32 @@ namespace ParkEase.ViewModel
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
 
+        public ObservableCollection<string> ParkingTimes { get; }
+        private string _selectedParkingTime;
+
+        public string SelectedParkingTime
+        {
+            get => _selectedParkingTime;
+            set
+            {
+                SetProperty(ref _selectedParkingTime, value);
+                ParkingTime = value; // Update the ParkingTime property when a selection is made
+            }
+        }
+
+        // New properties for Parking Fee Picker
+        public ObservableCollection<string> ParkingFees { get; }
+        private string _selectedParkingFee;
+
+        public string SelectedParkingFee
+        {
+            get => _selectedParkingFee;
+            set
+            {
+                SetProperty(ref _selectedParkingFee, value);
+                ParkingFee = value; // Update the ParkingTime property when a selection is made
+            }
+        }
         public class Polyline
         {
             public List<Location> Points { get; set; }
@@ -65,6 +92,21 @@ namespace ParkEase.ViewModel
             draw = false;
             startLocation = null;
             selectedPolyline = new Polyline();
+
+            ParkingTimes = new ObservableCollection<string>   /*https://www.calgaryparking.com/find-parking/on-street.html*/
+            {
+                "Mon to Fri: 7am to 6pm",
+                "Sat: 9am to 6pm",
+                "Sun and holidays",
+                "Evening after 6pm"
+            };
+
+            ParkingFees = new ObservableCollection<string> /*https://thecityofcalgary.maps.arcgis.com/apps/instant/sidebar/index.html?appid=10fd81aba2a548d49e7731f593c36282*/
+            {
+                "Free",
+                "$1.50 per hour",
+                "$2.00 per hour"
+            };
         }
 
         public ICommand SubmitCommand => new RelayCommand(async () =>
