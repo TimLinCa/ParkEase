@@ -5,10 +5,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:MapViewModel">
 
-
+    <!--https://enisn-projects.io/docs/en/uranium/-->
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250" />
@@ -20,6 +22,7 @@
             Grid.Column="0"
             Padding="10"
             BackgroundColor="LightGray">
+            
             <Label
                 Margin="10"
                 FontSize="20"
@@ -52,22 +55,35 @@
             <material:TextField
                 Title="Parking Spot"
                 Margin="10,3"
-                Text="{Binding ParkingSpot}" />
+                Text="{Binding ParkingSpot}" >  
+                <validation:RequiredValidation />
+            </material:TextField>
 
-            <material:TextField
+            <!--https://enisn-projects.io/docs/en/uranium/latest/theming/Icons#material-icons-->
+            <material:PickerField 
                 Title="Enforcement Time"
                 Margin="10,3"
-                Text="{Binding ParkingTime}" />
+                ItemsSource="{Binding ParkingTimes}"
+                SelectedItem="{Binding SelectedParkingTime}"
+                Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialRegular.Expand_circle_down}}">
+                <validation:RequiredValidation />
+            </material:PickerField>
 
-            <material:TextField
+            <material:PickerField
                 Title="Parking Fee"
                 Margin="10,3"
-                Text="{Binding ParkingFee}" />
+                ItemsSource="{Binding ParkingFees}"
+                SelectedItem="{Binding SelectedParkingFee}"
+                Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialRegular.Expand_circle_down}}">
+                <validation:RequiredValidation />
+            </material:PickerField>
 
             <material:TextField
                 Title="Parking Capacity"
                 Margin="10,3"
-                Text="{Binding ParkingCapacity}" />
+                Text="{Binding ParkingCapacity}" >
+                <validation:RequiredValidation />
+            </material:TextField>
 
             <Label
                 HorizontalOptions="Center"

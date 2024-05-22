@@ -12,7 +12,7 @@
         <toolkit:EventToCommandBehavior EventName="Loaded" Command="{Binding InitCommand}" />
     </ContentPage.Behaviors>
     <ScrollView>
-  
+        <!--https://enisn-projects.io/docs/en/uranium/latest/themes/material/components/TextField-->
         <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
 
             <input:FormView SubmitCommand="{Binding LogInCommand}" Spacing="20">
