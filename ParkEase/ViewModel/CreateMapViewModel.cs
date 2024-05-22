@@ -16,27 +16,21 @@ namespace ParkEase.ViewModel
 {
     public partial class CreateMapViewModel : ObservableObject
     {
-
+        [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
 
         [ObservableProperty]
         private ImageSource uploadedImage;
 
-        private GraphicsView graphicsView;
+        [ObservableProperty]
+        private int recCount;
 
         [ObservableProperty]
-        private RectDrawable drawable;
-
-        public ObservableCollection<RectF> Rectangles => rectangles;
-
-        public ICommand AddRectangleCommand { get; }
+        private string imgPath;
 
         public CreateMapViewModel()
         {
             rectangles = new ObservableCollection<RectF>();
-            drawable = new RectDrawable(rectangles);
-
-            AddRectangleCommand = new Command<PointF>(AddRectangle);
         }
 
         public ICommand UploadImageClicked => new RelayCommand(async () =>
@@ -56,19 +50,21 @@ namespace ParkEase.ViewModel
             }
         });
 
-        public void SetGraphicsView(GraphicsView view)
+        public ICommand OnGrapgicsViewClick => new RelayCommand<TappedEventArgs>(e =>
         {
-            graphicsView = view;
-        }
+
+        });
+
 
         public void AddRectangle(PointF point)
         {
             var rect = new RectF(point.X, point.Y, 100, 50);
-            rectangles.Add(rect);
-            drawable.UpdateRectangles(rectangles);
+            Rectangles.Add(rect);
+            RecCount = RecCount + 1;
+            //Drawable.UpdateRectangles(rectangles);
 
-            OnPropertyChanged(nameof(Rectangles));
-            graphicsView?.Invalidate();
+            //OnPropertyChanged(nameof(Rectangles));
+            //graphicsView?.Invalidate();
         }
 
         public async Task SaveRectanglesAsync(string buildingName, string floorNo)

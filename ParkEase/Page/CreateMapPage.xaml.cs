@@ -6,12 +6,13 @@ namespace ParkEase.Page;
 
 public partial class CreateMapPage : ContentPage
 {
+
+    private GraphicsView graphicsView;
     public CreateMapPage()
     {
         InitializeComponent();
 
-        var viewModel = BindingContext as CreateMapViewModel;
-        viewModel?.SetGraphicsView(this.RectangleDrawableView);
+        //viewModel?.SetGraphicsView(this.RectangleDrawableView);
     }
 
     /*private async void UploadImageClicked(object sender, EventArgs e)
@@ -35,8 +36,8 @@ public partial class CreateMapPage : ContentPage
     public async void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
     {
         var viewModel = BindingContext as CreateMapViewModel;
-        viewModel?.SetGraphicsView(this.RectangleDrawableView);
-        var touchPosition = args.GetPosition(UploadedImage);
+        //viewModel?.SetGraphicsView(this.RectangleDrawableView);
+        var touchPosition = args.GetPosition(RectangleDrawableView);
 
         if (viewModel != null && touchPosition.HasValue)
         {

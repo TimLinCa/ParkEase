@@ -13,29 +13,28 @@ namespace ParkEase.Utilities
     {
         /* https://learn.microsoft.com/en-us/dotnet/maui/user-interface/graphics/draw?view=net-maui-8.0#draw-a-rectangle */
 
-        private ObservableCollection<RectF> rectangles;
+        public string ImgPath { get; set; }
 
-        public RectDrawable(ObservableCollection<RectF> rectangles)
-        {
-            this.rectangles = rectangles;
-        }
+        public int RecCount { get; set; }
 
-        public void UpdateRectangles(ObservableCollection<RectF> newRectangles)
-        {
-            rectangles = newRectangles;
-        }
+        public ObservableCollection<RectF> Rectangles { get; set; }
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
             canvas.StrokeColor = Colors.Green;
             canvas.StrokeSize = 2;
 
-            foreach (var rect in rectangles)
+            if(Rectangles != null)
             {
-                //if (rect.IntersectsWith(dirtyRect))
-                //{
+                foreach (var rect in Rectangles)
+                {
                     canvas.DrawRectangle(rect);
-                //}
+                }
+            }
+            
+            if(ImgPath != null)
+            {
+                //implement draw image here
             }
         }
     }
