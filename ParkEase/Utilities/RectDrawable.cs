@@ -24,18 +24,29 @@ namespace ParkEase.Utilities
             canvas.StrokeColor = Colors.Green;
             canvas.StrokeSize = 2;
 
-            if(Rectangles != null)
+            if (ImgPath != null)
+            {
+                Microsoft.Maui.Graphics.IImage image;
+                Assembly assembly = GetType().GetTypeInfo().Assembly;
+                using (Stream stream = File.OpenRead(ImgPath))
+                {
+                    image = PlatformImage.FromStream(stream);
+                }
+
+                if (image != null)
+                {
+                    canvas.DrawImage(image, 10, 10, image.Width, image.Height);
+                }
+            }
+
+            if (Rectangles != null)
             {
                 foreach (var rect in Rectangles)
                 {
                     canvas.DrawRectangle(rect);
                 }
             }
-            
-            if(ImgPath != null)
-            {
-                //implement draw image here
-            }
+         
         }
     }
 }

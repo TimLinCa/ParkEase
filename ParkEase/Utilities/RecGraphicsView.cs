@@ -9,11 +9,12 @@ namespace ParkEase.Utilities
 {
     public class RecGraphicsView : GraphicsView
     {
-
+        /// <summary>
+        /// Due to Rectangles setter will not be triggered when to collection was added an item, so RecCount must be changed to perform the draw method.
+        /// </summary>
         public int RecCount
         {
             get => (int)GetValue(RecCountProperty); set { SetValue(RecCountProperty, value); }
-
         }
 
         public string ImgPath
@@ -30,7 +31,7 @@ namespace ParkEase.Utilities
 
         public static readonly BindableProperty RectanglesProperty = BindableProperty.Create(nameof(Rectangles), typeof(ObservableCollection<RectF>), typeof(RecGraphicsView), propertyChanged: RectanglesPropertyChanged);
 
-        public static readonly BindableProperty ImgPathProperty = BindableProperty.Create(nameof(ImgPath), typeof(ObservableCollection<string>), typeof(RecGraphicsView), propertyChanged: ImgPathPropertyChanged);
+        public static readonly BindableProperty ImgPathProperty = BindableProperty.Create(nameof(ImgPath), typeof(string), typeof(RecGraphicsView), propertyChanged: ImgPathPropertyChanged);
 
 
         private static void RectanglesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
