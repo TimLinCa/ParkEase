@@ -124,7 +124,7 @@ namespace ParkEase.ViewModel
                     };
 
                     await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
-
+     
                     await dialogService.ShowAlertAsync("", "Your information is submitted.", "OK");
                 }
                 else

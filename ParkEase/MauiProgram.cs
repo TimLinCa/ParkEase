@@ -17,7 +17,7 @@ namespace ParkEase
     {
         public static MauiApp CreateMauiApp()
         {
-            bool developerMode = false;
+            bool developerMode = true;
 
             var builder = MauiApp.CreateBuilder();
             builder

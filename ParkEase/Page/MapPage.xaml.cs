@@ -4,6 +4,9 @@ using MongoDB.Bson;
 using Newtonsoft.Json;
 using ParkEase.ViewModel;
 using System;
+using Microsoft.Maui.Graphics;
+using ParkEase.Core.Services;
+using ParkEase.Core.Data;
 
 namespace ParkEase.Page;
 
@@ -218,6 +221,7 @@ public partial class MapPage : ContentPage
         
         mapWebView.Source = htmlSource; // Set the source of the WebView to the HTML content.
         mapWebView.Navigating += OnWebViewNavigating; // Event handler for WebView navigation.
+        draw_lines();
     }
 
     private void OnWebViewNavigating(object sender, WebNavigatingEventArgs e)
@@ -294,11 +298,16 @@ public partial class MapPage : ContentPage
     // It sends a JavaScript command to the WebView to start selecting points for drawing a line on the map
     private void btn_Draw_Clicked(object sender, EventArgs e)
     {
+       
+
         mapWebView.EvaluateJavaScriptAsync("startSelectingPoints()");// This function enables the mode where the user can click on the map to select points for drawing a line
+
+        
     }
 
     private void btn_Clear_Clicked(object sender, EventArgs e)
     {
+       
         mapWebView.EvaluateJavaScriptAsync("deleteLine()");
     }
 
@@ -309,6 +318,16 @@ public partial class MapPage : ContentPage
         var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
         result = result.Replace("\\\"", "\"");
         List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
+    }
+
+    private async void draw_lines()
+    {
+        MongoDBService mongoDBService = new MongoDBService();
+        List<ParkingData> parkingDatas = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+        foreach(var parkingData in parkingDatas)
+        {
+            //await mapWebView.EvaluateJavaScriptAsync($"drawLine({parkingData.Points[0].Lat)},{parkingData.Points[0].Lng)},{parkingData.Points[1].Lat)},{parkingData.Points[1].Lng)}");
+        }
     }
 
     // This class represents a point on the map with latitude and longitude
