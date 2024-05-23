@@ -34,9 +34,10 @@
                 <Button
                     x:Name="btn_Draw"
                     Margin="50,50,50,0"
+                    BackgroundColor="Blue"
                     Clicked="btn_Draw_Clicked"
                     Text="Draw Line"
-                    VerticalOptions="Center"/>
+                    VerticalOptions="Center" />
 
                 <Button
                     x:Name="btn_Clear"

@@ -71,12 +71,14 @@ public partial class MapPage : ContentPage
                                         drawLine(selectedPoints[0].lat, selectedPoints[0].lng, selectedPoints[1].lat, selectedPoints[1].lng);
                                         selectedPoints = [];
                                         start = false;
+                                        window.location.href = 'myapp://lineDrawn';
                                     }
                                 } else {
                                     //findLine(event.latLng);
                                 }
                             });
                         }
+
 
                         // Returns the list of drawn lines as a JSON string
                         function getLines(){
@@ -137,7 +139,8 @@ public partial class MapPage : ContentPage
                             line.setMap(map);
 
                             lines.push(line);
-
+                            
+                            window.location.href = ""myapp://lineDrawn?index="";
                             console.log('draw');
                         }
 
@@ -202,6 +205,7 @@ public partial class MapPage : ContentPage
                         // Enables the point selection mode
                         function startSelectingPoints() {
                             start = true;
+                            monitorLineDrawing();
                         }
 
                         // Deletes the selected line
@@ -235,6 +239,16 @@ public partial class MapPage : ContentPage
 
             HandleLineClicked(info); // Call your C# function to handle the line click
         }
+
+        else if (e.Url.StartsWith("myapp://linedrawn"))
+        {
+            e.Cancel = true; 
+
+           
+            btn_Draw.Text = "Draw Line";
+            btn_Draw.BackgroundColor = Colors.Blue; 
+        }
+
     }
 
     // From ChatGPT: This method is called when the page appears on the screen
@@ -298,11 +312,13 @@ public partial class MapPage : ContentPage
     // It sends a JavaScript command to the WebView to start selecting points for drawing a line on the map
     private void btn_Draw_Clicked(object sender, EventArgs e)
     {
-       
+        var button = (Button)sender;
+        button.Text = "Drawing...";
+        button.BackgroundColor = Colors.Gray;
 
         mapWebView.EvaluateJavaScriptAsync("startSelectingPoints()");// This function enables the mode where the user can click on the map to select points for drawing a line
 
-        
+
     }
 
     private void btn_Clear_Clicked(object sender, EventArgs e)
