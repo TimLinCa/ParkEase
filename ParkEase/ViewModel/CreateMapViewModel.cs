@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.VisualBasic;
+using ParkEase.Contracts.Services;
 using ParkEase.Utilities;
 using System;
 using System.Collections.Generic;
@@ -25,8 +26,11 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string imgPath;
 
-        public CreateMapViewModel()
+        private readonly IDialogService dialogService;
+
+        public CreateMapViewModel(IDialogService dialogService)
         {
+            this.dialogService = dialogService;
             rectangles = new ObservableCollection<RectF>();
         }
 
@@ -43,7 +47,7 @@ namespace ParkEase.ViewModel
             }
             else
             {
-                await Shell.Current.DisplayAlert("OOPS", "Your device isn't supported", "OK");
+                await dialogService.ShowAlertAsync("OOPS", "Your device isn't supported", "OK");
             }
         });
 
@@ -52,16 +56,28 @@ namespace ParkEase.ViewModel
             var rect = new RectF(point.X, point.Y, 100, 50);
             Rectangles.Add(rect);
             RecCount = RecCount + 1;
-            //Drawable.UpdateRectangles(rectangles);
-
-            //OnPropertyChanged(nameof(Rectangles));
-            //graphicsView?.Invalidate();
         }
 
-        public async Task SaveRectanglesAsync(string buildingName, string floorNo)
+        public ICommand RemoveRectangleClick => new RelayCommand(async () =>
         {
+            try
+            {
+                if (RecCount > 0)
+                {
+                    Rectangles.RemoveAt(RecCount - 1);
+                    RecCount--;
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Error", "There is nothing to deldete.\nPlease draw the map first!", "OK");
+                }
+            } catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
             
-        }
+        });
+
     }
 
 }

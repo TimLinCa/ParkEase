@@ -15,11 +15,15 @@
                 Text="Welcome to .NET MAUI!!!!!"
                 VerticalOptions="Center" />
 
-            <Button
-                x:Name="UploadBtn"
-                Command="{Binding UploadImageClicked}"
-                HorizontalOptions="Center"
-                Text="Upload Image" />
+            <Button x:Name="UploadBtn"
+                    Command="{Binding UploadImageClicked}"
+                    HorizontalOptions="Center"
+                    Text="Upload Image" />
+
+            <Button x:Name="DeleteBtn"
+                    Command="{Binding RemoveRectangleClick}"
+                    HorizontalOptions="Center"
+                    Text="Delete a Rectangle" />
 
 
             <drawables:RecGraphicsView
@@ -33,7 +37,7 @@
                     <drawables:RectDrawable />
                 </drawables:RecGraphicsView.Drawable>
                 <GraphicsView.GestureRecognizers>
-                    <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped" />
+                    <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped"/>
                 </GraphicsView.GestureRecognizers>
             </drawables:RecGraphicsView>
 
