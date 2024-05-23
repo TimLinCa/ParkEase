@@ -6,46 +6,76 @@
     xmlns:drawables="clr-namespace:ParkEase.Utilities;assembly=ParkEase"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
-    Title="CreateMapPage"
     x:DataType="vm:CreateMapViewModel">
+    
     <ScrollView>
-        <VerticalStackLayout>
-            <Label
-                HorizontalOptions="Center"
-                Text="Welcome to .NET MAUI!!!!!"
-                VerticalOptions="Center" />
 
-            <Button x:Name="UploadBtn"
-                    Command="{Binding UploadImageClicked}"
-                    HorizontalOptions="Center"
-                    Text="Upload Image" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <Button x:Name="DeleteBtn"
-                    Command="{Binding RemoveRectangleClick}"
-                    HorizontalOptions="Center"
-                    Text="Delete a Rectangle" />
+            <!-- Form -->
+            <ScrollView Grid.Column="0">
+            <StackLayout Padding="10"
+                         BackgroundColor="LightGray">
+                
+                <Label Margin="10"
+                       FontSize="20"
+                       HorizontalOptions="Center"
+                       Text="Create Map Editor" />
 
+                <Button x:Name="UploadBtn"
+                        Margin="50,50,50,0"
+                        VerticalOptions="Center"
+                        Text="Upload Image"
+                        Command="{Binding UploadImageClick}" />
+                <HorizontalStackLayout HorizontalOptions="Center">
+                <Button x:Name="DeleteBtn"
+                        WidthRequest="100"
+                        Margin="10,20,0,0"
+                        HorizontalOptions="Center"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Text="Delete" 
+                        Command="{Binding RemoveRectangleClick}"/>
+                
+                <Button x:Name="ClearBtn"
+                        WidthRequest="100"
+                        Margin="10,20,10,0"
+                        HorizontalOptions="Center"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Text="Clear" 
+                        Command="{Binding ClearAllRectangleClick}"/>
+                </HorizontalStackLayout>
+            </StackLayout>
+            </ScrollView>
 
-            <drawables:RecGraphicsView
+            
+            <!-- GraphicsView -->
+            <Border Grid.Column="1"
+                    Stroke="#512BD4">
+
+                <drawables:RecGraphicsView
                 x:Name="RectangleDrawableView"
                 ImgPath="{Binding ImgPath}"
                 MinimumHeightRequest="700"
                 MinimumWidthRequest="700"
                 RecCount="{Binding RecCount}"
                 Rectangles="{Binding Rectangles}">
-                <drawables:RecGraphicsView.Drawable>
-                    <drawables:RectDrawable />
-                </drawables:RecGraphicsView.Drawable>
-                <GraphicsView.GestureRecognizers>
-                    <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped"/>
-                </GraphicsView.GestureRecognizers>
-            </drawables:RecGraphicsView>
+                    <drawables:RecGraphicsView.Drawable>
+                        <drawables:RectDrawable />
+                    </drawables:RecGraphicsView.Drawable>
+                    <GraphicsView.GestureRecognizers>
+                        <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped"/>
+                    </GraphicsView.GestureRecognizers>
+                </drawables:RecGraphicsView>
 
+            </Border>
 
 
             <!--  https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/graphicsview?view=net-maui-8.0#position-and-size-graphical-objects  -->
 
-
-        </VerticalStackLayout>
+        </Grid>
     </ScrollView>
 </ContentPage>

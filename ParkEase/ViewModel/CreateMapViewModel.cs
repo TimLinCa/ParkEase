@@ -34,7 +34,7 @@ namespace ParkEase.ViewModel
             rectangles = new ObservableCollection<RectF>();
         }
 
-        public ICommand UploadImageClicked => new RelayCommand(async () =>
+        public ICommand UploadImageClick => new RelayCommand(async () =>
         {
             if (MediaPicker.Default.IsCaptureSupported)
             {
@@ -76,6 +76,27 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
             
+        });
+
+        public ICommand ClearAllRectangleClick => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (RecCount > 0)
+                {
+                    Rectangles.Clear();
+                    RecCount = 0;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
         });
 
     }
