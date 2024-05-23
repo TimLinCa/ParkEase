@@ -26,7 +26,7 @@ public partial class MapPage : ContentPage
         {
             Html = @"
                 <!DOCTYPE html>
-                <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml"">  // namespace URL for XHTML
+                <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml"">  
                 <head>
                     <meta charset=""utf-8"" />
                     <title></title>
@@ -233,7 +233,7 @@ public partial class MapPage : ContentPage
         }
     }
 
-    // This method is called when the page appears on the screen
+    // From ChatGPT: This method is called when the page appears on the screen
     protected override void OnAppearing()
     {
         // Call the base class's OnAppearing method to ensure any base class functionality is executed
