@@ -51,7 +51,7 @@
                     Margin="50,10,50,50"
                     Clicked="btn_Test_Test"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    Text="Clear Line"
+                    Text="Check Line"
                     VerticalOptions="Center" />
 
                 <material:TextField
