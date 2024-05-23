@@ -12,7 +12,7 @@ public partial class CreateMapPage : ContentPage
 
     }
 
-    public async void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
+    public void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
     {
         var viewModel = BindingContext as CreateMapViewModel;
         var touchPosition = args.GetPosition(RectangleDrawableView);
