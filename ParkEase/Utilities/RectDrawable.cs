@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Graphics.Platform;
+﻿//using AVFoundation;
+using Microsoft.Maui.Graphics.Platform;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -33,7 +34,32 @@ namespace ParkEase.Utilities
 
                 if (image != null)
                 {
-                    canvas.DrawImage(image, 10, 10, image.Width, image.Height);
+                    // Calculate image width and height to show
+                    // https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview
+
+                    float viewRatio = dirtyRect.Width / dirtyRect.Height;
+                    float imageRatio = image.Width / image.Height;
+                    float offsetX, offsetY, drawWidth, drawHeight;
+
+                    if (imageRatio <= viewRatio)
+                    {
+                        drawHeight = dirtyRect.Height;
+                        drawWidth = drawHeight / imageRatio;
+
+                        offsetY = 0;
+                        offsetX = (dirtyRect.Width - drawWidth) / 2;
+                    }
+                    else
+                    {
+                        drawWidth = dirtyRect.Width;
+                        drawHeight = drawWidth / imageRatio;
+
+                        offsetX = 0;
+                        offsetY = (dirtyRect.Height - drawHeight) / 2;
+                    }
+
+
+                    canvas.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
                     if (Rectangles != null)
                     {
