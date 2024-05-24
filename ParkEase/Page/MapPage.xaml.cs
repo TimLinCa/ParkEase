@@ -12,6 +12,7 @@ using Microsoft.Maui.Controls;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace ParkEase.Page;
 
@@ -227,10 +228,13 @@ public partial class MapPage : ContentPage
                 </html>"
         };
 
-        
+
         mapWebView.Source = htmlSource; // Set the source of the WebView to the HTML content.
         mapWebView.Navigating += OnWebViewNavigating; // Event handler for WebView navigation.
-        draw_lines();
+        mapWebView.Navigated += async (s, e) =>
+        {
+            await draw_lines(); 
+        };
     }
 
     private void OnWebViewNavigating(object sender, WebNavigatingEventArgs e)
@@ -239,7 +243,7 @@ public partial class MapPage : ContentPage
         {
             e.Cancel = true; // Cancel the navigation
 
-            var info =  e.Url.Split('=')[2]; // Extract the line index from the URL
+            var info = e.Url.Split('=')[2]; // Extract the line index from the URL
             info = System.Net.WebUtility.UrlDecode(info);
 
             HandleLineClicked(info); // Call your C# function to handle the line click
@@ -247,11 +251,11 @@ public partial class MapPage : ContentPage
 
         else if (e.Url.StartsWith("myapp://linedrawn"))
         {
-            e.Cancel = true; 
+            e.Cancel = true;
 
-           
+
             btn_Draw.Text = "Draw Line";
-            btn_Draw.BackgroundColor = Colors.Blue; 
+            btn_Draw.BackgroundColor = Colors.Blue;
         }
 
     }
@@ -328,7 +332,7 @@ public partial class MapPage : ContentPage
 
     private void btn_Clear_Clicked(object sender, EventArgs e)
     {
-       
+
         mapWebView.EvaluateJavaScriptAsync("deleteLine()");
     }
 
@@ -343,14 +347,54 @@ public partial class MapPage : ContentPage
         _viewModel.Points = lines.SelectMany(line => line.Points).ToList();
     }
 
-    private async void draw_lines()
+    public class ParkingData
     {
-        MongoDBService mongoDBService = new MongoDBService();
-        List<ParkingData> parkingDatas = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
-        foreach(var parkingData in parkingDatas)
-        {
-            //await mapWebView.EvaluateJavaScriptAsync($"drawLine({parkingData.Points[0].Lat)},{parkingData.Points[0].Lng)},{parkingData.Points[1].Lat)},{parkingData.Points[1].Lng)}");
-        }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+        public int Index { get; set; }
+        public List<MapPoint> Points { get; set; }
+        public string ParkingSpot { get; set; }
+        public string ParkingTime { get; set; }
+        public string ParkingFee { get; set; }
+        public int ParkingCapacity { get; set; }
+        public int Role { get; set; }
     }
 
+    private async Task draw_lines()
+    {
+        try
+        {
+            MongoDBService mongoDBService = new MongoDBService();
+            List<ParkingData> parkingDatas = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+
+            if (parkingDatas == null || !parkingDatas.Any())
+            {
+                System.Diagnostics.Debug.WriteLine("No parking data found.");
+                return;
+            }
+
+            foreach (var parkingData in parkingDatas)
+            {
+                System.Diagnostics.Debug.WriteLine($"ParkingData: {JsonConvert.SerializeObject(parkingData)}");
+
+                if (parkingData.Points.Count > 1)
+                {
+                    for (int i = 0; i < parkingData.Points.Count - 1; i++)
+                    {
+                        string jsCommand = $"drawLine({parkingData.Points[i].Lat}, {parkingData.Points[i].Lng}, {parkingData.Points[i + 1].Lat}, {parkingData.Points[i + 1].Lng});";
+                        System.Diagnostics.Debug.WriteLine($"Executing JS Command: {jsCommand}");
+                        await mapWebView.EvaluateJavaScriptAsync(jsCommand);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error in draw_lines: {ex.Message}");
+        }
+    }
 }
+
+
+ 
