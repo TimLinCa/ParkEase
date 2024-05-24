@@ -48,7 +48,15 @@
                         Text="Clear" 
                         Command="{Binding ClearAllRectangleClick}"/>
                 </HorizontalStackLayout>
-            </StackLayout>
+
+                    <Button x:Name="SubmitBtn"
+        WidthRequest="100"
+        Margin="50,50,50,0"
+        HorizontalOptions="Center"
+        Text="Submit" 
+        Command="{Binding AddParkingInfoAsync}"/>
+                
+                </StackLayout>
             </ScrollView>
 
             

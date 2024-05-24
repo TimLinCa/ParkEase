@@ -37,7 +37,15 @@ namespace ParkEase.Core.Data
 
     public class FloorInfo
     {
+        public string Floor { get; set; }
         public List<Rectangle> Rectangles { get; set; }
         public byte[] ImageData { get; set; }
+
+        public FloorInfo(string floor, List<Rectangle> rectangles, byte[] imageData)
+        {
+            Floor = floor;
+            Rectangles = rectangles;
+            ImageData = imageData;
+        }
     }
 }

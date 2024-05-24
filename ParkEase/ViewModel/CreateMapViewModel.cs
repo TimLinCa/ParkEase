@@ -33,13 +33,26 @@ namespace ParkEase.ViewModel
         private string city;
 
         [ObservableProperty]
-        private ObservableCollection<RectF> rectangles;
+        private double fee;
+
+        [ObservableProperty]
+        private double limitHour;
+
+        [ObservableProperty]
+        private string floor;
 
         [ObservableProperty]
         private int recCount;
 
         [ObservableProperty]
         private string imgPath;
+
+        [ObservableProperty]
+        private ObservableCollection<RectF> rectangles;
+
+        private List<Rectangle> ListRectangles { get; set; }
+
+        private List<FloorInfo> ListfloorInfos { get; set; }
 
         private byte[] imageData;
 
@@ -56,7 +69,12 @@ namespace ParkEase.ViewModel
             companyName = string.Empty;
             address = string.Empty;
             city = string.Empty;
+            fee = 0;
+            limitHour = 0;
             rectangles = new ObservableCollection<RectF>();
+
+            ListRectangles = new List<Rectangle>();
+            ListfloorInfos = new List<FloorInfo>();
         }
 
         public ICommand UploadImageClick => new RelayCommand(async () =>
@@ -90,31 +108,6 @@ namespace ParkEase.ViewModel
             }
 
         });
-
-        public ICommand AddParkingInfoAsync => new RelayCommand(async () =>
-
-        {
-            try
-            {
-                var parkingInfo = new PrivateParking
-                {
-                    CompanyName = CompanyName,
-                    Address = Address,
-                    City = City,
-
-                };
-                await mongoDBService.InsertData(CollectionName.PrivateParking, parkingInfo);
-                var TEST = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-        });
-
-
-
 
         public void AddRectangle(PointF point)
         {
@@ -162,6 +155,61 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
 
+        });
+
+        // Save Floor Information Command
+
+        // Submit Command
+        public ICommand AddParkingInfoAsync => new RelayCommand(async () =>
+
+        {
+            try
+            {
+                for (int i = 0; i < RecCount; i++)
+                {
+                    var insertRect = new Rectangle(i + 1, rectangles[i]);
+                    ListRectangles.Add(insertRect);
+                };
+
+                /*var rect1 = new Rectangle(1, new RectF(10, 10, 100, 50));
+                var rect2 = new Rectangle(2, new RectF(50, 30, 100, 50));
+                ListRectangles.Add(rect1);
+                ListRectangles.Add(rect2);*/
+
+                var floor1 = new FloorInfo("b1", ListRectangles, imageData);
+                ListfloorInfos.Add(floor1);
+
+
+                var privateParkingInfo = new PrivateParking
+                {
+                    CompanyName = CompanyName,
+                    Address = Address,
+                    City = City,
+                    ParkingInfo = new ParkingInfo
+                    {
+                        Fee = Fee,
+                        LimitedHour = LimitHour
+                    },
+
+                    FloorInfo = ListfloorInfos
+
+                    /*FloorInfo = new List<FloorInfo>
+                    {
+                        Floor = floor,
+                        Rectangles = listRectangles,
+                        imageData = imageData,
+                    }*/
+
+
+                };
+                await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
+                var TEST = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
         });
 
     }

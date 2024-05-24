@@ -10,12 +10,15 @@ namespace ParkEase.Core.Data
 {
     public class Rectangle
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public int id;
 
-        public string Index {  get; set; }
+        public int Index {  get; set; }
 
         public RectF Rect {  get; set; }
+
+        public Rectangle(int index, RectF rect) 
+        {
+            Index = index;
+            Rect = rect;
+        }
     }
 }
