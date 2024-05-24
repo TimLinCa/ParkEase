@@ -54,7 +54,8 @@
             
             <!-- GraphicsView -->
             <Border Grid.Column="1"
-                    Stroke="#512BD4">
+                    Stroke="#512BD4"
+                    BackgroundColor="WhiteSmoke">
 
                 <drawables:RecGraphicsView
                 x:Name="RectangleDrawableView"
