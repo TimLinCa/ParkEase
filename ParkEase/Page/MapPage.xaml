@@ -102,6 +102,7 @@
             <!--  Map Section  -->
             <!--<maps:Map x:Name="myMap" Grid.Column="1" MapType="Satellite" IsShowingUser="True" IsTrafficEnabled="false"/>-->
             <WebView x:Name="mapWebView" Grid.Column="1" />
+
         </Grid>
 
     </ScrollView>
