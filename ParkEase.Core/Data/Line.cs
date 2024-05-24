@@ -11,6 +11,7 @@ public class Line : IEquatable<Line>
     {
         if (ReferenceEquals(null, other)) return false;
         bool isEquals = true;
+        if (Points == null || Points.Count < 2) return false;
         for (var i = 0; i < Points.Count; i++)  // Compare each point in the line to check for equality
         {
             if (!this.Points[i].Equals(other.Points[i])) return false;

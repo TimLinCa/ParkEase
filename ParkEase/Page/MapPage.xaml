@@ -89,7 +89,6 @@
 
                 <Button
                     x:Name="btn_Test"
-                    Clicked="btn_Test_Test"
                     Command="{Binding SubmitCommand}"
                     CornerRadius="10"
                     HorizontalOptions="Center"

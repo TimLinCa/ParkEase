@@ -38,15 +38,15 @@ namespace ParkEase.ViewModel
         private Location? startLocation; // The starting point of the line
 
         [ObservableProperty]
-        private Polyline? selectedPolyline; // Selected line
+        private Line? selectedLine; // Selected line
 
         [ObservableProperty]
-        private List<MapPoint> points; // New property for line coordinates
+        private List<Line> lines; //list on map
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         private static int currentMaxIndex = 0; // Initialize the index counter
-
+        
         public ObservableCollection<string> ParkingTimes { get; }
         private string _selectedParkingTime;
 
@@ -95,8 +95,8 @@ namespace ParkEase.ViewModel
             locationInfo = "";
             draw = false;
             startLocation = null;
-            selectedPolyline = new Polyline();
-            points = new List<MapPoint>();
+            selectedLine = new Line();
+            lines = new List<Line>();
 
             ParkingTimes = new ObservableCollection<string>   /*https://www.calgaryparking.com/find-parking/on-street.html*/
             {
@@ -123,22 +123,28 @@ namespace ParkEase.ViewModel
             currentMaxIndex = data.Any() ? data.Max(d => d.Index) : 0;
         }
 
+        partial void OnSelectedLineChanged(Line? value)
+        {
+          
+        }
+
         public ICommand SubmitCommand => new RelayCommand(async () =>
         {
             try
             {
                 if (!string.IsNullOrEmpty(ParkingSpot) && !string.IsNullOrEmpty(ParkingTime) &&
                     !string.IsNullOrEmpty(ParkingFee) && !string.IsNullOrEmpty(ParkingCapacity) &&
-                    Points != null && Points.Count > 0)
+                    SelectedLine != null && SelectedLine.Points.Count > 0)
                 {
+
                     var parkingData = new ParkingData
                     {
-                        Index = ++currentMaxIndex, // Increment the index for each new line
+                        Index = SelectedLine.Index, // Increment the index for each new line
                         ParkingSpot = ParkingSpot,
                         ParkingTime = ParkingTime,
                         ParkingFee = ParkingFee,
                         ParkingCapacity = ParkingCapacity,
-                        Points = Points
+                        Points = SelectedLine.Points
                     };
 
                     await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);

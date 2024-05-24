@@ -21,7 +21,8 @@ public partial class MapPage : ContentPage
 {
     // ViewModel for the MapPage to handle data binding.
     private MapViewModel _viewModel;
-
+    private bool mapInitial = true;
+    private Line selectedLine;
     public MapPage()
     {
         InitializeComponent();
@@ -60,7 +61,7 @@ public partial class MapPage : ContentPage
                         let lines = [];
                         let selectedLine = null;
                         let hoverLine = null;
-
+                        let initial = true;
                         // Initializes the Google Map 
                         function initMap() {
                             map = new google.maps.Map(document.getElementById(""map""), {
@@ -143,10 +144,10 @@ public partial class MapPage : ContentPage
                             });
 
                             line.setMap(map);
-
+                            
                             lines.push(line);
                             
-                            window.location.href = ""myapp://lineDrawn?index="";
+                            if(!initial)window.location.href = ""myapp://lineDrawn?index="";
                             console.log('draw');
                         }
 
@@ -222,6 +223,10 @@ public partial class MapPage : ContentPage
                                 selectedLine = null; // Reset selectedLine
                             }
                         }
+
+                        function setInitial(newValue) {
+                            initial = newValue;
+                        }
                     </script>
                     <script src=""https://maps.googleapis.com/maps/api/js?key=AIzaSyCMPKV70vmSd-153eJsECz6gJD0AipZD-M&callback=initMap"" async defer></script>
                 </body>
@@ -231,13 +236,10 @@ public partial class MapPage : ContentPage
 
         mapWebView.Source = htmlSource; // Set the source of the WebView to the HTML content.
         mapWebView.Navigating += OnWebViewNavigating; // Event handler for WebView navigation.
-        mapWebView.Navigated += async (s, e) =>
-        {
-            await draw_lines(); 
-        };
+        mapWebView.Navigated += OnWebViewNavigated;
     }
 
-    private void OnWebViewNavigating(object sender, WebNavigatingEventArgs e)
+    private async void OnWebViewNavigating(object sender, WebNavigatingEventArgs e)
     {
         if (e.Url.StartsWith("myapp://lineclicked"))
         {
@@ -256,7 +258,26 @@ public partial class MapPage : ContentPage
 
             btn_Draw.Text = "Draw Line";
             btn_Draw.BackgroundColor = Colors.Blue;
+
+            // Evaluate the JavaScript function "getLines()" to get the JSON string of all lines from the WebView
+            var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
+            result = result.Replace("\\\"", "\"");
+            // Deserialize the JSON string into a list of Line objects
+            List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
+            _viewModel.Lines = lines;
         }
+
+    }
+
+    private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
+    {
+        // Call your draw_lines function here
+        if (mapInitial) 
+        {
+            await draw_lines();
+            mapInitial = false;
+            await mapWebView.EvaluateJavaScriptAsync("setInitial(false)");
+        } 
 
     }
 
@@ -277,7 +298,6 @@ public partial class MapPage : ContentPage
         var points = info.Split(';');
         List<MapPoint> mapPoints = new List<MapPoint>();
 
-
         foreach (var point in points)
         {
             // Split the point into latitude and longitude
@@ -295,7 +315,7 @@ public partial class MapPage : ContentPage
         }
 
         // Create a new Line object to represent the selected line
-        Line selectedLine = new Line();
+        selectedLine = new Line();
         //Initialize the index to -1(indicating it is not yet matched)
         selectedLine.Index = -1;
         // Set the Points property to the list of MapPoints
@@ -309,6 +329,7 @@ public partial class MapPage : ContentPage
 
         // Find the line that matches the selected line based on the points
         selectedLine = lines.FirstOrDefault(line => line.Equals(selectedLine));
+        _viewModel.SelectedLine = selectedLine;
     }
 
     // It logs the clicked location and updates the ViewModel with the location information
@@ -334,17 +355,6 @@ public partial class MapPage : ContentPage
     {
 
         mapWebView.EvaluateJavaScriptAsync("deleteLine()");
-    }
-
-
-    // It retrieves the lines drawn on the map from the WebView and processes the result
-    private async void btn_Test_Test(object sender, EventArgs e)
-    {
-        var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
-        result = result.Replace("\\\"", "\"");
-        List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
-
-        _viewModel.Points = lines.SelectMany(line => line.Points).ToList();
     }
 
     public class ParkingData
