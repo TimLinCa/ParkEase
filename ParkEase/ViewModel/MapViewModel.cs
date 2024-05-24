@@ -40,8 +40,12 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private Polyline? selectedPolyline; // Selected line
 
+        [ObservableProperty]
+        private List<MapPoint> points; // New property for line coordinates
+
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
+        private static int currentMaxIndex = 0; // Initialize the index counter
 
         public ObservableCollection<string> ParkingTimes { get; }
         private string _selectedParkingTime;
@@ -92,6 +96,7 @@ namespace ParkEase.ViewModel
             draw = false;
             startLocation = null;
             selectedPolyline = new Polyline();
+            points = new List<MapPoint>();
 
             ParkingTimes = new ObservableCollection<string>   /*https://www.calgaryparking.com/find-parking/on-street.html*/
             {
@@ -107,29 +112,42 @@ namespace ParkEase.ViewModel
                 "$1.50 per hour",
                 "$2.00 per hour"
             };
+
+            InitializeIndexCounter();
+        }
+
+        private async void InitializeIndexCounter()
+        {
+            // Optionally, retrieve the current max index from MongoDB
+            var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+            currentMaxIndex = data.Any() ? data.Max(d => d.Index) : 0;
         }
 
         public ICommand SubmitCommand => new RelayCommand(async () =>
         {
             try
             {
-                if (!string.IsNullOrEmpty(ParkingTime) && !string.IsNullOrEmpty(ParkingFee) && !string.IsNullOrEmpty(ParkingCapacity))
+                if (!string.IsNullOrEmpty(ParkingSpot) && !string.IsNullOrEmpty(ParkingTime) &&
+                    !string.IsNullOrEmpty(ParkingFee) && !string.IsNullOrEmpty(ParkingCapacity) &&
+                    Points != null && Points.Count > 0)
                 {
                     var parkingData = new ParkingData
                     {
+                        Index = ++currentMaxIndex, // Increment the index for each new line
                         ParkingSpot = ParkingSpot,
                         ParkingTime = ParkingTime,
                         ParkingFee = ParkingFee,
-                        ParkingCapacity = ParkingCapacity
+                        ParkingCapacity = ParkingCapacity,
+                        Points = Points
                     };
 
                     await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
      
-                    await dialogService.ShowAlertAsync("", "Your information is submitted.", "OK");
+                    await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                 }
                 else
                 {
-                    await dialogService.ShowAlertAsync("", "Please fill in all fields.", "OK");
+                    await dialogService.ShowAlertAsync("Warning", "Please fill in all fields.", "OK");
                 }
             }
             catch (Exception ex)
@@ -154,12 +172,6 @@ namespace ParkEase.ViewModel
         public event EventHandler DrawLineRequested;
         public event EventHandler ClearLineRequested;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }
 

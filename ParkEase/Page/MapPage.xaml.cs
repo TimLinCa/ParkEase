@@ -7,6 +7,11 @@ using System;
 using Microsoft.Maui.Graphics;
 using ParkEase.Core.Services;
 using ParkEase.Core.Data;
+using System;
+using Microsoft.Maui.Controls;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ParkEase.Page;
 
@@ -334,6 +339,8 @@ public partial class MapPage : ContentPage
         var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
         result = result.Replace("\\\"", "\"");
         List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
+
+        _viewModel.Points = lines.SelectMany(line => line.Points).ToList();
     }
 
     private async void draw_lines()
@@ -346,38 +353,4 @@ public partial class MapPage : ContentPage
         }
     }
 
-    // This class represents a point on the map with latitude and longitude
-    private class MapPoint : IEquatable<MapPoint>
-    {
-        public double Lat { get; set; }
-        public double Lng { get; set; }
-
-
-        // Determines whether the specified MapPoint is equal to the current MapPoint
-        public bool Equals(MapPoint? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if(other.Lat == this.Lat && other.Lng == this.Lng) return true;
-            return false;
-        }
-    }
-
-    // This class represents a line on the map consisting of multiple points
-    private class Line : IEquatable<Line>
-    {
-        public int Index { get; set; }  // Index of the line, used for identification
-        public List<MapPoint> Points { get; set; }
-
-        // Determines whether the specified Line is equal to the current Line
-        public bool Equals(Line? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            bool isEquals = true;
-            for(var i = 0; i < Points.Count; i++)  // Compare each point in the line to check for equality
-            {
-                if (!this.Points[i].Equals(other.Points[i])) return false;
-            }
-            return isEquals;
-        }
-    }
 }
