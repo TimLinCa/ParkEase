@@ -12,11 +12,26 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using IImage = Microsoft.Maui.Graphics.IImage;
+using ParkEase.Page;
+using ParkEase.Core.Contracts.Services;
+using ParkEase.Core.Data;
+using ParkEase.Core.Services;
+using Microsoft.Maui.Media;
+
 
 namespace ParkEase.ViewModel
 {
     public partial class CreateMapViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private string companyName;
+
+        [ObservableProperty]
+        private string address;
+
+        [ObservableProperty]
+        private string city;
+
         [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
 
@@ -26,30 +41,80 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string imgPath;
 
+        private byte[] imageData;
+
+        private readonly IMongoDBService mongoDBService;
+
         private readonly IDialogService dialogService;
 
-        public CreateMapViewModel(IDialogService dialogService)
+
+
+        public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
         {
+            this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
+            companyName = string.Empty;
+            address = string.Empty;
+            city = string.Empty;
             rectangles = new ObservableCollection<RectF>();
         }
 
         public ICommand UploadImageClick => new RelayCommand(async () =>
         {
-            if (MediaPicker.Default.IsCaptureSupported)
+            try
             {
-                // Load photo
-                FileResult myPhoto = await MediaPicker.Default.PickPhotoAsync();
-                if (myPhoto != null)
+                if (MediaPicker.Default.IsCaptureSupported)
                 {
-                    ImgPath = myPhoto.FullPath;
+                    // Load photo
+                    FileResult myPhoto = await MediaPicker.PickPhotoAsync();
+                    if (myPhoto != null)
+                    {
+                        ImgPath = myPhoto.FullPath;
+                        using var stream = await myPhoto.OpenReadAsync();
+                        using var memoryStream = new MemoryStream();
+                        await stream.CopyToAsync(memoryStream);
+                        var imageBytes = memoryStream.ToArray();
+
+                        // Convert byte array to Base64 string and assign to ImageData
+                        imageData = imageBytes;
+                    }
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("OOPS", "Your device isn't supported", "OK");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                await dialogService.ShowAlertAsync("OOPS", "Your device isn't supported", "OK");
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
+        });
+
+        public ICommand AddParkingInfoAsync => new RelayCommand(async () =>
+
+        {
+            try
+            {
+                var parkingInfo = new PrivateParking
+                {
+                    CompanyName = CompanyName,
+                    Address = Address,
+                    City = City,
+
+                };
+                await mongoDBService.InsertData(CollectionName.PrivateParking, parkingInfo);
+                var TEST = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         });
+
+
+
 
         public void AddRectangle(PointF point)
         {

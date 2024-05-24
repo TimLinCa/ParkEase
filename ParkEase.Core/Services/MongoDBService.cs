@@ -50,6 +50,7 @@ namespace ParkEase.Core.Services
     {
         public static string Users = "Users";
         public static string ParkingData = "ParkingData";
+        public static string PrivateParking = "PrivateParking";
 
     }
 }
