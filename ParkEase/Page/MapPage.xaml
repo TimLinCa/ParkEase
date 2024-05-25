@@ -47,6 +47,32 @@
                     Text="Clear Line"
                     VerticalOptions="Center" />
 
+
+                <!-- Labels for displaying parking data -->
+                <Label Text="Parking Spot:" 
+                       FontAttributes="Bold" 
+                       Margin="10,3" />
+                <Label Text="{Binding SelectedParkingData.ParkingSpot}" 
+                       Margin="10,3"/>
+
+                <Label Text="Enforcement Time:" 
+                       FontAttributes="Bold" 
+                       Margin="10,3" />
+                <Label Text="{Binding SelectedParkingData.ParkingTime}" 
+                       Margin="10,3" />
+
+                <Label Text="Parking Fee:" 
+                       FontAttributes="Bold" 
+                       Margin="10,3" />
+                <Label Text="{Binding SelectedParkingData.ParkingFee}" 
+                       Margin="10,3"/>
+
+                <Label Text="Parking Capacity:" 
+                       FontAttributes="Bold" 
+                       Margin="10,3"/>
+                <Label Text="{Binding SelectedParkingData.ParkingCapacity}" 
+                       Margin="10,3,10,40"/>
+
                 <material:TextField
                     Title="Parking Spot"
                     Margin="10,3"

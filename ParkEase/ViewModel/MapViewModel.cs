@@ -43,6 +43,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private List<Line> lines; //list on map
 
+        [ObservableProperty]
+        private ParkingData selectedParkingData;
+
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         private static int currentMaxIndex = 0; // Initialize the index counter
