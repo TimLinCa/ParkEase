@@ -330,7 +330,7 @@
        <x>10</x>
        <y>20</y>
        <width>371</width>
-       <height>381</height>
+       <height>411</height>
       </rect>
      </property>
      <property name="widgetResizable">
@@ -342,7 +342,7 @@
         <x>0</x>
         <y>0</y>
         <width>369</width>
-        <height>379</height>
+        <height>409</height>
        </rect>
       </property>
       <widget class="QGroupBox" name="groupBox_4">
@@ -351,7 +351,7 @@
          <x>10</x>
          <y>10</y>
          <width>341</width>
-         <height>241</height>
+         <height>271</height>
         </rect>
        </property>
        <property name="title">
@@ -374,7 +374,7 @@
         <property name="geometry">
          <rect>
           <x>260</x>
-          <y>140</y>
+          <y>170</y>
           <width>75</width>
           <height>23</height>
          </rect>
@@ -387,7 +387,7 @@
         <property name="geometry">
          <rect>
           <x>180</x>
-          <y>140</y>
+          <y>170</y>
           <width>69</width>
           <height>22</height>
          </rect>
@@ -398,7 +398,7 @@
          <rect>
           <x>90</x>
           <y>50</y>
-          <width>241</width>
+          <width>191</width>
           <height>20</height>
          </rect>
         </property>
@@ -407,7 +407,7 @@
         <property name="geometry">
          <rect>
           <x>90</x>
-          <y>140</y>
+          <y>170</y>
           <width>47</width>
           <height>16</height>
          </rect>
@@ -447,7 +447,7 @@
          <rect>
           <x>90</x>
           <y>20</y>
-          <width>241</width>
+          <width>191</width>
           <height>20</height>
          </rect>
         </property>
@@ -455,8 +455,8 @@
        <widget class="QPushButton" name="btn_draw">
         <property name="geometry">
          <rect>
-          <x>130</x>
-          <y>180</y>
+          <x>10</x>
+          <y>240</y>
           <width>75</width>
           <height>23</height>
          </rect>
@@ -470,7 +470,7 @@
          <rect>
           <x>90</x>
           <y>80</y>
-          <width>241</width>
+          <width>191</width>
           <height>20</height>
          </rect>
         </property>
@@ -505,7 +505,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>140</y>
+          <y>170</y>
           <width>51</width>
           <height>16</height>
          </rect>
@@ -517,8 +517,8 @@
        <widget class="QPushButton" name="bnt_saveconfig">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>210</y>
+          <x>130</x>
+          <y>240</y>
           <width>75</width>
           <height>23</height>
          </rect>
@@ -531,7 +531,7 @@
         <property name="geometry">
          <rect>
           <x>260</x>
-          <y>210</y>
+          <y>240</y>
           <width>75</width>
           <height>23</height>
          </rect>
@@ -540,12 +540,74 @@
          <string>Load Config</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="bnt_loadCam">
+        <property name="geometry">
+         <rect>
+          <x>290</x>
+          <y>20</y>
+          <width>41</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bnt_loadArea">
+        <property name="geometry">
+         <rect>
+          <x>290</x>
+          <y>80</y>
+          <width>41</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_6">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>140</y>
+          <width>71</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Binding Floor:</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="cmb_floor">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>140</y>
+          <width>69</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_11">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>140</y>
+          <width>47</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_5">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>260</y>
+         <y>290</y>
          <width>341</width>
          <height>111</height>
         </rect>
@@ -612,7 +674,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>VideoTest</string>
+         <string>VideoPath</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_videoPath">

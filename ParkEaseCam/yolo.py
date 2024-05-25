@@ -76,7 +76,6 @@ def parkingLot_detect_cam(cam_index,config_file_path):
     cap.release()
     cv2.destroyAllWindows()
             
-
 def parkingLot_detect_video(video_filePath,config_file_path):
     with open(config_file_path,"rb") as f:
         data = pickle.load(f)
@@ -91,6 +90,7 @@ def parkingLot_detect_video(video_filePath,config_file_path):
     cap=cv2.VideoCapture(video_filePath)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+
     count=0
 
     while True:
@@ -98,9 +98,8 @@ def parkingLot_detect_video(video_filePath,config_file_path):
         if not ret:
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
-
         count += 1
-        if count % 2 != 0:
+        if count % 3 != 0:
             continue
 
         results=model.predict(frame)
@@ -127,8 +126,8 @@ def parkingLot_detect_video(video_filePath,config_file_path):
 
             #checking if car is inside the polyline
             for carP in carPosition:
-                cx1= carP[0]
-                cy1= carP[1]
+                cx1 = carP[0]
+                cy1 = carP[1]
 
                 result=cv2.pointPolygonTest(polyline,(cx1,cy1),False)
                 if result >= 0:

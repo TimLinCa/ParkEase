@@ -13,10 +13,16 @@ from enum import Enum
 from functools import partial
 import pickle
 from yolo import parkingLot_detect_video,parkingLot_detect_cam
+from pymongo import MongoClient
 
+
+client = MongoClient('localhost', 27017)
+db = client.ParkEase
+camConfig = db.CamConfig
+publicArea = db.ParkingData
+privateArea = db.PrivateParking
 
 polyitems = []
-
 area_names=[]
 points = []
 drawing = False
@@ -293,7 +299,7 @@ class webcamThreadClass(QThread):
         self.ThreadActive = True
         prev_frame_time = 0
         new_frame_time = 0
-        while self.ThreadActive: 
+        while self.ThreadActive:
             ret,frame = Capture.read()
             if ret:
                 new_frame_time = time.time()
@@ -315,6 +321,7 @@ class MainWindow(QMainWindow):
         #super().__init__()
         # Load the UI
         self.ui = uic.loadUi("MainWindow.ui",self)
+        self.Initialize()
         # Get the list of available cameras
         self.online_cam = QCameraInfo.availableCameras()
         self.camlist.addItems([c.description() for c in self.online_cam])
@@ -333,6 +340,13 @@ class MainWindow(QMainWindow):
         self.bnt_loadconfig.clicked.connect(self.loadConfig)
         self.bnt_importVideo.clicked.connect(self.importVideo)
         self.bnt_importTestConfig.clicked.connect(self.importTestConfig)
+        self.bnt_loadArea.clicked.connect(self.loadPrivateArea)
+        # Set command for when combobox is changed
+        self.cmb_areaType.currentIndexChanged.connect(self.areaTypeChanged)
+        self.cmb_floor.currentIndexChanged.connect(self.floorChanged)
+        self.bnt_loadArea.setEnabled(False)
+        self.cmb_lotId.setEnabled(False)
+       
         # Resource Usage
         self.resource_usage = boardInfoClass()
         self.resource_usage.start()
@@ -353,7 +367,12 @@ class MainWindow(QMainWindow):
         lay = QtWidgets.QVBoxLayout(self.disp_main)
         lay.addWidget(self.graphicsview)
 
-    def startWebCam(self,pin):
+    def Initialize(self):
+         pas = publicArea.find()
+         for pa in pas:
+            self.cmb_areaName.addItem(pa.get('ParkingSpot'))
+
+    def startWebCam(self):
         try:
             self.btn_stop.setEnabled(True)
             self.btn_start.setEnabled(False)
@@ -377,7 +396,7 @@ class MainWindow(QMainWindow):
         except Exception as error :
             print(error)
     
-    def stopWebcam(self,pin):
+    def stopWebcam(self):
         self.btn_start.setEnabled(True)
         self.btn_stop.setEnabled(False)
         self.rab_cam.setEnabled(True)
@@ -518,6 +537,62 @@ class MainWindow(QMainWindow):
                     self.m_scene.polygon_item.addPoint(QtCore.QPointF(point[0],point[1]))
 
                 self.m_scene.setCurrentInstruction(Instructions.No_Instruction)
+
+    def areaTypeChanged(self):
+        if self.cmb_areaType.currentIndex() == 0:
+            self.bnt_loadArea.setEnabled(False)
+            self.cmb_lotId.setEnabled(False)
+            self.cmb_floor.setEnabled(False)
+            self.cmb_lotId.clear()
+            self.cmb_floor.clear()
+            self.loadArea()
+        else:
+            self.bnt_loadArea.setEnabled(True)
+            self.cmb_lotId.setEnabled(True)
+            self.cmb_floor.setEnabled(True)
+            self.loadArea()
+        
+    
+    def loadArea(self):
+        try:
+            if self.cmb_areaName.count() > 0:
+                self.cmb_areaName.clear()   
+            if self.cmb_areaType.currentIndex() == 0:
+                pas = publicArea.find()
+                for pa in pas:
+                    self.cmb_areaName.addItem(pa.get('ParkingSpot'))
+            else:
+                pas = privateArea.find()
+                for pa in pas:
+                    self.cmb_areaName.addItem(pa.get('companyName'))
+        except Exception as error:
+            print(error)
+
+    def loadPrivateArea(self):
+        try:
+            if self.cmb_areaName.count() > 0:
+                if self.cmb_areaName.currentText == '':
+                    return
+                area = privateArea.find_one({'companyName':self.cmb_areaName.currentText()})
+                self.cmb_floor.clear()
+                self.cmb_lotId.clear()
+
+                fis = area.get("FloorInfo")
+                for fi in fis:
+                    self.cmb_floor.addItem(fi.get("Floor"))
+                # for rec in fis[0].get("Rectangles"):
+                #     self.cmb_lotId.addItem(str(rec.get("Index")))
+        except Exception as error:
+            print(error)
+
+    def floorChanged(self):
+        if self.cmb_floor.currentIndex() == -1:
+            return
+        area = privateArea.find_one({'companyName':self.cmb_areaName.currentText()})
+        fis = area.get("FloorInfo")
+        self.cmb_lotId.clear()
+        for rec in fis[self.cmb_floor.currentIndex()].get("Rectangles"):
+                self.cmb_lotId.addItem(str(rec.get("Index")))
 
 if __name__ == '__main__':
     app = QApplication([])
