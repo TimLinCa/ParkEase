@@ -6,6 +6,11 @@ public class Line : IEquatable<Line>
     public int Index { get; set; }  // Index of the line, used for identification
     public List<MapPoint> Points { get; set; }
 
+    public string ParkingSpot { get; set; }
+    public string ParkingTime { get; set; }
+    public string ParkingFee { get; set; }
+    public string ParkingCapacity { get; set; }
+
     // Determines whether the specified Line is equal to the current Line
     public bool Equals(Line? other)
     {

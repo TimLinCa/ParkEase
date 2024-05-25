@@ -78,6 +78,7 @@ namespace ParkEase.ViewModel
         }
         public class Polyline
         {
+            public int Index { get; set; }
             public List<Location> Points { get; set; }
 
             public Polyline()
@@ -128,7 +129,13 @@ namespace ParkEase.ViewModel
 
         partial void OnSelectedLineChanged(Line? value)
         {
-          
+            if (value != null)
+            {
+                ParkingSpot = value.ParkingSpot;
+                ParkingTime = value.ParkingTime;
+                ParkingFee = value.ParkingFee;
+                ParkingCapacity = value.ParkingCapacity;
+            }
         }
 
         public ICommand SubmitCommand => new RelayCommand(async () =>
@@ -165,21 +172,27 @@ namespace ParkEase.ViewModel
             }
         });
 
-        public ICommand DrawLineCommand => new RelayCommand(() =>
+        public async Task LoadParkingData(int index)
         {
-            // Communicate with the WebView to start drawing a line
-            DrawLineRequested?.Invoke(this, EventArgs.Empty);
-        });
+            var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+            SelectedParkingData = data.FirstOrDefault(d => d.Index == index);
+        }
 
-        public ICommand ClearLineCommand => new RelayCommand(() =>
-        {
-            // Communicate with the WebView to clear the selected line
-            ClearLineRequested?.Invoke(this, EventArgs.Empty);
-        });
+        //public ICommand DrawLineCommand => new RelayCommand(() =>
+        //{
+        //    // Communicate with the WebView to start drawing a line
+        //    DrawLineRequested?.Invoke(this, EventArgs.Empty);
+        //});
 
-        // Events to communicate with the WebView
-        public event EventHandler DrawLineRequested;
-        public event EventHandler ClearLineRequested;
+        //public ICommand ClearLineCommand => new RelayCommand(() =>
+        //{
+        //    // Communicate with the WebView to clear the selected line
+        //    ClearLineRequested?.Invoke(this, EventArgs.Empty);
+        //});
+
+        //// Events to communicate with the WebView
+        //public event EventHandler DrawLineRequested;
+        //public event EventHandler ClearLineRequested;
 
     }
 }

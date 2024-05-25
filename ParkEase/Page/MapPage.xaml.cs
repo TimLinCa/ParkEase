@@ -329,6 +329,12 @@ public partial class MapPage : ContentPage
 
         // Find the line that matches the selected line based on the points
         selectedLine = lines.FirstOrDefault(line => line.Equals(selectedLine));
+
+        if (selectedLine != null)
+        {
+            await _viewModel.LoadParkingData(selectedLine.Index);
+        }
+
         _viewModel.SelectedLine = selectedLine;
     }
 
