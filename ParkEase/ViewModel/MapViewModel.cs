@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MongoDB.Driver;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
@@ -13,8 +14,6 @@ namespace ParkEase.ViewModel
 {
     public partial class MapViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private string parkingId;
 
         [ObservableProperty]
         private string parkingSpot;
@@ -91,7 +90,6 @@ namespace ParkEase.ViewModel
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
-            parkingId = "";
             parkingSpot = "";
             parkingTime = "";
             parkingFee = "";
@@ -177,6 +175,34 @@ namespace ParkEase.ViewModel
             var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
             SelectedParkingData = data.FirstOrDefault(d => d.Index == index);
         }
+
+        public async Task DeleteLineDataAsync(int lineIndex)
+        {
+            try
+            {
+                // Create a filter to match the line with the specified index
+                var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, lineIndex);
+
+                // Delete the line data from MongoDB
+                var result = await mongoDBService.DeleteData(CollectionName.ParkingData, filter);
+
+                if (result.DeletedCount > 0)
+                {
+                    // Optionally, remove the line from the Lines list in the ViewModel
+                    var lineToRemove = Lines.FirstOrDefault(line => line.Index == lineIndex);
+                    if (lineToRemove != null)
+                    {
+                        Lines.Remove(lineToRemove);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors that occur during the deletion process
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
 
         //public ICommand DrawLineCommand => new RelayCommand(() =>
         //{

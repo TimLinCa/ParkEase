@@ -361,6 +361,12 @@ public partial class MapPage : ContentPage
     {
 
         mapWebView.EvaluateJavaScriptAsync("deleteLine()");
+
+        // Call a method to delete the line data from MongoDB
+        if (_viewModel.SelectedLine != null)
+        {
+           _viewModel.DeleteLineDataAsync(_viewModel.SelectedLine.Index);
+        }
     }
 
     public class ParkingData

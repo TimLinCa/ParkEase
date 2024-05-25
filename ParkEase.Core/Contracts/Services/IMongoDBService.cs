@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,8 @@ namespace ParkEase.Core.Contracts.Services
         Task InsertData<T>(string collectionName, T data) where T : class;
 
         Task<List<T>> GetData<T>(string collectionName) where T : class;
+
+        Task<DeleteResult> DeleteData<T>(string collectionName, FilterDefinition<T> filter) where T : class;
 
     }
 }

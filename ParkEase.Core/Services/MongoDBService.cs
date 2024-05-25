@@ -40,6 +40,13 @@ namespace ParkEase.Core.Services
             return result.ToList();
         }
 
+        public async Task<DeleteResult> DeleteData<T>(string collectionName, FilterDefinition<T> filter) where T : class
+        {
+            var collection = getCollection<T>(collectionName);
+            return await collection.DeleteOneAsync(filter);
+        }
+
+
         private IMongoCollection<T> getCollection<T>(string collectionName)
         {
             return db.GetCollection<T>(collectionName);
