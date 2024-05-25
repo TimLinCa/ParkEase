@@ -33,6 +33,7 @@ namespace ParkEase.Core.Data
     {
         public double Fee { get; set; }
         public double LimitedHour { get; set; }
+        public int NumberOfLot {  get; set; }
     }
 
     public class FloorInfo

@@ -39,6 +39,9 @@ namespace ParkEase.ViewModel
         private double limitHour;
 
         [ObservableProperty]
+        private int numberofLot;
+
+        [ObservableProperty]
         private string floor;
 
         [ObservableProperty]
@@ -71,6 +74,7 @@ namespace ParkEase.ViewModel
             city = string.Empty;
             fee = 0;
             limitHour = 0;
+            numberofLot = 0;
             rectangles = new ObservableCollection<RectF>();
 
             ListRectangles = new List<Rectangle>();
@@ -188,7 +192,8 @@ namespace ParkEase.ViewModel
                     ParkingInfo = new ParkingInfo
                     {
                         Fee = Fee,
-                        LimitedHour = LimitHour
+                        LimitedHour = LimitHour,
+                        NumberOfLot = RecCount
                     },
 
                     FloorInfo = ListfloorInfos
