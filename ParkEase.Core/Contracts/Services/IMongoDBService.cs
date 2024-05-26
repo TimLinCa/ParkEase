@@ -17,5 +17,7 @@ namespace ParkEase.Core.Contracts.Services
 
         Task<DeleteResult> DeleteData<T>(string collectionName, FilterDefinition<T> filter) where T : class;
 
+        Task UpdateData<T>(string collectionName, FilterDefinition<T> filter, UpdateDefinition<T> update);
+
     }
 }

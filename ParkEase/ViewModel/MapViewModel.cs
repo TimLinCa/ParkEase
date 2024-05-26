@@ -144,10 +144,9 @@ namespace ParkEase.ViewModel
                     !string.IsNullOrEmpty(ParkingFee) && !string.IsNullOrEmpty(ParkingCapacity) &&
                     SelectedLine != null && SelectedLine.Points.Count > 0)
                 {
-
                     var parkingData = new ParkingData
                     {
-                        Index = SelectedLine.Index, // Increment the index for each new line
+                        Index = SelectedLine.Index,
                         ParkingSpot = ParkingSpot,
                         ParkingTime = ParkingTime,
                         ParkingFee = ParkingFee,
@@ -155,9 +154,25 @@ namespace ParkEase.ViewModel
                         Points = SelectedLine.Points
                     };
 
-                    await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
-     
-                    await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
+                    var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, parkingData.Index);
+                    var update = Builders<ParkingData>.Update
+                        .Set(p => p.ParkingSpot, parkingData.ParkingSpot)
+                        .Set(p => p.ParkingTime, parkingData.ParkingTime)
+                        .Set(p => p.ParkingFee, parkingData.ParkingFee)
+                        .Set(p => p.ParkingCapacity, parkingData.ParkingCapacity)
+                        .Set(p => p.Points, parkingData.Points);
+
+                    var existingData = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+                    if (existingData.Any(d => d.Index == parkingData.Index))
+                    {
+                        await mongoDBService.UpdateData(CollectionName.ParkingData, filter, update);
+                        await dialogService.ShowAlertAsync("Success", "Your information is updated.", "OK");
+                    }
+                    else
+                    {
+                        await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
+                        await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
+                    }
                 }
                 else
                 {
@@ -202,23 +217,6 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         }
-
-
-        //public ICommand DrawLineCommand => new RelayCommand(() =>
-        //{
-        //    // Communicate with the WebView to start drawing a line
-        //    DrawLineRequested?.Invoke(this, EventArgs.Empty);
-        //});
-
-        //public ICommand ClearLineCommand => new RelayCommand(() =>
-        //{
-        //    // Communicate with the WebView to clear the selected line
-        //    ClearLineRequested?.Invoke(this, EventArgs.Empty);
-        //});
-
-        //// Events to communicate with the WebView
-        //public event EventHandler DrawLineRequested;
-        //public event EventHandler ClearLineRequested;
 
     }
 }

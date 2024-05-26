@@ -46,6 +46,11 @@ namespace ParkEase.Core.Services
             return await collection.DeleteOneAsync(filter);
         }
 
+        public async Task UpdateData<T>(string collectionName, FilterDefinition<T> filter, UpdateDefinition<T> update)
+        {
+            var collection = db.GetCollection<T>(collectionName);
+            await collection.UpdateOneAsync(filter, update);
+        }
 
         private IMongoCollection<T> getCollection<T>(string collectionName)
         {
