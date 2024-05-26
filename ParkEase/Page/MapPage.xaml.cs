@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Attributes;
 
+
 namespace ParkEase.Page;
 
 //// This class represents the MapPage, which contains the Google Map and buttons to interact with it.
@@ -62,12 +63,17 @@ public partial class MapPage : ContentPage
                         let selectedLine = null;
                         let hoverLine = null;
                         let initial = true;
+                        let userMarker = null;
+
+
                         // Initializes the Google Map 
-                        function initMap() {
+                        function initMap(lat, lng) {
                             map = new google.maps.Map(document.getElementById(""map""), {
-                                center: { lat: 51.0499, lng: -114.0666 }, // Sets the initial center point of the map
+                                center: { lat: lat, lng: lng  }, 
                                 zoom: 10, // Set the initial zoom level
                             });
+
+                            addUserMarker(lat, lng);
 
                             // Add a click event listener to the map
                             map.addListener('click', function(event) {
@@ -85,6 +91,21 @@ public partial class MapPage : ContentPage
                                 }
                             });
                         }
+
+                        function addUserMarker(lat, lng) {
+                            if (userMarker) {
+                                userMarker.setMap(null);
+                            }
+                            userMarker = new google.maps.Marker({
+                                position: { lat: lat, lng: lng },
+                                map: map,
+                                title: 'Your Location',
+                                icon: {
+                                    url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                                }
+                            });
+                        }                        
+
 
 
                         // Returns the list of drawn lines as a JSON string
@@ -272,13 +293,41 @@ public partial class MapPage : ContentPage
     private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
     {
         // Call your draw_lines function here
-        if (mapInitial) 
+        if (mapInitial)
         {
-            await draw_lines();
-            mapInitial = false;
-            await mapWebView.EvaluateJavaScriptAsync("setInitial(false)");
-        } 
+            try
+            {
+                var location = await Geolocation.GetLocationAsync();
+                if (location != null)
+                {
+                    string jsCommand = $"initMap({location.Latitude}, {location.Longitude});";
+                    await mapWebView.EvaluateJavaScriptAsync(jsCommand);
 
+                    // Adding user marker on the map
+                    string markerCommand = $"addUserMarker({location.Latitude}, {location.Longitude});";
+                    await mapWebView.EvaluateJavaScriptAsync(markerCommand);
+                }
+            }
+            catch (FeatureNotSupportedException fnsEx)
+            {
+                // Handle not supported on device exception
+            }
+            catch (PermissionException pEx)
+            {
+                // Handle permission exception
+            }
+            catch (Exception ex)
+            {
+                // Unable to get location
+            }
+            if (mapInitial)
+            {
+                await draw_lines();
+                mapInitial = false;
+                await mapWebView.EvaluateJavaScriptAsync("setInitial(false)");
+            }
+
+        }
     }
 
     // From ChatGPT: This method is called when the page appears on the screen

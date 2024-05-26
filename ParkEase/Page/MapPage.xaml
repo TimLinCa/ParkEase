@@ -48,30 +48,30 @@
                     VerticalOptions="Center" />
 
 
-                <!-- Labels for displaying parking data -->
-                <Label Text="Parking Spot:" 
-                       FontAttributes="Bold" 
-                       Margin="10,3" />
-                <Label Text="{Binding SelectedParkingData.ParkingSpot}" 
-                       Margin="10,3"/>
+                <!--  Labels for displaying parking data  -->
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Parking Spot:" />
+                <Label Margin="10,3" Text="{Binding SelectedParkingData.ParkingSpot}" />
 
-                <Label Text="Enforcement Time:" 
-                       FontAttributes="Bold" 
-                       Margin="10,3" />
-                <Label Text="{Binding SelectedParkingData.ParkingTime}" 
-                       Margin="10,3" />
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Enforcement Time:" />
+                <Label Margin="10,3" Text="{Binding SelectedParkingData.ParkingTime}" />
 
-                <Label Text="Parking Fee:" 
-                       FontAttributes="Bold" 
-                       Margin="10,3" />
-                <Label Text="{Binding SelectedParkingData.ParkingFee}" 
-                       Margin="10,3"/>
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Parking Fee:" />
+                <Label Margin="10,3" Text="{Binding SelectedParkingData.ParkingFee}" />
 
-                <Label Text="Parking Capacity:" 
-                       FontAttributes="Bold" 
-                       Margin="10,3"/>
-                <Label Text="{Binding SelectedParkingData.ParkingCapacity}" 
-                       Margin="10,3,10,40"/>
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Parking Capacity:" />
+                <Label Margin="10,3,10,40" Text="{Binding SelectedParkingData.ParkingCapacity}" />
 
                 <material:TextField
                     Title="Parking Spot"
@@ -127,6 +127,7 @@
             <!--  Map Section  -->
             <!--<maps:Map x:Name="myMap" Grid.Column="1" MapType="Satellite" IsShowingUser="True" IsTrafficEnabled="false"/>-->
             <WebView x:Name="mapWebView" Grid.Column="1" />
+
 
         </Grid>
 
