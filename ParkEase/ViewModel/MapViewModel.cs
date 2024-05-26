@@ -140,10 +140,13 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (!string.IsNullOrEmpty(ParkingSpot) && !string.IsNullOrEmpty(ParkingTime) &&
-                    !string.IsNullOrEmpty(ParkingFee) && !string.IsNullOrEmpty(ParkingCapacity) &&
-                    SelectedLine != null && SelectedLine.Points != null && SelectedLine.Points.Count > 0)
+                if (IsValid())
                 {
+                    if (SelectedLine.Index <= 0) // New line, assign new unique index
+                    {
+                        SelectedLine.Index = ++currentMaxIndex;
+                    }
+
                     var parkingData = new ParkingData
                     {
                         Index = SelectedLine.Index,
@@ -168,11 +171,15 @@ namespace ParkEase.ViewModel
                         await mongoDBService.UpdateData(CollectionName.ParkingData, filter, update);
                         await dialogService.ShowAlertAsync("Success", "Your information is updated.", "OK");
                     }
+
+
                     else
                     {
                         await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
+
+                 
                 }
                 else
                 {
@@ -184,6 +191,18 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         });
+
+        private bool IsValid()
+        {
+            return !string.IsNullOrEmpty(ParkingSpot) &&
+                   !string.IsNullOrEmpty(ParkingTime) &&
+                   !string.IsNullOrEmpty(ParkingFee) &&
+                   !string.IsNullOrEmpty(ParkingCapacity) &&
+                   SelectedLine != null &&
+                   SelectedLine.Points != null &&
+                   SelectedLine.Points.Count > 0;
+        }
+
 
         public async Task LoadParkingData(int index)
         {
@@ -209,7 +228,21 @@ namespace ParkEase.ViewModel
                     {
                         Lines.Remove(lineToRemove);
                     }
+
+                    // Clear the SelectedLine if it was the deleted line
+                    if (SelectedLine != null && SelectedLine.Index == lineIndex)
+                    {
+                        SelectedLine = null;
+                    }
+
+                    // Notify the UI that the Lines collection has changed
+                    OnPropertyChanged(nameof(Lines));
+
+                    // Reset the currentMaxIndex if necessary
+                    currentMaxIndex = Lines.Any() ? Lines.Max(line => line.Index) : 0;
                 }
+
+            
             }
             catch (Exception ex)
             {
