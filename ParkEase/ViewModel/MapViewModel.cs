@@ -142,7 +142,7 @@ namespace ParkEase.ViewModel
             {
                 if (!string.IsNullOrEmpty(ParkingSpot) && !string.IsNullOrEmpty(ParkingTime) &&
                     !string.IsNullOrEmpty(ParkingFee) && !string.IsNullOrEmpty(ParkingCapacity) &&
-                    SelectedLine != null && SelectedLine.Points.Count > 0)
+                    SelectedLine != null && SelectedLine.Points != null && SelectedLine.Points.Count > 0)
                 {
                     var parkingData = new ParkingData
                     {
