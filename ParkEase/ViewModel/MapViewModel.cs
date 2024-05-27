@@ -45,22 +45,15 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ParkingData selectedParkingData;
 
+        [ObservableProperty]
+        private string selectedParkingTime;
+
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         private static int currentMaxIndex = 0; // Initialize the index counter
         
         public ObservableCollection<string> ParkingTimes { get; }
-        private string _selectedParkingTime;
 
-        public string SelectedParkingTime
-        {
-            get => _selectedParkingTime;
-            set
-            {
-                SetProperty(ref _selectedParkingTime, value);
-                ParkingTime = value; // Update the ParkingTime property when a selection is made
-            }
-        }
 
         // New properties for Parking Fee Picker
         public ObservableCollection<string> ParkingFees { get; }
@@ -125,10 +118,17 @@ namespace ParkEase.ViewModel
             currentMaxIndex = data.Any() ? data.Max(d => d.Index) : 0;
         }
 
+        partial void OnSelectedParkingTimeChanged(string value)
+        {
+            ParkingTime = value;
+        }
+
         partial void OnSelectedLineChanged(Line? value)
         {
+            
             if (value != null)
             {
+                LoadParkingData(value.Index);
                 ParkingSpot = value.ParkingSpot;
                 ParkingTime = value.ParkingTime;
                 ParkingFee = value.ParkingFee;
@@ -203,7 +203,6 @@ namespace ParkEase.ViewModel
                    SelectedLine.Points.Count > 0;
         }
 
-
         public async Task LoadParkingData(int index)
         {
             var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
@@ -234,9 +233,6 @@ namespace ParkEase.ViewModel
                     {
                         SelectedLine = null;
                     }
-
-                    // Notify the UI that the Lines collection has changed
-                    OnPropertyChanged(nameof(Lines));
 
                     // Reset the currentMaxIndex if necessary
                     currentMaxIndex = Lines.Any() ? Lines.Max(line => line.Index) : 0;
