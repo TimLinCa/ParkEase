@@ -27,11 +27,6 @@ public partial class MapPage : ContentPage
     public MapPage()
     {
         InitializeComponent();
-        // Event handler for Draw button click.
-        btn_Draw.Clicked += btn_Draw_Clicked;
-        // Event handler for Clear button click.
-        btn_Clear.Clicked += btn_Clear_Clicked;
-
 
         // HTML content to be loaded in the WebView for displaying Google Maps. https://www.google.com/search?sca_esv=00e485a4403845c8&sca_upv=1&rlz=1C1UEAD_enCA1040CA1040&sxsrf=ADLYWIIu_-3h0kGt3_IxavzDEMmyG-bAfg:1716486128385&q=HTML+content+to+be+loaded+in+the+WebView+for+displaying+Google+Maps.&tbm=vid&source=lnms&prmd=sivbnmtz&sa=X&ved=2ahUKEwi-zMaPqaSGAxWqJzQIHecgDQEQ0pQJegQIChAB&biw=1920&bih=911&dpr=1#fpstate=ive&vld=cid:7c1c270e,vid:s3g04pbAJBA,st:0
         var htmlSource = new HtmlWebViewSource
@@ -243,6 +238,7 @@ public partial class MapPage : ContentPage
                                 selectedLine.setMap(null); // Removes the selected segment from the map
                                 lines.splice(lines.indexOf(selectedLine), 1); // Removes the selected segment from the array
                                 selectedLine = null; // Reset selectedLine
+                                window.location.href = 'myapp://updateLines?index=""';
                             }
                         }
 
@@ -288,7 +284,17 @@ public partial class MapPage : ContentPage
             List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
             _viewModel.Lines = lines;
         }
+        else if (e.Url.StartsWith("myapp://updateLines"))
+        {
+            e.Cancel = true;
 
+            // Evaluate the JavaScript function "getLines()" to get the JSON string of all lines from the WebView
+            var result = await mapWebView.EvaluateJavaScriptAsync("getLines()");
+            result = result.Replace("\\\"", "\"");
+            // Deserialize the JSON string into a list of Line objects
+            List<Line> lines = JsonConvert.DeserializeObject<List<Line>>(result);
+            _viewModel.Lines = lines;
+        }
     }
 
     private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
@@ -412,21 +418,6 @@ public partial class MapPage : ContentPage
         {
            _viewModel.DeleteLineDataAsync(_viewModel.SelectedLine.Index);
         }
-    }
-
-    public class ParkingData
-    {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public ObjectId Id { get; set; }
-        public int Index { get; set; }
-        public List<MapPoint> Points { get; set; }
-        public string ParkingSpot { get; set; }
-        public string ParkingTime { get; set; }
-        public string ParkingFee { get; set; }
-        public int ParkingCapacity { get; set; }
-        public int Role { get; set; }
-
     }
 
     private async Task draw_lines()
