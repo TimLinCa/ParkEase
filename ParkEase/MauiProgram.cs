@@ -9,6 +9,7 @@ using UraniumUI;
 using epj.RouteGenerator;
 using ParkEase.Core.Model;
 using CommunityToolkit.Maui;
+using Syncfusion.Maui.Core.Hosting;
 
 namespace ParkEase
 {
@@ -25,6 +26,7 @@ namespace ParkEase
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .UseMauiCommunityToolkit()
+                .ConfigureSyncfusionCore()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

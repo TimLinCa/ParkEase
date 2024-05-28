@@ -39,7 +39,7 @@ namespace ParkEase.ViewModel
         private double limitHour;
 
         [ObservableProperty]
-        private int numberofLot;
+        private int numberOfLot;
 
         [ObservableProperty]
         private string floor;
@@ -49,6 +49,12 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private string imgPath;
+
+        [ObservableProperty]
+        private float rectWidth;
+
+        [ObservableProperty]
+        private float rectHeight;
 
         [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
@@ -74,14 +80,16 @@ namespace ParkEase.ViewModel
             city = string.Empty;
             fee = 0;
             limitHour = 0;
-            numberofLot = 0;
+            numberOfLot = 0;
+            rectWidth = 100;
+            rectHeight = 50;
             rectangles = new ObservableCollection<RectF>();
 
             ListRectangles = new List<Rectangle>();
             ListfloorInfos = new List<FloorInfo>();
         }
 
-        public ICommand UploadImageClick => new RelayCommand(async () =>
+    public ICommand UploadImageClick => new RelayCommand(async () =>
         {
             try
             {
@@ -115,9 +123,13 @@ namespace ParkEase.ViewModel
 
         public void AddRectangle(PointF point)
         {
-            var rect = new RectF(point.X, point.Y, 100, 50);
-            Rectangles.Add(rect);
-            RecCount = RecCount + 1;
+            if (ImgPath != null)
+            {
+                var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
+                Rectangles.Add(rect);
+                RecCount = RecCount + 1;
+            }
+
         }
 
         public ICommand RemoveRectangleClick => new RelayCommand(async () =>
