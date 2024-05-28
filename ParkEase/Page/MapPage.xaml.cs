@@ -32,6 +32,7 @@ public partial class MapPage : ContentPage
         // Event handler for Clear button click.
         btn_Clear.Clicked += btn_Clear_Clicked;
 
+
         // HTML content to be loaded in the WebView for displaying Google Maps. https://www.google.com/search?sca_esv=00e485a4403845c8&sca_upv=1&rlz=1C1UEAD_enCA1040CA1040&sxsrf=ADLYWIIu_-3h0kGt3_IxavzDEMmyG-bAfg:1716486128385&q=HTML+content+to+be+loaded+in+the+WebView+for+displaying+Google+Maps.&tbm=vid&source=lnms&prmd=sivbnmtz&sa=X&ved=2ahUKEwi-zMaPqaSGAxWqJzQIHecgDQEQ0pQJegQIChAB&biw=1920&bih=911&dpr=1#fpstate=ive&vld=cid:7c1c270e,vid:s3g04pbAJBA,st:0
         var htmlSource = new HtmlWebViewSource
         {
@@ -417,7 +418,7 @@ public partial class MapPage : ContentPage
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public ObjectId Id { get; set; }
         public int Index { get; set; }
         public List<MapPoint> Points { get; set; }
         public string ParkingSpot { get; set; }
@@ -425,6 +426,7 @@ public partial class MapPage : ContentPage
         public string ParkingFee { get; set; }
         public int ParkingCapacity { get; set; }
         public int Role { get; set; }
+
     }
 
     private async Task draw_lines()

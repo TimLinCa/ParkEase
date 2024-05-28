@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Platform;
 using MongoDB.Driver;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
@@ -51,13 +52,18 @@ namespace ParkEase.ViewModel
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         private static int currentMaxIndex = 0; // Initialize the index counter
-        
+
+        // Action to evaluate JavaScript
+        public Func<string, Task<string>> EvaluateJavaScript { get; set; }
+
+
         public ObservableCollection<string> ParkingTimes { get; }
 
 
         // New properties for Parking Fee Picker
         public ObservableCollection<string> ParkingFees { get; }
         private string _selectedParkingFee;
+        private object mapWebView;
 
         public string SelectedParkingFee
         {
@@ -125,7 +131,7 @@ namespace ParkEase.ViewModel
 
         partial void OnSelectedLineChanged(Line? value)
         {
-            
+
             if (value != null)
             {
                 LoadParkingData(value.Index);
@@ -179,7 +185,7 @@ namespace ParkEase.ViewModel
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
 
-                 
+
                 }
                 else
                 {
@@ -209,7 +215,7 @@ namespace ParkEase.ViewModel
             SelectedParkingData = data.FirstOrDefault(d => d.Index == index);
         }
 
-        public async Task DeleteLineDataAsync(int lineIndex)
+        /*public async Task DeleteLineDataAsync(int lineIndex)
         {
             try
             {
@@ -245,8 +251,97 @@ namespace ParkEase.ViewModel
                 // Handle any errors that occur during the deletion process
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
+        }*/
+
+
+        public async Task DeleteLineDataAsync(int lineIndex)
+        {
+            try
+            {
+                // Create a filter to match the line with the specified index
+                var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, lineIndex);
+
+                // Delete the line data from MongoDB
+                var result = await mongoDBService.DeleteData(CollectionName.ParkingData, filter);
+
+                if (result.DeletedCount > 0)
+                {
+                    // Reload all remaining lines from the database
+                    var remainingLines = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+
+                    // Reassign indexes to be consecutive starting from 1
+                    int newIndex = 1;
+                    foreach (var line in remainingLines.OrderBy(l => l.Index))
+                    {
+                        if (line.Index != newIndex)
+                        {
+                            var updateFilter = Builders<ParkingData>.Filter.Eq(p => p.Id, line.Id);
+                            var update = Builders<ParkingData>.Update.Set(p => p.Index, newIndex);
+                            await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);
+
+                            // Update the local Lines collection as well
+                            var lineToUpdate = Lines.FirstOrDefault(l => l.Id == line.Id);
+                            if (lineToUpdate != null)
+                            {
+                                lineToUpdate.Index = newIndex;
+                            }
+                        }
+                        newIndex++;
+                    }
+
+                    // Refresh the Lines collection in the ViewModel
+                    Lines = remainingLines.OrderBy(l => l.Index).Select(pd => new Line
+                    {
+                        Id = pd.Id,
+                        Index = pd.Index,
+                        Points = pd.Points,
+                        ParkingSpot = pd.ParkingSpot,
+                        ParkingTime = pd.ParkingTime,
+                        ParkingFee = pd.ParkingFee,
+                        ParkingCapacity = pd.ParkingCapacity
+                    }).ToList();
+
+                    // Clear the SelectedLine if it was the deleted line
+                    if (SelectedLine != null && SelectedLine.Index == lineIndex)
+                    {
+                        SelectedLine = null;
+                    }
+
+                    // Reset the currentMaxIndex
+                    currentMaxIndex = Lines.Any() ? Lines.Max(line => line.Index) : 0;
+
+                    // Notify the UI that the Lines collection has changed
+                    OnPropertyChanged(nameof(Lines));
+
+                    // Redraw the lines on the map
+                    await RedrawLinesOnMap();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors that occur during the deletion process
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
         }
 
+
+        private async Task RedrawLinesOnMap()
+        {
+            if (EvaluateJavaScript != null)
+            {
+                await EvaluateJavaScript("clearMap()");
+
+                foreach (var line in Lines)
+                {
+                    for (int i = 0; i < line.Points.Count - 1; i++)
+                    {
+                        string jsCommand = $"drawLine({line.Points[i].Lat}, {line.Points[i].Lng}, {line.Points[i + 1].Lat}, {line.Points[i + 1].Lng});";
+                        await EvaluateJavaScript(jsCommand);
+                    }
+                }
+            }
+
+        }
     }
 }
 
