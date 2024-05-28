@@ -412,6 +412,9 @@ public partial class MapPage : ContentPage
         {
            _viewModel.DeleteLineDataAsync(_viewModel.SelectedLine.Index);
         }
+
+        // Reset the side panel data
+        _viewModel.ResetSidePanelData();
     }
 
     public class ParkingData
