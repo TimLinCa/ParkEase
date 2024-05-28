@@ -41,14 +41,14 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private double limitHour;
 
-        [ObservableProperty]
+        //[ObservableProperty]
         private int numberOfLot;
 
         [ObservableProperty]
         private string floor;
 
-        [ObservableProperty]
-        private int recCount;
+        //[ObservableProperty]
+        private int RectCount;
 
         [ObservableProperty]
         private IImage imgSourceData;
@@ -134,12 +134,18 @@ namespace ParkEase.ViewModel
         {
             try
             {
+<<<<<<< Updated upstream
                 if (ImgSourceData != null)
                 {
                     var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
                     Rectangles.Add(rect);
                     RecCount = RecCount + 1;
                 }
+=======
+                var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
+                Rectangles.Add(rect);
+                RectCount++;
+>>>>>>> Stashed changes
             }
             catch (Exception)
             {
@@ -154,10 +160,10 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (RecCount > 0)
+                if (RectCount > 0)
                 {
-                    Rectangles.RemoveAt(RecCount - 1);
-                    RecCount--;
+                    Rectangles.RemoveAt(RectCount - 1);
+                    RectCount--;
                 }
                 else
                 {
@@ -175,10 +181,10 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (RecCount > 0)
+                if (RectCount > 0)
                 {
                     Rectangles.Clear();
-                    RecCount = 0;
+                    RectCount = 0;
                 }
                 else
                 {
@@ -193,60 +199,104 @@ namespace ParkEase.ViewModel
         });
 
         // Save Floor Information Command
-
-        // Submit Command
-        public ICommand AddParkingInfoAsync => new RelayCommand(async () =>
-
+        public ICommand SaveFloorInfoCommand => new RelayCommand(async () =>
         {
             try
             {
-                for (int i = 0; i < RecCount; i++)
+                if (RectCount > 0)
                 {
+<<<<<<< Updated upstream
                     var insertRect = new Rectangle(i + 1, Rectangles[i]);
                     ListRectangles.Add(insertRect);
                 };
+=======
+                    for (int i = 0; i < RectCount; i++)
+                    {
+                        var insertedRect = new Rectangle(i + 1, Rectangles[i]);
+                        ListRectangles.Add(insertedRect);
+                    };
+                }
+>>>>>>> Stashed changes
 
-                /*var rect1 = new Rectangle(1, new RectF(10, 10, 100, 50));
-                var rect2 = new Rectangle(2, new RectF(50, 30, 100, 50));
-                ListRectangles.Add(rect1);
-                ListRectangles.Add(rect2);*/
-
-                var floor1 = new FloorInfo("b1", ListRectangles, imageData);
-                ListfloorInfos.Add(floor1);
-
-
-                var privateParkingInfo = new PrivateParking
+                if (Floor != null && ListRectangles.Count > 0 && imageData != null)
                 {
-                    CompanyName = CompanyName,
-                    Address = Address,
-                    City = City,
-                    ParkingInfo = new ParkingInfo
+                    var floorInfo = new FloorInfo(Floor, ListRectangles, RectCount, imageData);
+                    ListfloorInfos.Add(floorInfo);
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Warning", "One of these information is missing. Please check the following:\n1. Is floor typed?\n2. Do you upload Image?\n3. Do you create at least one rectangle?", "OK");
+                }
+            } catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+        );
+
+        // Submit Command
+        public ICommand AddParkingInfoAsync => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (IsValid())
+                {
+                    var privateParkingInfo = new PrivateParking
                     {
-                        Fee = Fee,
-                        LimitedHour = LimitHour,
-                        NumberOfLot = RecCount
-                    },
+                        CompanyName = CompanyName,
+                        Address = Address,
+                        City = City,
+                        ParkingInfo = new ParkingInfo
+                        {
+                            Fee = Fee,
+                            LimitedHour = LimitHour
+                        },
 
-                    FloorInfo = ListfloorInfos
+                        FloorInfo = ListfloorInfos
 
-                    /*FloorInfo = new List<FloorInfo>
-                    {
-                        Floor = floor,
-                        Rectangles = listRectangles,
-                        imageData = imageData,
-                    }*/
-
-
-                };
-                await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
-                var TEST = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
+                    };
+                    await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
+                    var TEST = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                    await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Warning", "Please fill in all fields.", "OK");
+                }
             }
             catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         });
+
+        private bool IsValid()
+        {
+            return !string.IsNullOrEmpty(CompanyName) &&
+                    !string.IsNullOrEmpty(Address) &&
+                    !string.IsNullOrEmpty(City) &&
+                    ListfloorInfos.Count() > 0;
+        }
+
+        private void ResetAfterSubmit()
+        {
+            CompanyName = string.Empty;
+            Address = string.Empty;
+            City = string.Empty;
+            ListfloorInfos = new List<FloorInfo>();
+            ListRectangles = new List<Rectangle>();
+        }
+
+        private void ResetFloorInfo()
+        {
+            Floor = string.Empty;
+            ImgPath = string.Empty;
+            RectWidth = 100;
+            RectHeight = 50;
+            RectCount = 0;
+            Rectangles = [];
+
+        }
 
     }
 

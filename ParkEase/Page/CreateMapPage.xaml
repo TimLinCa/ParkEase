@@ -187,6 +187,7 @@
                         WidthRequest="100" />
                 </HorizontalStackLayout>
 
+<<<<<<< Updated upstream
 
 
                 <Button
@@ -198,6 +199,36 @@
                     WidthRequest="100" />
 
                 <!--  Submit Button  -->
+=======
+                <!-- Save map for one tab/floor before creating a new one -->
+                <Button 
+                    x:Name="SaveBtn"
+                    Margin="50,50,50,30"
+                    WidthRequest="200"
+                    VerticalOptions="Center"
+                    Text="Save" 
+                    Command="{Binding SaveFloorInfoCommand}"/>
+
+                <!-- Submit Button -->
+                <Frame BackgroundColor="#ac99ea"
+                       WidthRequest="350"
+                       HeightRequest="90"
+                       CornerRadius="10">
+                    <Button 
+                        x:Name="SubmitBtn"
+                        Margin="0,0,0,0"
+                        Padding="0"
+                        TextColor="Black"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        BackgroundColor="WhiteSmoke"
+                        WidthRequest="180"
+                        VerticalOptions="Center"
+                        Text="Submit" 
+                        Command="{Binding AddParkingInfoAsync}"/>
+                </Frame>
+
+>>>>>>> Stashed changes
 
             </StackLayout>
         </ScrollView>

@@ -18,7 +18,7 @@ namespace ParkEase.Utilities
         private object drawLock = new object();
         public IImage? ImageSource { get; set; }
 
-        public int RecCount { get; set; }
+        public int RectCount { get; set; }
 
         public ObservableCollection<RectF>? Rectangles { get; set; }
 
