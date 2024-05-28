@@ -163,8 +163,6 @@ namespace ParkEase.ViewModel
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
 
-                    ResetFormFields();
-
                 }
                 else
                 {
@@ -202,45 +200,6 @@ namespace ParkEase.ViewModel
 
         }
 
-        /*public async Task DeleteLineDataAsync(int lineIndex)
-        {
-            try
-            {
-                // Create a filter to match the line with the specified index
-                var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, lineIndex);
-
-                // Delete the line data from MongoDB
-                var result = await mongoDBService.DeleteData(CollectionName.ParkingData, filter);
-
-                if (result.DeletedCount > 0)
-                {
-                    // Optionally, remove the line from the Lines list in the ViewModel
-                    var lineToRemove = Lines.FirstOrDefault(line => line.Index == lineIndex);
-                    if (lineToRemove != null)
-                    {
-                        Lines.Remove(lineToRemove);
-                    }
-
-                    // Clear the SelectedLine if it was the deleted line
-                    if (SelectedLine != null && SelectedLine.Index == lineIndex)
-                    {
-                        SelectedLine = null;
-                    }
-
-                    // Reset the currentMaxIndex if necessary
-                    currentMaxIndex = Lines.Any() ? Lines.Max(line => line.Index) : 0;
-                }
-
-            
-            }
-            catch (Exception ex)
-            {
-                // Handle any errors that occur during the deletion process
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-        }*/
-
-
         public async Task DeleteLineDataAsync(int lineIndex)
         {
             try
@@ -268,33 +227,6 @@ namespace ParkEase.ViewModel
                     }
 
                     SelectedLine = null;
-
-                    //// Refresh the Lines collection in the ViewModel
-                    //Lines = remainingLines.OrderBy(l => l.Index).Select(pd => new Line
-                    //{
-                    //    Id = pd.Id,
-                    //    Index = pd.Index,
-                    //    Points = pd.Points,
-                    //    ParkingSpot = pd.ParkingSpot,
-                    //    ParkingTime = pd.ParkingTime,
-                    //    ParkingFee = pd.ParkingFee,
-                    //    ParkingCapacity = pd.ParkingCapacity
-                    //}).ToList();
-
-                    //// Clear the SelectedLine if it was the deleted line
-                    //if (SelectedLine != null && SelectedLine.Index == lineIndex)
-                    //{
-                    //    SelectedLine = null;
-                    //}
-
-                    //// Reset the currentMaxIndex
-                    //currentMaxIndex = Lines.Any() ? Lines.Max(line => line.Index) : 0;
-
-                    //// Notify the UI that the Lines collection has changed
-                    //OnPropertyChanged(nameof(Lines));
-
-                    //// Redraw the lines on the map
-                    //await RedrawLinesOnMap();
                 }
             }
             catch (Exception ex)
@@ -307,41 +239,13 @@ namespace ParkEase.ViewModel
         private void ResetFormFields()
         {
             ParkingSpot = string.Empty;
-            ParkingTime = string.Empty;
-            ParkingFee = string.Empty;
-            ParkingCapacity = string.Empty;
             SelectedParkingTime = null;
             SelectedParkingFee = null;
-
+            ParkingCapacity = string.Empty;
         }
         public void ResetSidePanelData()
         {
             SelectedParkingData = null;
-            ParkingSpot = string.Empty;
-            ParkingTime = string.Empty;
-            ParkingFee = string.Empty;
-            ParkingCapacity = string.Empty;
-            SelectedParkingTime = null;
-            SelectedParkingFee = null;
-            LocationInfo = string.Empty;
-        }
-
-        private async Task RedrawLinesOnMap()
-        {
-            if (EvaluateJavaScript != null)
-            {
-                await EvaluateJavaScript("clearMap()");
-
-                foreach (var line in Lines)
-                {
-                    for (int i = 0; i < line.Points.Count - 1; i++)
-                    {
-                        string jsCommand = $"drawLine({line.Points[i].Lat}, {line.Points[i].Lng}, {line.Points[i + 1].Lat}, {line.Points[i + 1].Lng});";
-                        await EvaluateJavaScript(jsCommand);
-                    }
-                }
-            }
-
         }
     }
 }
