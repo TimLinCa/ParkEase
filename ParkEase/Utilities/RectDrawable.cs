@@ -21,8 +21,8 @@ namespace ParkEase.Utilities
 
         public ObservableCollection<RectF>? Rectangles { get; set; }
 
-        public float RectWidth { get; set; } = 100;
-        public float RectHeight { get; set; } = 50;
+        /*public float RectWidth { get; set; } = 100;
+        public float RectHeight { get; set; } = 50;*/
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {

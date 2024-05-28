@@ -21,10 +21,10 @@
         <!-- Form -->
         <ScrollView Grid.Column="0">
             <StackLayout 
-                Padding="10"
+                Padding="10,20,10,20"
                 BackgroundColor="#EFEFEF">
-                
-            <!-- General information -->
+
+                <!-- General information -->
                 <Label 
                     Margin="10"
                     FontSize="20"
@@ -81,48 +81,73 @@
                     <validation:RequiredValidation />
                 </material:TextField>
 
+                <!-- Separate line -->
+                <BoxView
+                    HeightRequest="2"
+                    BackgroundColor="#9880e5"
+                    Margin="0, 5" />
+                <BoxView
+                    HeightRequest="2"
+                    BackgroundColor="#9880e5"
+                    Margin="0, 0" />
 
                 <!-- Create floor section -->
                 <Label 
-                    Margin="20, 20, 20, 4"
+                    Margin="20, 30, 20, 4"
                     FontSize="14"
+                    FontAttributes="Bold"
                     Style="{StaticResource SecondaryDarkText}"
                     HorizontalOptions="Start"
-                    Text="Enter your parking level (ex: B1, B2, F1, F2, etc.) or 'Ground' if it's on ground level." />
+                    Text="Enter your parking level (ex: B1, B2, F1, F2 or Ground)" />
 
+                <HorizontalStackLayout HorizontalOptions="Start" VerticalOptions="Center">
+                    
                 <material:TextField
                     Margin="20, 4, 20, 10"
                     IsReadOnly="False"
                     Title="Level"
                     AllowClear="True"
                     Text="{Binding Floor}"
-                    WidthRequest="350">
+                    WidthRequest="200">
                     <validation:RequiredValidation />
                 </material:TextField>
 
                 <Button
                     x:Name="CreateLevelBtn"
-                    Margin="50,50,50,0"
+                    Margin="0,0,20,0"
                     VerticalOptions="Center"
                     Text="Add Level"
                     />
 
+                </HorizontalStackLayout>
                 <!-- Create map section-->
 
                 <Button 
                     x:Name="UploadBtn"
-                    Margin="50,50,50,50"
+                    Margin="50,20,50,30"
+                    WidthRequest="150"
                     VerticalOptions="Center"
                     Text="Upload Image"
                     Command="{Binding UploadImageClick}" />
-                
+
+                <BoxView
+                    HeightRequest="2"
+                    BackgroundColor="#9880e5"
+                    Margin="0, 5" />
 
                 <!-- Rectangle Width Slider -->
+                <Label 
+                    Margin="20, 30, 20, 4"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    Style="{StaticResource SecondaryDarkText}"
+                    HorizontalOptions="Start"
+                    Text="Control Width and Height of drawing rectangle" />
+                
                 <Label
                     HorizontalOptions="Start"
-                    Text="Width"
-                    FontAttributes="Bold"/>
-                
+                    Text="Width" />
+
                 <sliders:SfSlider
                     Margin="0,0,0,30"
                     Minimum="0"
@@ -148,9 +173,8 @@
                 <!-- Rectangle Height Slider -->
                 <Label
                     HorizontalOptions="Start"
-                    Text="Height"
-                    FontAttributes="Bold"/>
-                
+                    Text="Height" />
+
                 <sliders:SfSlider
                     Minimum="0"
                     Maximum="300"
@@ -172,7 +196,7 @@
                 </sliders:SfSlider>
 
                 <HorizontalStackLayout HorizontalOptions="Center">
-                <Button 
+                    <Button 
                     x:Name="DeleteBtn"
                     WidthRequest="100"
                     Margin="10,20,0,0"
@@ -180,8 +204,8 @@
                     Style="{StaticResource SecondaryButtonStyle}"
                     Text="Delete" 
                     Command="{Binding RemoveRectangleClick}"/>
-                
-                <Button 
+
+                    <Button 
                     x:Name="ClearBtn"
                     WidthRequest="100"
                     Margin="10,20,10,0"
@@ -195,16 +219,16 @@
 
                 <Button 
                     x:Name="SubmitBtn"
-                    WidthRequest="100"
-                    Margin="50,50,50,0"
-                    HorizontalOptions="Center"
+                    Margin="50,50,50,30"
+                    VerticalOptions="Center"
                     Text="Submit" 
                     Command="{Binding AddParkingInfoAsync}"/>
-                
+
                 <!-- Submit Button -->
 
             </StackLayout>
         </ScrollView>
+
 
             
         <!-- GraphicsView -->

@@ -28,7 +28,7 @@ namespace ParkEase.Utilities
             get => (ObservableCollection<RectF>)GetValue(RectanglesProperty); set => SetValue(RectanglesProperty, value);
         }
 
-        public float RectWidth
+        /*public float RectWidth
         {
             get => (int)GetValue(RectWidthProperty); set { SetValue(RectWidthProperty, value); }
         }
@@ -36,7 +36,7 @@ namespace ParkEase.Utilities
         public float RectHeight
         {
             get => (int)GetValue(RectHeightProperty); set { SetValue(RectHeightProperty, value); }
-        }
+        }*/
 
 
         public static readonly BindableProperty RecCountProperty = BindableProperty.Create(nameof(RecCount), typeof(int), typeof(RecGraphicsView),propertyChanged: RecCountPropertyChanged);
@@ -45,9 +45,9 @@ namespace ParkEase.Utilities
 
         public static readonly BindableProperty ImgPathProperty = BindableProperty.Create(nameof(ImgPath), typeof(string), typeof(RecGraphicsView), propertyChanged: ImgPathPropertyChanged);
 
-        public static readonly BindableProperty RectWidthProperty = BindableProperty.Create(nameof(RectWidth), typeof(float), typeof(RecGraphicsView), propertyChanged: RectWidthPropertyChanged);
+        //public static readonly BindableProperty RectWidthProperty = BindableProperty.Create(nameof(RectWidth), typeof(float), typeof(RecGraphicsView), propertyChanged: RectWidthPropertyChanged);
 
-        public static readonly BindableProperty RectHeightProperty = BindableProperty.Create(nameof(RectHeight), typeof(float), typeof(RecGraphicsView), propertyChanged: RectHeightPropertyChanged);
+        //public static readonly BindableProperty RectHeightProperty = BindableProperty.Create(nameof(RectHeight), typeof(float), typeof(RecGraphicsView), propertyChanged: RectHeightPropertyChanged);
 
 
 
@@ -85,7 +85,7 @@ namespace ParkEase.Utilities
             view.Invalidate();
         }
 
-        private static void RectWidthPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        /*private static void RectWidthPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not RecGraphicsView { Drawable: RectDrawable drawable } view)
             {
@@ -105,6 +105,6 @@ namespace ParkEase.Utilities
 
             drawable.RectHeight = (float)newValue;
             view.Invalidate();
-        }
+        }*/
     }
 }
