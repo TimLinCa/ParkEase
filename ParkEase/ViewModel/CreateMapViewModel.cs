@@ -47,8 +47,8 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string floor;
 
-        //[ObservableProperty]
-        private int RectCount;
+        [ObservableProperty]
+        private int rectCount;
 
         [ObservableProperty]
         private IImage imgSourceData;
@@ -134,18 +134,12 @@ namespace ParkEase.ViewModel
         {
             try
             {
-<<<<<<< Updated upstream
                 if (ImgSourceData != null)
                 {
                     var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
                     Rectangles.Add(rect);
-                    RecCount = RecCount + 1;
+                    RectCount = RectCount + 1;
                 }
-=======
-                var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
-                Rectangles.Add(rect);
-                RectCount++;
->>>>>>> Stashed changes
             }
             catch (Exception)
             {
@@ -205,18 +199,13 @@ namespace ParkEase.ViewModel
             {
                 if (RectCount > 0)
                 {
-<<<<<<< Updated upstream
-                    var insertRect = new Rectangle(i + 1, Rectangles[i]);
-                    ListRectangles.Add(insertRect);
-                };
-=======
+
                     for (int i = 0; i < RectCount; i++)
                     {
                         var insertedRect = new Rectangle(i + 1, Rectangles[i]);
                         ListRectangles.Add(insertedRect);
                     };
                 }
->>>>>>> Stashed changes
 
                 if (Floor != null && ListRectangles.Count > 0 && imageData != null)
                 {
@@ -290,7 +279,7 @@ namespace ParkEase.ViewModel
         private void ResetFloorInfo()
         {
             Floor = string.Empty;
-            ImgPath = string.Empty;
+            imgSourceData = null;
             RectWidth = 100;
             RectHeight = 50;
             RectCount = 0;

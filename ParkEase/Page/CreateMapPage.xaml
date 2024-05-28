@@ -187,19 +187,10 @@
                         WidthRequest="100" />
                 </HorizontalStackLayout>
 
-<<<<<<< Updated upstream
 
-
-                <Button
-                    x:Name="SubmitBtn"
-                    Margin="50,50,50,0"
-                    Command="{Binding AddParkingInfoAsync}"
-                    HorizontalOptions="Center"
-                    Text="Submit"
-                    WidthRequest="100" />
 
                 <!--  Submit Button  -->
-=======
+
                 <!-- Save map for one tab/floor before creating a new one -->
                 <Button 
                     x:Name="SaveBtn"
@@ -228,7 +219,6 @@
                         Command="{Binding AddParkingInfoAsync}"/>
                 </Frame>
 
->>>>>>> Stashed changes
 
             </StackLayout>
         </ScrollView>
@@ -247,7 +237,7 @@
                                         ImageSource="{Binding ImgSourceData}"
                                         MinimumHeightRequest="700"
                                         MinimumWidthRequest="700"
-                                        RecCount="{Binding RecCount}"
+                                        RectCount="{Binding RectCount}"
                                         Rectangles="{Binding Rectangles}">
                                     <drawables:RecGraphicsView.Drawable>
                                         <drawables:RectDrawable />
