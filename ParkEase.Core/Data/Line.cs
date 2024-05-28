@@ -1,8 +1,11 @@
+using MongoDB.Bson;
+
 namespace ParkEase.Core.Data;
 
 // This class represents a line on the map consisting of multiple points
 public class Line : IEquatable<Line>
 {
+    public ObjectId Id { get; set; }
     public int Index { get; set; }  // Index of the line, used for identification
     public List<MapPoint> Points { get; set; }
 
