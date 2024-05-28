@@ -163,6 +163,7 @@ namespace ParkEase.ViewModel
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
 
+                    ResetFormFields();
 
                 }
                 else
@@ -303,6 +304,27 @@ namespace ParkEase.ViewModel
             }
         }
 
+        private void ResetFormFields()
+        {
+            ParkingSpot = string.Empty;
+            ParkingTime = string.Empty;
+            ParkingFee = string.Empty;
+            ParkingCapacity = string.Empty;
+            SelectedParkingTime = null;
+            SelectedParkingFee = null;
+
+        }
+        public void ResetSidePanelData()
+        {
+            SelectedParkingData = null;
+            ParkingSpot = string.Empty;
+            ParkingTime = string.Empty;
+            ParkingFee = string.Empty;
+            ParkingCapacity = string.Empty;
+            SelectedParkingTime = null;
+            SelectedParkingFee = null;
+            LocationInfo = string.Empty;
+        }
 
         private async Task RedrawLinesOnMap()
         {
