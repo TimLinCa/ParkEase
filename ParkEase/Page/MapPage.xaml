@@ -23,7 +23,7 @@
             <StackLayout
                 Grid.Column="0"
                 Padding="10"
-                BackgroundColor="LightGray">
+                BackgroundColor="#EFEFEF">
 
                 <Label
                     Margin="10"
@@ -34,7 +34,6 @@
                 <Button
                     x:Name="btn_Draw"
                     Margin="50,50,50,0"
-                    BackgroundColor="Blue"
                     Clicked="btn_Draw_Clicked"
                     Text="Draw Line"
                     VerticalOptions="Center" />

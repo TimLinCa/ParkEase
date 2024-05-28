@@ -20,12 +20,6 @@ namespace ParkEase.ViewModel
         private string parkingSpot;
 
         [ObservableProperty]
-        private string parkingTime;
-
-        [ObservableProperty]
-        private string parkingFee;
-
-        [ObservableProperty]
         private string parkingCapacity;
 
         [ObservableProperty]
@@ -49,6 +43,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string selectedParkingTime;
 
+        [ObservableProperty]
+        private string selectedParkingFee;
+
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         private static int currentMaxIndex = 0; // Initialize the index counter
@@ -62,18 +59,8 @@ namespace ParkEase.ViewModel
 
         // New properties for Parking Fee Picker
         public ObservableCollection<string> ParkingFees { get; }
-        private string _selectedParkingFee;
-        private object mapWebView;
 
-        public string SelectedParkingFee
-        {
-            get => _selectedParkingFee;
-            set
-            {
-                SetProperty(ref _selectedParkingFee, value);
-                ParkingFee = value; // Update the ParkingTime property when a selection is made
-            }
-        }
+        private object mapWebView;
         public class Polyline
         {
             public int Index { get; set; }
@@ -90,8 +77,6 @@ namespace ParkEase.ViewModel
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             parkingSpot = "";
-            parkingTime = "";
-            parkingFee = "";
             parkingCapacity = "";
             locationInfo = "";
             draw = false;
@@ -124,10 +109,6 @@ namespace ParkEase.ViewModel
             currentMaxIndex = data.Any() ? data.Max(d => d.Index) : 0;
         }
 
-        partial void OnSelectedParkingTimeChanged(string value)
-        {
-            ParkingTime = value;
-        }
 
         partial void OnSelectedLineChanged(Line? value)
         {
@@ -135,10 +116,7 @@ namespace ParkEase.ViewModel
             if (value != null)
             {
                 LoadParkingData(value.Index);
-                ParkingSpot = value.ParkingSpot;
-                ParkingTime = value.ParkingTime;
-                ParkingFee = value.ParkingFee;
-                ParkingCapacity = value.ParkingCapacity;
+              
             }
         }
 
@@ -157,8 +135,8 @@ namespace ParkEase.ViewModel
                     {
                         Index = SelectedLine.Index,
                         ParkingSpot = ParkingSpot,
-                        ParkingTime = ParkingTime,
-                        ParkingFee = ParkingFee,
+                        ParkingTime = SelectedParkingTime,
+                        ParkingFee = SelectedParkingFee,
                         ParkingCapacity = ParkingCapacity,
                         Points = SelectedLine.Points
                     };
@@ -185,8 +163,6 @@ namespace ParkEase.ViewModel
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
 
-                    ResetFormFields();
-
                 }
                 else
                 {
@@ -202,8 +178,8 @@ namespace ParkEase.ViewModel
         private bool IsValid()
         {
             return !string.IsNullOrEmpty(ParkingSpot) &&
-                   !string.IsNullOrEmpty(ParkingTime) &&
-                   !string.IsNullOrEmpty(ParkingFee) &&
+                   !string.IsNullOrEmpty(SelectedParkingTime) &&
+                   !string.IsNullOrEmpty(SelectedParkingFee) &&
                    !string.IsNullOrEmpty(ParkingCapacity) &&
                    SelectedLine != null &&
                    SelectedLine.Points != null &&
@@ -214,46 +190,15 @@ namespace ParkEase.ViewModel
         {
             var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
             SelectedParkingData = data.FirstOrDefault(d => d.Index == index);
+            if (SelectedParkingData != null)
+            {
+                ParkingSpot = SelectedParkingData.ParkingSpot;
+                SelectedParkingTime = SelectedParkingData.ParkingTime;
+                SelectedParkingFee = SelectedParkingData.ParkingFee;
+                ParkingCapacity = SelectedParkingData.ParkingCapacity;
+            }
+
         }
-
-        /*public async Task DeleteLineDataAsync(int lineIndex)
-        {
-            try
-            {
-                // Create a filter to match the line with the specified index
-                var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, lineIndex);
-
-                // Delete the line data from MongoDB
-                var result = await mongoDBService.DeleteData(CollectionName.ParkingData, filter);
-
-                if (result.DeletedCount > 0)
-                {
-                    // Optionally, remove the line from the Lines list in the ViewModel
-                    var lineToRemove = Lines.FirstOrDefault(line => line.Index == lineIndex);
-                    if (lineToRemove != null)
-                    {
-                        Lines.Remove(lineToRemove);
-                    }
-
-                    // Clear the SelectedLine if it was the deleted line
-                    if (SelectedLine != null && SelectedLine.Index == lineIndex)
-                    {
-                        SelectedLine = null;
-                    }
-
-                    // Reset the currentMaxIndex if necessary
-                    currentMaxIndex = Lines.Any() ? Lines.Max(line => line.Index) : 0;
-                }
-
-            
-            }
-            catch (Exception ex)
-            {
-                // Handle any errors that occur during the deletion process
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-        }*/
-
 
         public async Task DeleteLineDataAsync(int lineIndex)
         {
@@ -271,51 +216,17 @@ namespace ParkEase.ViewModel
                     var remainingLines = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
 
                     // Reassign indexes to be consecutive starting from 1
-                    int newIndex = 1;
-                    foreach (var line in remainingLines.OrderBy(l => l.Index))
+                    int newIndex = lineIndex;
+                    foreach (var line in remainingLines.Where(line => line.Index > newIndex).OrderBy(l => l.Index))
                     {
-                        if (line.Index != newIndex)
-                        {
-                            var updateFilter = Builders<ParkingData>.Filter.Eq(p => p.Id, line.Id);
-                            var update = Builders<ParkingData>.Update.Set(p => p.Index, newIndex);
-                            await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);
 
-                            // Update the local Lines collection as well
-                            var lineToUpdate = Lines.FirstOrDefault(l => l.Id == line.Id);
-                            if (lineToUpdate != null)
-                            {
-                                lineToUpdate.Index = newIndex;
-                            }
-                        }
+                        var updateFilter = Builders<ParkingData>.Filter.Eq(p => p.Id, line.Id);
+                        var update = Builders<ParkingData>.Update.Set(p => p.Index, newIndex);
+                        await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);
                         newIndex++;
                     }
 
-                    // Refresh the Lines collection in the ViewModel
-                    Lines = remainingLines.OrderBy(l => l.Index).Select(pd => new Line
-                    {
-                        Id = pd.Id,
-                        Index = pd.Index,
-                        Points = pd.Points,
-                        ParkingSpot = pd.ParkingSpot,
-                        ParkingTime = pd.ParkingTime,
-                        ParkingFee = pd.ParkingFee,
-                        ParkingCapacity = pd.ParkingCapacity
-                    }).ToList();
-
-                    // Clear the SelectedLine if it was the deleted line
-                    if (SelectedLine != null && SelectedLine.Index == lineIndex)
-                    {
-                        SelectedLine = null;
-                    }
-
-                    // Reset the currentMaxIndex
-                    currentMaxIndex = Lines.Any() ? Lines.Max(line => line.Index) : 0;
-
-                    // Notify the UI that the Lines collection has changed
-                    OnPropertyChanged(nameof(Lines));
-
-                    // Redraw the lines on the map
-                    await RedrawLinesOnMap();
+                    SelectedLine = null;
                 }
             }
             catch (Exception ex)
@@ -328,41 +239,13 @@ namespace ParkEase.ViewModel
         private void ResetFormFields()
         {
             ParkingSpot = string.Empty;
-            ParkingTime = string.Empty;
-            ParkingFee = string.Empty;
-            ParkingCapacity = string.Empty;
             SelectedParkingTime = null;
             SelectedParkingFee = null;
-
+            ParkingCapacity = string.Empty;
         }
         public void ResetSidePanelData()
         {
             SelectedParkingData = null;
-            ParkingSpot = string.Empty;
-            ParkingTime = string.Empty;
-            ParkingFee = string.Empty;
-            ParkingCapacity = string.Empty;
-            SelectedParkingTime = null;
-            SelectedParkingFee = null;
-            LocationInfo = string.Empty;
-        }
-
-        private async Task RedrawLinesOnMap()
-        {
-            if (EvaluateJavaScript != null)
-            {
-                await EvaluateJavaScript("clearMap()");
-
-                foreach (var line in Lines)
-                {
-                    for (int i = 0; i < line.Points.Count - 1; i++)
-                    {
-                        string jsCommand = $"drawLine({line.Points[i].Lat}, {line.Points[i].Lng}, {line.Points[i + 1].Lat}, {line.Points[i + 1].Lng});";
-                        await EvaluateJavaScript(jsCommand);
-                    }
-                }
-            }
-
         }
     }
 }
