@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IImage = Microsoft.Maui.Graphics.IImage;
 
 namespace ParkEase.Utilities
 {
@@ -12,15 +13,15 @@ namespace ParkEase.Utilities
         /// <summary>
         /// Due to Rectangles setter will not be triggered when to collection was added an item, so RecCount must be changed to perform the draw method.
         /// </summary>
-
+        private static object drawlock = new object();
         public int RecCount
         {
             get => (int)GetValue(RecCountProperty); set { SetValue(RecCountProperty, value); }
         }
 
-        public string ImgPath
+        public IImage ImageSource
         {
-            get => (string)GetValue(ImgPathProperty); set { SetValue(ImgPathProperty, value); }
+            get => (IImage)GetValue(ImageSourceProperty); set { SetValue(ImageSourceProperty, value); }
         }
 
         public ObservableCollection<RectF> Rectangles
@@ -43,7 +44,7 @@ namespace ParkEase.Utilities
 
         public static readonly BindableProperty RectanglesProperty = BindableProperty.Create(nameof(Rectangles), typeof(ObservableCollection<RectF>), typeof(RecGraphicsView), propertyChanged: RectanglesPropertyChanged);
 
-        public static readonly BindableProperty ImgPathProperty = BindableProperty.Create(nameof(ImgPath), typeof(string), typeof(RecGraphicsView), propertyChanged: ImgPathPropertyChanged);
+        public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create(nameof(ImageSource), typeof(IImage), typeof(RecGraphicsView), propertyChanged: ImageSourcePropertyChanged);
 
         //public static readonly BindableProperty RectWidthProperty = BindableProperty.Create(nameof(RectWidth), typeof(float), typeof(RecGraphicsView), propertyChanged: RectWidthPropertyChanged);
 
@@ -60,7 +61,7 @@ namespace ParkEase.Utilities
             }
 
             drawable.Rectangles = (ObservableCollection<RectF>)newValue;
-            view.Invalidate();
+            reRender(view);
         }
 
         private static void RecCountPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -71,18 +72,34 @@ namespace ParkEase.Utilities
             }
 
             drawable.RecCount = (int)newValue;
-            view.Invalidate();
+            reRender(view);
         }
 
-        private static void ImgPathPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        private static void ImageSourcePropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not RecGraphicsView { Drawable: RectDrawable drawable } view)
             {
                 return;
             }
 
-            drawable.ImgPath = (string)newValue;
-            view.Invalidate();
+            drawable.ImageSource = (IImage)newValue;
+            reRender(view);
+        }
+
+        private static void reRender(RecGraphicsView view)
+        {
+            lock(drawlock)
+            {
+                try
+                {
+                    view.Invalidate();
+                }
+                catch (Exception)
+                {
+
+                }
+            
+            }
         }
 
         /*private static void RectWidthPropertyChanged(BindableObject bindable, object oldValue, object newValue)

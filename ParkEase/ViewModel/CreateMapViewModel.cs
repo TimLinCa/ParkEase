@@ -17,6 +17,9 @@ using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Services;
 using Microsoft.Maui.Media;
+using Microsoft.Maui.Graphics.Platform;
+using System.Reflection;
+using Microsoft.Maui.Graphics;
 
 
 namespace ParkEase.ViewModel
@@ -48,7 +51,7 @@ namespace ParkEase.ViewModel
         private int recCount;
 
         [ObservableProperty]
-        private string imgPath;
+        private IImage imgSourceData;
 
         [ObservableProperty]
         private float rectWidth;
@@ -69,7 +72,7 @@ namespace ParkEase.ViewModel
 
         private readonly IDialogService dialogService;
 
-
+        private Task drawTask = null;
 
         public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
         {
@@ -89,46 +92,61 @@ namespace ParkEase.ViewModel
             ListfloorInfos = new List<FloorInfo>();
         }
 
-    public ICommand UploadImageClick => new RelayCommand(async () =>
-        {
-            try
+        public ICommand UploadImageClick => new RelayCommand(async () =>
             {
-                if (MediaPicker.Default.IsCaptureSupported)
+                try
                 {
-                    // Load photo
-                    FileResult myPhoto = await MediaPicker.PickPhotoAsync();
-                    if (myPhoto != null)
+                    if (MediaPicker.Default.IsCaptureSupported)
                     {
-                        ImgPath = myPhoto.FullPath;
-                        using var stream = await myPhoto.OpenReadAsync();
-                        using var memoryStream = new MemoryStream();
-                        await stream.CopyToAsync(memoryStream);
-                        var imageBytes = memoryStream.ToArray();
+                        // Load photo
+                        FileResult myPhoto = await MediaPicker.PickPhotoAsync();
+                        if (myPhoto != null)
+                        {
+                            string imgPath = myPhoto.FullPath;
+                            Microsoft.Maui.Graphics.IImage image;
+                            Assembly assembly = GetType().GetTypeInfo().Assembly;
+                            using (Stream fileStream = File.OpenRead(imgPath))
+                            {
+                                ImgSourceData = PlatformImage.FromStream(fileStream);
+                            }
+                            using var stream = await myPhoto.OpenReadAsync();
+                            using var memoryStream = new MemoryStream();
+                            await stream.CopyToAsync(memoryStream);
+                            var imageBytes = memoryStream.ToArray();
 
-                        // Convert byte array to Base64 string and assign to ImageData
-                        imageData = imageBytes;
+                            // Convert byte array to Base64 string and assign to ImageData
+                            imageData = imageBytes;
+                        }
+                    }
+                    else
+                    {
+                        await dialogService.ShowAlertAsync("OOPS", "Your device isn't supported", "OK");
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    await dialogService.ShowAlertAsync("OOPS", "Your device isn't supported", "OK");
+                    await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
                 }
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
 
-        });
+            });
 
         public void AddRectangle(PointF point)
         {
-            if (ImgPath != null)
+            try
             {
-                var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
-                Rectangles.Add(rect);
-                RecCount = RecCount + 1;
+                if (ImgSourceData != null)
+                {
+                    var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
+                    Rectangles.Add(rect);
+                    RecCount = RecCount + 1;
+                }
             }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
 
         }
 
@@ -145,11 +163,12 @@ namespace ParkEase.ViewModel
                 {
                     await dialogService.ShowAlertAsync("Error", "There is nothing to deldete.\nPlease draw the map first!", "OK");
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-            
+
         });
 
         public ICommand ClearAllRectangleClick => new RelayCommand(async () =>
@@ -183,7 +202,7 @@ namespace ParkEase.ViewModel
             {
                 for (int i = 0; i < RecCount; i++)
                 {
-                    var insertRect = new Rectangle(i + 1, rectangles[i]);
+                    var insertRect = new Rectangle(i + 1, Rectangles[i]);
                     ListRectangles.Add(insertRect);
                 };
 
