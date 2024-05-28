@@ -15,7 +15,7 @@ namespace ParkEase.ViewModel
 {
     public partial class MapViewModel : ObservableObject
     {
-
+        // Automatically generate property change notification - any changes to the properties update UI
         [ObservableProperty]
         private string parkingSpot;
 
@@ -50,14 +50,12 @@ namespace ParkEase.ViewModel
         private readonly IDialogService dialogService;
         private static int currentMaxIndex = 0; // Initialize the index counter
 
-        // Action to evaluate JavaScript
+        // Action to evaluate JavaScript - run js code in Webview
         public Func<string, Task<string>> EvaluateJavaScript { get; set; }
 
 
         public ObservableCollection<string> ParkingTimes { get; }
 
-
-        // New properties for Parking Fee Picker
         public ObservableCollection<string> ParkingFees { get; }
 
         private object mapWebView;
@@ -102,14 +100,14 @@ namespace ParkEase.ViewModel
             InitializeIndexCounter();
         }
 
+        // retrieve parking data from MongoDB to initialize currentMaxIndex
         private async void InitializeIndexCounter()
         {
-            // Optionally, retrieve the current max index from MongoDB
             var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
             currentMaxIndex = data.Any() ? data.Max(d => d.Index) : 0;
         }
 
-
+        // Loads parking data for selected line
         partial void OnSelectedLineChanged(Line? value)
         {
 
@@ -120,13 +118,15 @@ namespace ParkEase.ViewModel
             }
         }
 
+
+        //Form submission and updates entry in MongoDB
         public ICommand SubmitCommand => new RelayCommand(async () =>
         {
             try
             {
                 if (IsValid())
                 {
-                    if (SelectedLine.Index <= 0) // New line, assign new unique index
+                    if (SelectedLine.Index <= 0) // assign new unique index
                     {
                         SelectedLine.Index = ++currentMaxIndex;
                     }
@@ -175,6 +175,7 @@ namespace ParkEase.ViewModel
             }
         });
 
+        // check if all required fields are filled
         private bool IsValid()
         {
             return !string.IsNullOrEmpty(ParkingSpot) &&
@@ -186,6 +187,7 @@ namespace ParkEase.ViewModel
                    SelectedLine.Points.Count > 0;
         }
 
+        // loads parking data from MongoDB for given index and update properties
         public async Task LoadParkingData(int index)
         {
             var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
@@ -200,6 +202,7 @@ namespace ParkEase.ViewModel
 
         }
 
+        //Delete Parking data and updates indexes of remaining lines
         public async Task DeleteLineDataAsync(int lineIndex)
         {
             try
@@ -236,13 +239,7 @@ namespace ParkEase.ViewModel
             }
         }
 
-        private void ResetFormFields()
-        {
-            ParkingSpot = string.Empty;
-            SelectedParkingTime = null;
-            SelectedParkingFee = null;
-            ParkingCapacity = string.Empty;
-        }
+        // Reset selected parking data in side panel
         public void ResetSidePanelData()
         {
             SelectedParkingData = null;
