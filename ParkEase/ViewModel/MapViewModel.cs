@@ -1,11 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Platform;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using ParkEase.Contracts.Services;
+using ParkEase.Controls;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Services;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -26,16 +30,16 @@ namespace ParkEase.ViewModel
         private string locationInfo;
 
         [ObservableProperty]
-        private bool draw; // Indicates whether the line is drawn or not
-
-        [ObservableProperty]
         private Location? startLocation; // The starting point of the line
 
         [ObservableProperty]
-        private Line? selectedLine; // Selected line
+        private ObservableCollection<MapLine> mapLines;  //list on map
 
         [ObservableProperty]
-        private List<Line> lines; //list on map
+        private MapLine selectedMapLine;
+
+        [ObservableProperty]
+        private bool drawingLine;
 
         [ObservableProperty]
         private ParkingData selectedParkingData;
@@ -77,10 +81,7 @@ namespace ParkEase.ViewModel
             parkingSpot = "";
             parkingCapacity = "";
             locationInfo = "";
-            draw = false;
             startLocation = null;
-            selectedLine = new Line();
-            lines = new List<Line>();
 
             ParkingTimes = new ObservableCollection<string>   /*https://www.calgaryparking.com/find-parking/on-street.html*/
             {
@@ -97,7 +98,7 @@ namespace ParkEase.ViewModel
                 "$2.00 per hour"
             };
 
-            InitializeIndexCounter();
+            //InitializeIndexCounter();
         }
 
         // retrieve parking data from MongoDB to initialize currentMaxIndex
@@ -108,13 +109,12 @@ namespace ParkEase.ViewModel
         }
 
         // Loads parking data for selected line
-        partial void OnSelectedLineChanged(Line? value)
+        partial void OnSelectedMapLineChanged(MapLine? value)
         {
 
             if (value != null)
             {
                 LoadParkingData(value.Index);
-              
             }
         }
 
@@ -126,19 +126,14 @@ namespace ParkEase.ViewModel
             {
                 if (IsValid())
                 {
-                    if (SelectedLine.Index <= 0) // assign new unique index
-                    {
-                        SelectedLine.Index = ++currentMaxIndex;
-                    }
-
                     var parkingData = new ParkingData
                     {
-                        Index = SelectedLine.Index,
+                        Index = SelectedMapLine.Index,
                         ParkingSpot = ParkingSpot,
                         ParkingTime = SelectedParkingTime,
                         ParkingFee = SelectedParkingFee,
                         ParkingCapacity = ParkingCapacity,
-                        Points = SelectedLine.Points
+                        Points = SelectedMapLine.Points
                     };
 
                     var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, parkingData.Index);
@@ -155,14 +150,12 @@ namespace ParkEase.ViewModel
                         await mongoDBService.UpdateData(CollectionName.ParkingData, filter, update);
                         await dialogService.ShowAlertAsync("Success", "Your information is updated.", "OK");
                     }
-
-
                     else
                     {
                         await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
-
+                    await LoadParkingData(SelectedMapLine.Index);
                 }
                 else
                 {
@@ -182,9 +175,9 @@ namespace ParkEase.ViewModel
                    !string.IsNullOrEmpty(SelectedParkingTime) &&
                    !string.IsNullOrEmpty(SelectedParkingFee) &&
                    !string.IsNullOrEmpty(ParkingCapacity) &&
-                   SelectedLine != null &&
-                   SelectedLine.Points != null &&
-                   SelectedLine.Points.Count > 0;
+                   SelectedMapLine != null &&
+                   SelectedMapLine.Points != null &&
+                   SelectedMapLine.Points.Count == 2;
         }
 
         // loads parking data from MongoDB for given index and update properties
@@ -228,8 +221,6 @@ namespace ParkEase.ViewModel
                         await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);
                         newIndex++;
                     }
-
-                    SelectedLine = null;
                 }
             }
             catch (Exception ex)
@@ -244,6 +235,84 @@ namespace ParkEase.ViewModel
         {
             SelectedParkingData = null;
         }
+
+        public ICommand MapNavigatedCommand => new RelayCommand<WebNavigatedEventArgs>(async e =>
+        {
+            try
+            {
+                List<ParkingData> parkingDatas = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+
+                if (parkingDatas == null || !parkingDatas.Any())
+                {
+                    System.Diagnostics.Debug.WriteLine("No parking data found.");
+                    return;
+                }
+
+                if (parkingDatas.Count > 0)
+                {
+                    parkingDatas = parkingDatas.OrderBy(pd => pd.Index).ToList();
+                    MapLines = new ObservableCollection<MapLine>();
+                    foreach (ParkingData parkingData in parkingDatas)
+                    {
+                       
+                        MapLine mapLine = new MapLine(parkingData.Points);
+                        MapLines.Add(mapLine);
+                    }
+                
+                    //MapLines = new ObservableCollection<MapLine>(parkingDatas.Where(pd => pd.Points.Count > 1).Select(pd => new MapLine(pd.Points) { Index = pd.Index }).ToList());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in draw_lines: {ex.Message}");
+            }
+        });
+
+        public ICommand DrawCommand => new RelayCommand(() =>
+        {
+            if (!DrawingLine) DrawingLine = true;
+        });
+
+        public ICommand DeletedLineCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (SelectedMapLine != null)
+                {
+                    MapLines.Remove(SelectedMapLine);
+                    int lineIndex = SelectedMapLine.Index;
+                    // Create a filter to match the line with the specified index
+                    var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, lineIndex);
+
+                    // Delete the line data from MongoDB
+                    var result = await mongoDBService.DeleteData(CollectionName.ParkingData, filter);
+
+                    if (result.DeletedCount > 0)
+                    {
+                        // Reload all remaining lines from the database
+                        var remainingLines = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
+
+                        // Reassign indexes to be consecutive starting from 1
+                        int newIndex = lineIndex;
+                        foreach (var line in remainingLines.Where(line => line.Index > newIndex).OrderBy(l => l.Index))
+                        {
+
+                            var updateFilter = Builders<ParkingData>.Filter.Eq(p => p.Id, line.Id);
+                            var update = Builders<ParkingData>.Update.Set(p => p.Index, newIndex);
+                            await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);
+                            newIndex++;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors that occur during the deletion process
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
+          
+        });
     }
 }
 

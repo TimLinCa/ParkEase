@@ -3,9 +3,11 @@
     x:Class="ParkEase.Page.MapPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:ParkEase.Controls"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
     xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:MapViewModel">
@@ -34,18 +36,33 @@
                 <Button
                     x:Name="btn_Draw"
                     Margin="50,50,50,0"
-                    Clicked="btn_Draw_Clicked"
-                    Text="Draw Line"
-                    VerticalOptions="Center" />
+                    Command="{Binding DrawCommand}"
+                    VerticalOptions="Center">
+                    <Button.Triggers>
+                        <DataTrigger
+                            Binding="{Binding DrawingLine}"
+                            TargetType="Button"
+                            Value="True">
+                            <Setter Property="Text" Value="Drawing..." />
+                            <Setter Property="BackgroundColor" Value="Gray" />
+                        </DataTrigger>
+                        <DataTrigger
+                            Binding="{Binding DrawingLine}"
+                            TargetType="Button"
+                            Value="False">
+                            <Setter Property="Text" Value="Draw Line" />
+                            <Setter Property="BackgroundColor" Value="Blue" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
 
                 <Button
                     x:Name="btn_Clear"
                     Margin="50,10,50,50"
-                    Clicked="btn_Clear_Clicked"
+                    Command="{Binding DeletedLineCommand}"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Text="Clear Line"
                     VerticalOptions="Center" />
-
 
                 <!--  Labels for displaying parking data  -->
                 <Label
@@ -125,8 +142,17 @@
 
             <!--  Map Section  -->
             <!--<maps:Map x:Name="myMap" Grid.Column="1" MapType="Satellite" IsShowingUser="True" IsTrafficEnabled="false"/>-->
-            <WebView x:Name="mapWebView" Grid.Column="1" />
+            <!--<WebView x:Name="mapWebView" Grid.Column="1" />-->
+            <controls:GMap
+                Grid.Column="1"
+                Drawing="{Binding DrawingLine}"
+                Lines="{Binding MapLines}"
+                SelectedLine="{Binding SelectedMapLine}">
+                <controls:GMap.Behaviors>
+                    <toolkit:EventToCommandBehavior Command="{Binding MapNavigatedCommand}" EventName="NavigatedEvent" />
+                </controls:GMap.Behaviors>
 
+            </controls:GMap>
 
         </Grid>
 

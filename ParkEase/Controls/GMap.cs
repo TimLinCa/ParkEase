@@ -1,6 +1,14 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Shapes;
+using Newtonsoft.Json;
+using ParkEase.Core.Data;
+using Syncfusion.Maui.Core.Carousel;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,7 +16,89 @@ namespace ParkEase.Controls
 {
     public class GMap : WebView
     {
+        private bool mapInitialised = false;
+        public delegate void NavigatedEventHandler(object sender, WebNavigatedEventArgs e);
+        public event NavigatedEventHandler NavigatedEvent;
+        //public event Action<WebNavigatedEventArgs> NavigatedEvent;
+        private static GMap currentInstance;
+        private static bool selfUpdatingLines = false;
+        public bool Drawing
+        {
+            get => (bool)GetValue(DrawingProperty); set { SetValue(DrawingProperty, value); }
+        }
 
+        public ObservableCollection<MapLine> Lines
+        {
+            get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
+        }
+
+        public MapLine SelectedLine
+        {
+            get => (MapLine)GetValue(SelectedLineProperty); set { SetValue(SelectedLineProperty, value); }
+        }
+
+
+        public static readonly BindableProperty LinesProperty = BindableProperty.Create(nameof(Lines), typeof(ObservableCollection<MapLine>), typeof(GMap), propertyChanged: LinesPropertyChanged,defaultBindingMode: BindingMode.TwoWay);
+
+        public static readonly BindableProperty SelectedLineProperty = BindableProperty.Create(nameof(SelectedLine), typeof(MapLine), typeof(GMap), defaultBindingMode: BindingMode.TwoWay);
+
+        public static readonly BindableProperty DrawingProperty = BindableProperty.Create(nameof(Drawing),typeof(bool), typeof(GMap), propertyChanged: DrawingPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
+
+        private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is not GMap view)
+            {
+                return;
+            }
+            ObservableCollection<MapLine> lines = (ObservableCollection<MapLine>)newValue;
+            lines.CollectionChanged += Lines_CollectionChanged;
+            if(!selfUpdatingLines)
+            {
+                foreach (MapLine line in lines.Where(l => l.Points.Count > 1))
+                {
+                    string jsCommand = $"drawLine({line.Points[0].Lat}, {line.Points[0].Lng}, {line.Points[1].Lat}, {line.Points[1].Lng},\"{line.Color}\");";
+                    view.EvaluateJavaScriptAsync(jsCommand);
+                }
+            }
+        }
+
+        private static void DrawingPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is not GMap view)
+            {
+                return;
+            }
+            if((bool)oldValue == false && (bool)newValue == true)
+            {
+                view.EvaluateJavaScriptAsync("startSelectingPoints()");
+            }
+        }
+
+        private static async void Lines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (selfUpdatingLines) return;
+            if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                if(currentInstance.SelectedLine!=null)
+                {
+                    //Remove the line from map
+                    await currentInstance.EvaluateJavaScriptAsync("deleteLine()");
+                    currentInstance.SelectedLine = null;
+                }
+            }
+            else if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                if(e.NewItems != null)
+                {
+                    foreach (MapLine mapLine in e.NewItems)
+                    {
+                        //Add the line to map
+                        string jsCommand = $"drawLine({mapLine.Points[0].Lat}, {mapLine.Points[0].Lng}, {mapLine.Points[1].Lat}, {mapLine.Points[1].Lng},\"{mapLine.Color}\");";
+                        await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+                    }
+                }
+            }
+        }
 
         public GMap()
         {
@@ -61,7 +151,7 @@ namespace ParkEase.Controls
                                     selectedPoints.push({ lat: event.latLng.lat(), lng: event.latLng.lng() });
 
                                     if (selectedPoints.length == 2) {
-                                        drawLine(selectedPoints[0].lat, selectedPoints[0].lng, selectedPoints[1].lat, selectedPoints[1].lng);
+                                        drawLine(selectedPoints[0].lat, selectedPoints[0].lng, selectedPoints[1].lat, selectedPoints[1].lng,""green"");
                                         selectedPoints = [];
                                         start = false;
                                         window.location.href = 'myapp://lineDrawn';
@@ -103,7 +193,7 @@ namespace ParkEase.Controls
                               return JSON.stringify(result);
                         }
 
-                        function drawLine(latitude1, longitude1, latitude2, longitude2) {
+                        function drawLine(latitude1, longitude1, latitude2, longitude2,color) {
                             // Draw a line on the map
                             let lineCoordinates = [
                                 { lat: parseFloat(latitude1), lng: parseFloat(longitude1) },
@@ -113,7 +203,7 @@ namespace ParkEase.Controls
                             let line = new google.maps.Polyline({
                                 path: lineCoordinates,
                                 geodesic: true,
-                                strokeColor: ""#097969"",
+                                strokeColor: color,
                                 strokeOpacity: 1.0,
                                 strokeWeight: 4
                             });
@@ -235,8 +325,142 @@ namespace ParkEase.Controls
                 </html>"
             };
 
-
             Source = htmlSource; // Set the source of the WebView to the HTML content.
+            Navigating += GMap_Navigating;
+            Navigated += GMap_Navigated;
+        }
+
+        private async void GMap_Navigated(object sender, WebNavigatedEventArgs e)
+        {
+            if(!mapInitialised)
+            {
+                currentInstance = (GMap)sender;
+                var location = await Geolocation.GetLocationAsync();
+                if (location != null)
+                {
+                    string jsCommand = $"initMap({location.Latitude}, {location.Longitude});";
+                    await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+
+                    // Adding user marker on the map
+                    string markerCommand = $"addUserMarker({location.Latitude}, {location.Longitude});";
+                    await currentInstance.EvaluateJavaScriptAsync(markerCommand);
+                }
+                await currentInstance.EvaluateJavaScriptAsync("setInitial(false)");
+                mapInitialised = true;
+                NavigatedEvent?.Invoke(sender, e);
+            }
+        }
+
+        private async void GMap_Navigating(object? sender, WebNavigatingEventArgs e)
+        {
+            if (e.Url.StartsWith("myapp://lineclicked"))
+            {
+                e.Cancel = true; // Cancel the navigation
+
+                var info = e.Url.Split('=')[2]; // Extract the line index from the URL
+                info = System.Net.WebUtility.UrlDecode(info);
+
+                HandleLineClicked(info); // Call your C# function to handle the line click
+            }
+
+            else if (e.Url.StartsWith("myapp://linedrawn"))
+            {
+                if (Drawing)
+                {
+                    e.Cancel = true;
+                    Drawing = false;
+                    await UpdateLines();
+                }
+            }
+            else if (e.Url.StartsWith("myapp://updateLines"))
+            {
+                e.Cancel = true;
+                await UpdateLines();
+            }
+        }
+
+        private async Task UpdateLines()
+        {
+            selfUpdatingLines = true;
+            // Evaluate the JavaScript function "getLines()" to get the JSON string of all lines from the WebView
+            var result = await this.EvaluateJavaScriptAsync("getLines()");
+            if(result!= null)
+            {
+                result = result.Replace("\\\"", "\"");
+                // Deserialize the JSON string into a list of Line objects
+                List<MapLine> lines = JsonConvert.DeserializeObject<List<MapLine>>(result);
+                Lines = new ObservableCollection<MapLine>(lines);
+                //if(lines!= null)
+                //{
+                //    Lines.Clear();
+                //    lines.ForEach(line => Lines.Add(line));
+                //}
+                selfUpdatingLines = false;
+            }
+           
+        }
+
+        private async void HandleLineClicked(string info)
+        {
+            // Split the info string into individual points using ';' as the delimiter
+            var points = info.Split(';');
+            List<MapPoint> mapPoints = new List<MapPoint>();
+
+            foreach (var point in points)
+            {
+                // Split the point into latitude and longitude
+                var latLng = point.Split(',');
+
+                // Create a new mapPoint object
+                MapPoint mp = new MapPoint
+                {
+                    Lat = double.Parse(latLng[0]),
+                    Lng = double.Parse(latLng[1])
+                };
+
+                // Add the mapPoint object to the list
+                mapPoints.Add(mp);
+            }
+
+            // Create a new Line object to represent the selected line
+            MapLine line_temp = new MapLine(mapPoints);
+
+            // Evaluate the JavaScript function "getLines()" to get the JSON string of all lines from the WebView
+            var result = await this.EvaluateJavaScriptAsync("getLines()");
+            if(result!= null)
+            {
+                result = result.Replace("\\\"", "\"");
+                // Deserialize the JSON string into a list of Line objects
+                List<MapLine> lines = JsonConvert.DeserializeObject<List<MapLine>>(result);
+
+                // Find the line that matches the selected line based on the points
+                SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
+            }
+        }
+    }
+
+    public class MapLine : IEquatable<MapLine>
+    {
+        public int Index { get; set; }
+        public List<MapPoint> Points { get; set; }
+        public string Color { get; set; } = "green";
+
+        public MapLine(List<MapPoint> points)
+        {
+            if (points == null) throw new ArgumentNullException();
+            if (points.Count != 2) throw new ArgumentException("Count of Points is not equal to 2");
+            Points = points;
+        }
+        public bool Equals(MapLine? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            bool isEquals = true;
+            if (Points == null || Points.Count < 2) return false;
+            for (var i = 0; i < Points.Count; i++)  // Compare each point in the line to check for equality
+            {
+                if (!this.Points[i].Equals(other.Points[i])) return false;
+            }
+            return isEquals;
         }
     }
 }
