@@ -45,9 +45,6 @@ namespace ParkEase.ViewModel
         private string floor;
 
         [ObservableProperty]
-        private int rectCount;
-
-        [ObservableProperty]
         private IImage imgSourceData;
 
         [ObservableProperty]
@@ -148,10 +145,9 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (RectCount > 0)
+                if (Rectangles.Count > 0)
                 {
-                    Rectangles.RemoveAt(RectCount - 1);
-                    RectCount--;
+                    Rectangles.RemoveAt(Rectangles.Count - 1);
                 }
                 else
                 {
@@ -169,10 +165,9 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (RectCount > 0)
+                if (Rectangles.Count > 0)
                 {
                     Rectangles.Clear();
-                    RectCount = 0;
                 }
                 else
                 {
@@ -191,10 +186,10 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (RectCount > 0)
+                if (Rectangles.Count > 0)
                 {
                     ListRectangles = new List<Rectangle>();
-                    for (int i = 0; i < RectCount; i++)
+                    for (int i = 0; i < Rectangles.Count; i++)
                     {
                         var insertedRect = new Rectangle(i + 1, Rectangles[i]);
                         ListRectangles.Add(insertedRect);
@@ -203,7 +198,7 @@ namespace ParkEase.ViewModel
 
                 if (Floor != null && ListRectangles.Count > 0 && imageData != null)
                 {
-                    var floorInfo = new FloorInfo(Floor, ListRectangles, RectCount, imageData);
+                    var floorInfo = new FloorInfo(Floor, ListRectangles, Rectangles.Count, imageData);
                     ListfloorInfos.Add(floorInfo);
 
                     ResetFloorInfo();
@@ -288,7 +283,6 @@ namespace ParkEase.ViewModel
                             {
                                 Rectangles.Add(rectangle.Rect);
                             }
-                            RectCount = floorInfo.NumberOfLot;
                             
                             // <Not completed> change byte[] to IImage
                             ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
@@ -326,7 +320,6 @@ namespace ParkEase.ViewModel
             ImgSourceData = null;
             RectWidth = 100;
             RectHeight = 50;
-            RectCount = 0;
             Rectangles.Clear();
         }
 

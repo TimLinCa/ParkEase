@@ -17,11 +17,6 @@ namespace ParkEase.Controls
         private static object drawlock = new object();
         private static RecGraphicsView _currentInstance;
 
-        public int RectCount
-        {
-            get => (int)GetValue(RectCountProperty); set { SetValue(RectCountProperty, value); }
-        }
-
         public IImage ImageSource
         {
             get => (IImage)GetValue(ImageSourceProperty); set { SetValue(ImageSourceProperty, value); }
@@ -35,9 +30,6 @@ namespace ParkEase.Controls
                 SetValue(RectanglesProperty, value);
             }
         }
-
-
-        public static readonly BindableProperty RectCountProperty = BindableProperty.Create(nameof(RectCount), typeof(int), typeof(RecGraphicsView), propertyChanged: RectCountPropertyChanged);
 
         public static readonly BindableProperty RectanglesProperty = BindableProperty.Create(nameof(Rectangles), typeof(ObservableCollection<RectF>), typeof(RecGraphicsView), propertyChanged: RectanglesPropertyChanged);
 
@@ -64,17 +56,6 @@ namespace ParkEase.Controls
             rectFs.CollectionChanged += Rectangles_CollectionChanged;
             drawable.Rectangles = rectFs;
             _currentInstance = view;
-            reRender(view);
-        }
-
-        private static void RectCountPropertyChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            if (bindable is not RecGraphicsView { Drawable: RectDrawable drawable } view)
-            {
-                return;
-            }
-
-            drawable.RectCount = (int)newValue;
             reRender(view);
         }
 

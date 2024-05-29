@@ -188,8 +188,8 @@
                 </HorizontalStackLayout>
 
 
-                <!-- Save map for one tab/floor before creating a new one -->
-                <Button 
+                <!--  Save map for one tab/floor before creating a new one  -->
+                <Button
                     x:Name="SaveBtn"
                     Margin="50,50,50,30"
                     Command="{Binding SaveFloorInfoCommand}"
@@ -197,21 +197,22 @@
                     VerticalOptions="Center"
                     WidthRequest="200" />
 
-                <!-- Edit map -->
-                <Button 
-                     x:Name="EditBtn"
-                     Margin="50,50,50,30"
-                     WidthRequest="200"
-                     VerticalOptions="Center"
-                     Text="Edit Map" 
-                     Command="{Binding EditMapCommand}"/>
+                <!--  Edit map  -->
+                <Button
+                    x:Name="EditBtn"
+                    Margin="50,50,50,30"
+                    Command="{Binding EditMapCommand}"
+                    Text="Edit Map"
+                    VerticalOptions="Center"
+                    WidthRequest="200" />
 
-                <!-- Submit Button -->
-                <Frame BackgroundColor="#ac99ea"
-                       WidthRequest="350"
-                       HeightRequest="90"
-                       CornerRadius="10">
-                    <Button 
+                <!--  Submit Button  -->
+                <Frame
+                    BackgroundColor="#ac99ea"
+                    CornerRadius="10"
+                    HeightRequest="90"
+                    WidthRequest="350">
+                    <Button
                         x:Name="SubmitBtn"
                         Margin="0,0,0,0"
                         Padding="0"
@@ -244,7 +245,6 @@
                                     ImageSource="{Binding ImgSourceData}"
                                     MinimumHeightRequest="700"
                                     MinimumWidthRequest="700"
-                                    RectCount="{Binding RectCount}"
                                     Rectangles="{Binding Rectangles}">
                                     <controls:RecGraphicsView.Drawable>
                                         <controls:RectDrawable />
