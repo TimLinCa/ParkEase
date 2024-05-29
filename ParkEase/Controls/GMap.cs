@@ -44,62 +44,6 @@ namespace ParkEase.Controls
 
         public static readonly BindableProperty DrawingProperty = BindableProperty.Create(nameof(Drawing),typeof(bool), typeof(GMap), propertyChanged: DrawingPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
-        private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            if (bindable is not GMap view)
-            {
-                return;
-            }
-            ObservableCollection<MapLine> lines = (ObservableCollection<MapLine>)newValue;
-            lines.CollectionChanged += Lines_CollectionChanged;
-            if(!selfUpdatingLines)
-            {
-                foreach (MapLine line in lines.Where(l => l.Points.Count > 1))
-                {
-                    string jsCommand = $"drawLine({line.Points[0].Lat}, {line.Points[0].Lng}, {line.Points[1].Lat}, {line.Points[1].Lng},\"{line.Color}\");";
-                    view.EvaluateJavaScriptAsync(jsCommand);
-                }
-            }
-        }
-
-        private static void DrawingPropertyChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            if (bindable is not GMap view)
-            {
-                return;
-            }
-            if((bool)oldValue == false && (bool)newValue == true)
-            {
-                view.EvaluateJavaScriptAsync("startSelectingPoints()");
-            }
-        }
-
-        private static async void Lines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (selfUpdatingLines) return;
-            if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
-            {
-                if(currentInstance.SelectedLine!=null)
-                {
-                    //Remove the line from map
-                    await currentInstance.EvaluateJavaScriptAsync("deleteLine()");
-                    currentInstance.SelectedLine = null;
-                }
-            }
-            else if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
-            {
-                if(e.NewItems != null)
-                {
-                    foreach (MapLine mapLine in e.NewItems)
-                    {
-                        //Add the line to map
-                        string jsCommand = $"drawLine({mapLine.Points[0].Lat}, {mapLine.Points[0].Lng}, {mapLine.Points[1].Lat}, {mapLine.Points[1].Lng},\"{mapLine.Color}\");";
-                        await currentInstance.EvaluateJavaScriptAsync(jsCommand);
-                    }
-                }
-            }
-        }
-
         public GMap()
         {
             // HTML content to be loaded in the WebView for displaying Google Maps. https://www.google.com/search?sca_esv=00e485a4403845c8&sca_upv=1&rlz=1C1UEAD_enCA1040CA1040&sxsrf=ADLYWIIu_-3h0kGt3_IxavzDEMmyG-bAfg:1716486128385&q=HTML+content+to+be+loaded+in+the+WebView+for+displaying+Google+Maps.&tbm=vid&source=lnms&prmd=sivbnmtz&sa=X&ved=2ahUKEwi-zMaPqaSGAxWqJzQIHecgDQEQ0pQJegQIChAB&biw=1920&bih=911&dpr=1#fpstate=ive&vld=cid:7c1c270e,vid:s3g04pbAJBA,st:0
@@ -156,8 +100,6 @@ namespace ParkEase.Controls
                                         start = false;
                                         window.location.href = 'myapp://lineDrawn';
                                     }
-                                } else {
-                                    //findLine(event.latLng);
                                 }
                             });
                         }
@@ -260,50 +202,16 @@ namespace ParkEase.Controls
                             return pathStr;
                         }
 
-                        // Finds the line that contains the given point
-                        function findLine(latLng) {
-                            for (let i = 0; i < lines.length; i++) {
-                                let linePath = lines[i].getPath();
-                                for (let j = 0; j < linePath.length - 1; j++) {
-                                    let p1 = linePath.getAt(j);
-                                    let p2 = linePath.getAt(j + 1);
-                                    if (isPointOnLine(latLng, p1, p2)) {
-                                        if (selectedLine != null) {
-                                            selectedLine.setOptions({ strokeColor: ""#097969"" });
-                                        }
-                                        selectedLine = lines[i];
-                                        selectedLine.setOptions({ strokeColor: ""red"" });
-                                        console.log('find');
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        // Checks if a point is on a line
-                        function isPointOnLine(pt, p1, p2) {
-                            let slope = (p2.lat() - p1.lat()) / (p2.lng() - p1.lng());
-                            let yIntercept = p1.lat() - (slope * p1.lng());
-                            let eps = 0.001;
-
-                            let minY = Math.min(p1.lat(), p2.lat()) - eps;
-                            let maxY = Math.max(p1.lat(), p2.lat()) + eps;
-
-                            let minX = Math.min(p1.lng(), p2.lng()) - eps;
-                            let maxX = Math.max(p1.lng(), p2.lng()) + eps;
-
-                            if (pt.lat() < minY || pt.lat() > maxY || pt.lng() < minX || pt.lng() > maxX) {
-                                return false;
-                            }
-
-                            let result = Math.abs(pt.lat() - (slope * pt.lng() + yIntercept)) < eps;
-                            return result;
-                        }
-
                         // Enables the point selection mode
                         function startSelectingPoints() {
                             start = true;
-                            monitorLineDrawing();
+                            //monitorLineDrawing();
+                        }
+
+                        // Disbles the point selection mode
+                        function cancelSelectingPoints() {
+                            start = false;
+                            selectedPoints = [];
                         }
 
                         // Deletes the selected line
@@ -329,6 +237,70 @@ namespace ParkEase.Controls
             Navigating += GMap_Navigating;
             Navigated += GMap_Navigated;
         }
+
+        private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is not GMap view)
+            {
+                return;
+            }
+            ObservableCollection<MapLine> lines = (ObservableCollection<MapLine>)newValue;
+            lines.CollectionChanged += Lines_CollectionChanged;
+            if(!selfUpdatingLines)
+            {
+                foreach (MapLine line in lines.Where(l => l.Points.Count > 1))
+                {
+                    string jsCommand = $"drawLine({line.Points[0].Lat}, {line.Points[0].Lng}, {line.Points[1].Lat}, {line.Points[1].Lng},\"{line.Color}\");";
+                    view.EvaluateJavaScriptAsync(jsCommand);
+                }
+            }
+        }
+
+        private static async void Lines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (selfUpdatingLines) return;
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                if (currentInstance.SelectedLine != null)
+                {
+                    //Remove the line from map
+                    await currentInstance.EvaluateJavaScriptAsync("deleteLine()");
+                    currentInstance.SelectedLine = null;
+                }
+            }
+            else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                if (e.NewItems != null)
+                {
+                    foreach (MapLine mapLine in e.NewItems)
+                    {
+                        //Add the line to map
+                        string jsCommand = $"drawLine({mapLine.Points[0].Lat}, {mapLine.Points[0].Lng}, {mapLine.Points[1].Lat}, {mapLine.Points[1].Lng},\"{mapLine.Color}\");";
+                        await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+                    }
+                }
+            }
+        }
+
+        private static void DrawingPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is not GMap view)
+            {
+                return;
+            }
+            if((bool)oldValue == false && (bool)newValue == true)
+            {
+                view.EvaluateJavaScriptAsync("startSelectingPoints()");
+            }
+            if((bool)oldValue == true && (bool)newValue == false)
+            {
+                view.EvaluateJavaScriptAsync("cancelSelectingPoints()");
+            }
+        }
+
+     
+
+       
 
         private async void GMap_Navigated(object sender, WebNavigatedEventArgs e)
         {
@@ -390,11 +362,6 @@ namespace ParkEase.Controls
                 // Deserialize the JSON string into a list of Line objects
                 List<MapLine> lines = JsonConvert.DeserializeObject<List<MapLine>>(result);
                 Lines = new ObservableCollection<MapLine>(lines);
-                //if(lines!= null)
-                //{
-                //    Lines.Clear();
-                //    lines.ForEach(line => Lines.Add(line));
-                //}
                 selfUpdatingLines = false;
             }
            

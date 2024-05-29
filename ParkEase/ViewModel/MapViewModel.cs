@@ -251,15 +251,7 @@ namespace ParkEase.ViewModel
                 if (parkingDatas.Count > 0)
                 {
                     parkingDatas = parkingDatas.OrderBy(pd => pd.Index).ToList();
-                    MapLines = new ObservableCollection<MapLine>();
-                    foreach (ParkingData parkingData in parkingDatas)
-                    {
-                       
-                        MapLine mapLine = new MapLine(parkingData.Points);
-                        MapLines.Add(mapLine);
-                    }
-                
-                    //MapLines = new ObservableCollection<MapLine>(parkingDatas.Where(pd => pd.Points.Count > 1).Select(pd => new MapLine(pd.Points) { Index = pd.Index }).ToList());
+                    MapLines = new ObservableCollection<MapLine>(parkingDatas.Where(pd => pd.Points.Count > 1).Select(pd => new MapLine(pd.Points) { Index = pd.Index }).ToList());
                 }
             }
             catch (Exception ex)
@@ -270,7 +262,7 @@ namespace ParkEase.ViewModel
 
         public ICommand DrawCommand => new RelayCommand(() =>
         {
-            if (!DrawingLine) DrawingLine = true;
+            DrawingLine = !DrawingLine;
         });
 
         public ICommand DeletedLineCommand => new RelayCommand(async () =>
