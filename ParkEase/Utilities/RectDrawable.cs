@@ -36,12 +36,12 @@ namespace ParkEase.Utilities
                         Microsoft.Maui.Graphics.IImage image = ImageSource;
 
 
-                        if (ImageSource != null)
+                        if (image != null)
                         {
                             //Calculate image width and height to show
                             //https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview
 
-                        float viewRatio = dirtyRect.Width / dirtyRect.Height;
+                            float viewRatio = dirtyRect.Width / dirtyRect.Height;
                             float imageRatio = image.Width / image.Height;
                             float offsetX, offsetY, drawWidth, drawHeight;
 

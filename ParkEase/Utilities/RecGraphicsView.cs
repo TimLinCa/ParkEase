@@ -62,8 +62,6 @@ namespace ParkEase.Utilities
 
             drawable.RectCount = (int)newValue;
             reRender(view);
-
-
         }
 
         private static void ImageSourcePropertyChanged(BindableObject bindable, object oldValue, object newValue)

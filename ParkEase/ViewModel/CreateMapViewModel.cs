@@ -41,9 +41,6 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private double limitHour;
 
-        //[ObservableProperty]
-        private int numberOfLot;
-
         [ObservableProperty]
         private string floor;
 
@@ -62,7 +59,7 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
 
-        private List<Rectangle> ListRectangles { get; set; }
+        private List<Rectangle> ListRectangles;
 
         private List<FloorInfo> ListfloorInfos { get; set; }
 
@@ -83,12 +80,10 @@ namespace ParkEase.ViewModel
             city = string.Empty;
             fee = 0;
             limitHour = 0;
-            numberOfLot = 0;
             rectWidth = 100;
             rectHeight = 50;
             rectangles = new ObservableCollection<RectF>();
 
-            ListRectangles = new List<Rectangle>();
             ListfloorInfos = new List<FloorInfo>();
         }
 
@@ -98,7 +93,6 @@ namespace ParkEase.ViewModel
                 {
                     if (MediaPicker.Default.IsCaptureSupported)
                     {
-                        // Load photo
                         FileResult myPhoto = await MediaPicker.PickPhotoAsync();
                         if (myPhoto != null)
                         {
@@ -109,6 +103,7 @@ namespace ParkEase.ViewModel
                             {
                                 ImgSourceData = PlatformImage.FromStream(fileStream);
                             }
+
                             using var stream = await myPhoto.OpenReadAsync();
                             using var memoryStream = new MemoryStream();
                             await stream.CopyToAsync(memoryStream);
@@ -141,10 +136,9 @@ namespace ParkEase.ViewModel
                     RectCount = RectCount + 1;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
 
 
@@ -199,7 +193,7 @@ namespace ParkEase.ViewModel
             {
                 if (RectCount > 0)
                 {
-
+                    ListRectangles = new List<Rectangle>();
                     for (int i = 0; i < RectCount; i++)
                     {
                         var insertedRect = new Rectangle(i + 1, Rectangles[i]);
@@ -211,6 +205,8 @@ namespace ParkEase.ViewModel
                 {
                     var floorInfo = new FloorInfo(Floor, ListRectangles, RectCount, imageData);
                     ListfloorInfos.Add(floorInfo);
+
+                    ResetFloorInfo();
                 }
                 else
                 {
@@ -247,6 +243,8 @@ namespace ParkEase.ViewModel
                     await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
                     var TEST = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
                     await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
+
+                    ResetAfterSubmit();
                 }
                 else
                 {
@@ -259,7 +257,52 @@ namespace ParkEase.ViewModel
             }
         });
 
-        private bool IsValid()
+        // Edit Command
+        public ICommand EditMapCommand => new RelayCommand(async () =>
+        {
+            // 1 Admid can have many different parking places
+            // - Option 1: there is a form (same as create map) but dropdown selection
+            // where users can select address, city of a specific parking lot  -> click EDIT
+            // in Manage Property, they can select from a list of property
+            try
+            {
+                var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                var loadedData = data.FirstOrDefault(data => data.Address == "16 Ave NW");
+                if (loadedData != null)
+                {
+                    CompanyName = loadedData.CompanyName;
+                    Address = loadedData.Address;
+                    City = loadedData.City;
+                    Fee = loadedData.ParkingInfo.Fee;
+                    LimitHour = loadedData.ParkingInfo.LimitedHour;
+                    ListfloorInfos = loadedData.FloorInfo;
+                    
+                    
+                    foreach (FloorInfo floorInfo in ListfloorInfos)
+                    {
+                        if (floorInfo != null)
+                        {
+                            Floor = floorInfo.Floor;
+                            ListRectangles = floorInfo.Rectangles;
+                            foreach (Rectangle rectangle in ListRectangles)
+                            {
+                                Rectangles.Add(rectangle.Rect);
+                            }
+                            RectCount = floorInfo.NumberOfLot;
+                            
+                            // <Not completed> change byte[] to IImage
+                            ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        });
+
+            private bool IsValid()
         {
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
@@ -272,19 +315,19 @@ namespace ParkEase.ViewModel
             CompanyName = string.Empty;
             Address = string.Empty;
             City = string.Empty;
-            ListfloorInfos = new List<FloorInfo>();
-            ListRectangles = new List<Rectangle>();
+            Fee = 0;
+            LimitHour = 0;
+            ListfloorInfos.Clear();
         }
 
         private void ResetFloorInfo()
         {
             Floor = string.Empty;
-            imgSourceData = null;
+            ImgSourceData = null;
             RectWidth = 100;
             RectHeight = 50;
             RectCount = 0;
-            Rectangles = [];
-
+            Rectangles.Clear();
         }
 
     }
