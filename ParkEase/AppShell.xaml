@@ -11,30 +11,33 @@
 
     <ShellItem Route="LogInPage">
         <ShellContent
-       ContentTemplate="{DataTemplate page:LogInPage}"
-       FlyoutItemIsVisible="False"
-       NavigationPage.HasNavigationBar="False"
-       Shell.FlyoutBehavior="Disabled"/>
+            ContentTemplate="{DataTemplate page:LogInPage}"
+            FlyoutItemIsVisible="False"
+            NavigationPage.HasNavigationBar="False"
+            Shell.FlyoutBehavior="Disabled" />
     </ShellItem>
 
     <Shell.FlyoutHeader>
-        <Image Source="parkease_logo.png"
-        HorizontalOptions="Center"
-        WidthRequest="100" 
-        Aspect="AspectFit"/>
+        <Image
+            Aspect="AspectFit"
+            HorizontalOptions="Center"
+            Source="parkease_logo.png"
+            WidthRequest="100" />
     </Shell.FlyoutHeader>
 
     <FlyoutItem Title="Map">
-        <ShellContent  ContentTemplate="{DataTemplate page:MapPage}" Route="MapPage"></ShellContent>
+        <ShellContent ContentTemplate="{DataTemplate page:MapPage}" Route="MapPage" />
     </FlyoutItem>
 
     <FlyoutItem Title="CreateMap">
-        <ShellContent  ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap"></ShellContent>
+        <ShellContent ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap" />
     </FlyoutItem>
 
-    <MenuFlyoutSubItem>
-        
-    </MenuFlyoutSubItem>
+    <FlyoutItem Title="UserMap">
+        <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMap" />
+    </FlyoutItem>
+
+    <MenuFlyoutSubItem />
 
 
 </Shell>

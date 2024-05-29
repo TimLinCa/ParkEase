@@ -66,6 +66,12 @@ namespace ParkEase
             {
                 BindingContext = provider.GetRequiredService<CreateMapViewModel>()
             });
+
+            builder.Services.AddSingleton<UserMapViewModel>();
+            builder.Services.AddSingleton(provider => new UserMapPage
+            {
+                BindingContext = provider.GetRequiredService<UserMapViewModel>()
+            });
             #endregion
 
             builder.Services.AddSingleton(provider => new ParkEaseModel(developerMode));
