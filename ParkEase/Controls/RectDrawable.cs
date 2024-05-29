@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Font = Microsoft.Maui.Graphics.Font;
 using IImage = Microsoft.Maui.Graphics.IImage;
 
-namespace ParkEase.Utilities
+namespace ParkEase.Controls
 {
     public class RectDrawable : IDrawable
     {
@@ -33,7 +33,7 @@ namespace ParkEase.Utilities
                 {
                     if (ImageSource != null)
                     {
-                        Microsoft.Maui.Graphics.IImage image = ImageSource;
+                        IImage image = ImageSource;
 
 
                         if (ImageSource != null)
@@ -41,7 +41,7 @@ namespace ParkEase.Utilities
                             //Calculate image width and height to show
                             //https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview
 
-                        float viewRatio = dirtyRect.Width / dirtyRect.Height;
+                            float viewRatio = dirtyRect.Width / dirtyRect.Height;
                             float imageRatio = image.Width / image.Height;
                             float offsetX, offsetY, drawWidth, drawHeight;
 
@@ -93,12 +93,12 @@ namespace ParkEase.Utilities
                 }
 
             }
-            
-         
+
+
             // https://github.com/dotnet/maui/issues/10624
 
-            
-         
+
+
         }
     }
 }

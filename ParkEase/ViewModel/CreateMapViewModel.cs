@@ -138,7 +138,7 @@ namespace ParkEase.ViewModel
                 {
                     var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
                     Rectangles.Add(rect);
-                    RectCount = RectCount + 1;
+                    //RectCount = RectCount + 1;
                 }
             }
             catch (Exception)

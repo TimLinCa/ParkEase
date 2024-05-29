@@ -3,12 +3,12 @@
     x:Class="ParkEase.Page.CreateMapPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:drawables="clr-namespace:ParkEase.Utilities;assembly=ParkEase"
+    xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
     xmlns:sliders="clr-namespace:Syncfusion.Maui.Sliders;assembly=Syncfusion.Maui.Sliders"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
-    xmlns:sf="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:CreateMapViewModel">
 
@@ -191,32 +191,33 @@
 
                 <!--  Submit Button  -->
 
-                <!-- Save map for one tab/floor before creating a new one -->
-                <Button 
+                <!--  Save map for one tab/floor before creating a new one  -->
+                <Button
                     x:Name="SaveBtn"
                     Margin="50,50,50,30"
-                    WidthRequest="200"
+                    Command="{Binding SaveFloorInfoCommand}"
+                    Text="Save"
                     VerticalOptions="Center"
-                    Text="Save" 
-                    Command="{Binding SaveFloorInfoCommand}"/>
+                    WidthRequest="200" />
 
-                <!-- Submit Button -->
-                <Frame BackgroundColor="#ac99ea"
-                       WidthRequest="350"
-                       HeightRequest="90"
-                       CornerRadius="10">
-                    <Button 
+                <!--  Submit Button  -->
+                <Frame
+                    BackgroundColor="#ac99ea"
+                    CornerRadius="10"
+                    HeightRequest="90"
+                    WidthRequest="350">
+                    <Button
                         x:Name="SubmitBtn"
                         Margin="0,0,0,0"
                         Padding="0"
-                        TextColor="Black"
-                        FontSize="18"
-                        FontAttributes="Bold"
                         BackgroundColor="WhiteSmoke"
-                        WidthRequest="180"
+                        Command="{Binding AddParkingInfoAsync}"
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        Text="Submit"
+                        TextColor="Black"
                         VerticalOptions="Center"
-                        Text="Submit" 
-                        Command="{Binding AddParkingInfoAsync}"/>
+                        WidthRequest="180" />
                 </Frame>
 
 
@@ -224,28 +225,29 @@
         </ScrollView>
 
 
-        <Border Grid.Column="1"
-        Stroke="#512BD4"
-        BackgroundColor="WhiteSmoke">
+        <Border
+            Grid.Column="1"
+            BackgroundColor="WhiteSmoke"
+            Stroke="#512BD4">
             <sf:SfTabView>
                 <sf:SfTabView.Items>
                     <sf:SfTabItem Header="first">
                         <sf:SfTabItem.Content>
                             <VerticalStackLayout>
-                                <drawables:RecGraphicsView
-                                        x:Name="RectangleDrawableView"
-                                        ImageSource="{Binding ImgSourceData}"
-                                        MinimumHeightRequest="700"
-                                        MinimumWidthRequest="700"
-                                        RectCount="{Binding RectCount}"
-                                        Rectangles="{Binding Rectangles}">
-                                    <drawables:RecGraphicsView.Drawable>
-                                        <drawables:RectDrawable />
-                                    </drawables:RecGraphicsView.Drawable>
+                                <controls:RecGraphicsView
+                                    x:Name="RectangleDrawableView"
+                                    ImageSource="{Binding ImgSourceData}"
+                                    MinimumHeightRequest="700"
+                                    MinimumWidthRequest="700"
+                                    RectCount="{Binding RectCount}"
+                                    Rectangles="{Binding Rectangles}">
+                                    <controls:RecGraphicsView.Drawable>
+                                        <controls:RectDrawable />
+                                    </controls:RecGraphicsView.Drawable>
                                     <GraphicsView.GestureRecognizers>
-                                        <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped"/>
+                                        <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped" />
                                     </GraphicsView.GestureRecognizers>
-                                </drawables:RecGraphicsView>
+                                </controls:RecGraphicsView>
                             </VerticalStackLayout>
                         </sf:SfTabItem.Content>
                     </sf:SfTabItem>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Maui.Controls;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IImage = Microsoft.Maui.Graphics.IImage;
 
-namespace ParkEase.Utilities
+namespace ParkEase.Controls
 {
     public class RecGraphicsView : GraphicsView
     {
@@ -14,7 +15,7 @@ namespace ParkEase.Utilities
         /// Due to Rectangles setter will not be triggered when to collection was added an item, so RecCount must be changed to perform the draw method.
         /// </summary>
         private static object drawlock = new object();
-
+        private static RecGraphicsView _currentInstance;
 
         public int RectCount
         {
@@ -28,18 +29,29 @@ namespace ParkEase.Utilities
 
         public ObservableCollection<RectF> Rectangles
         {
-            get => (ObservableCollection<RectF>)GetValue(RectanglesProperty); set => SetValue(RectanglesProperty, value);
+            get => (ObservableCollection<RectF>)GetValue(RectanglesProperty);
+            set
+            {
+                SetValue(RectanglesProperty, value);
+            }
         }
 
 
-
-
-        public static readonly BindableProperty RectCountProperty = BindableProperty.Create(nameof(RectCount), typeof(int), typeof(RecGraphicsView),propertyChanged: RectCountPropertyChanged);
+        public static readonly BindableProperty RectCountProperty = BindableProperty.Create(nameof(RectCount), typeof(int), typeof(RecGraphicsView), propertyChanged: RectCountPropertyChanged);
 
         public static readonly BindableProperty RectanglesProperty = BindableProperty.Create(nameof(Rectangles), typeof(ObservableCollection<RectF>), typeof(RecGraphicsView), propertyChanged: RectanglesPropertyChanged);
 
         public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create(nameof(ImageSource), typeof(IImage), typeof(RecGraphicsView), propertyChanged: ImageSourcePropertyChanged);
 
+
+        private static void Rectangles_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //Triger reRender
+            if (sender is ObservableCollection<RectF> rectangles && rectangles.Count > 0)
+            {
+                reRender(_currentInstance);
+            }
+        }
 
 
         private static void RectanglesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -48,8 +60,10 @@ namespace ParkEase.Utilities
             {
                 return;
             }
-
-            drawable.Rectangles = (ObservableCollection<RectF>)newValue;
+            ObservableCollection<RectF> rectFs = (ObservableCollection<RectF>)newValue;
+            rectFs.CollectionChanged += Rectangles_CollectionChanged;
+            drawable.Rectangles = rectFs;
+            _currentInstance = view;
             reRender(view);
         }
 
@@ -79,7 +93,7 @@ namespace ParkEase.Utilities
 
         private static void reRender(RecGraphicsView view)
         {
-            lock(drawlock)
+            lock (drawlock)
             {
                 try
                 {
@@ -89,7 +103,7 @@ namespace ParkEase.Utilities
                 {
 
                 }
-            
+
             }
         }
     }
