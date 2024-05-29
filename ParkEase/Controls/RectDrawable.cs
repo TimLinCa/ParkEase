@@ -36,7 +36,7 @@ namespace ParkEase.Controls
                         IImage image = ImageSource;
 
 
-                        if (ImageSource != null)
+                        if (image != null)
                         {
                             //Calculate image width and height to show
                             //https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview

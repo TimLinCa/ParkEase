@@ -188,11 +188,8 @@
                 </HorizontalStackLayout>
 
 
-
-                <!--  Submit Button  -->
-
-                <!--  Save map for one tab/floor before creating a new one  -->
-                <Button
+                <!-- Save map for one tab/floor before creating a new one -->
+                <Button 
                     x:Name="SaveBtn"
                     Margin="50,50,50,30"
                     Command="{Binding SaveFloorInfoCommand}"
@@ -200,13 +197,21 @@
                     VerticalOptions="Center"
                     WidthRequest="200" />
 
-                <!--  Submit Button  -->
-                <Frame
-                    BackgroundColor="#ac99ea"
-                    CornerRadius="10"
-                    HeightRequest="90"
-                    WidthRequest="350">
-                    <Button
+                <!-- Edit map -->
+                <Button 
+                     x:Name="EditBtn"
+                     Margin="50,50,50,30"
+                     WidthRequest="200"
+                     VerticalOptions="Center"
+                     Text="Edit Map" 
+                     Command="{Binding EditMapCommand}"/>
+
+                <!-- Submit Button -->
+                <Frame BackgroundColor="#ac99ea"
+                       WidthRequest="350"
+                       HeightRequest="90"
+                       CornerRadius="10">
+                    <Button 
                         x:Name="SubmitBtn"
                         Margin="0,0,0,0"
                         Padding="0"
