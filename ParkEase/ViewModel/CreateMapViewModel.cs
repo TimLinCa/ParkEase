@@ -255,10 +255,8 @@ namespace ParkEase.ViewModel
         // Edit Command
         public ICommand EditMapCommand => new RelayCommand(async () =>
         {
-            // 1 Admid can have many different parking places
-            // - Option 1: there is a form (same as create map) but dropdown selection
-            // where users can select address, city of a specific parking lot  -> click EDIT
-            // in Manage Property, they can select from a list of property
+            // 1. In CreateMapPage, they can edit foor they already save  -> click EDIT
+            // 2. Admid can have many different parking places -> in Manage Property, they can select a specific property to edit from a list
             try
             {
                 var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
@@ -281,11 +279,31 @@ namespace ParkEase.ViewModel
                             ListRectangles = floorInfo.Rectangles;
                             foreach (Rectangle rectangle in ListRectangles)
                             {
-                                Rectangles.Add(rectangle.Rect);
+                                float pointX = rectangle.Rect.X;
+                                float pointY = rectangle.Rect.Y;
+                                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
+                                Rectangles.Add(rect);
+
+                                // Can Delete, but cannot Clear (maybe after Clear, it doesn't re-draw bc Rectangles = 0) -> need to be fixed
                             }
                             
                             // <Not completed> change byte[] to IImage
-                            ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
+                            //ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
+                            /*try
+                            {
+                                byte[] imageByte = floorInfo.ImageData;
+                                IImage ImgSourceData;
+                                Assembly assembly = GetType().GetTypeInfo().Assembly;
+                                using (Stream stream = assembly.GetManifestResourceStream(imageByte.ToString()))
+                                {
+                                    if (stream == null) await dialogService.ShowAlertAsync("Error", "Stream is null", "OK");
+                                    ImgSourceData = PlatformImage.FromStream(stream);
+                                }
+                            } catch (Exception ex)
+                            {
+                                await dialogService.ShowAlertAsync("Error in Load edit image", ex.Message, "OK");
+                            }*/
+
                         }
                     }
                 }
