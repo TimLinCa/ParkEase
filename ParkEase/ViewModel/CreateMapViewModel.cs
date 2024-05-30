@@ -21,7 +21,6 @@ using Microsoft.Maui.Graphics.Platform;
 using System.Reflection;
 using Microsoft.Maui.Graphics;
 
-
 namespace ParkEase.ViewModel
 {
     public partial class CreateMapViewModel : ObservableObject
@@ -45,6 +44,9 @@ namespace ParkEase.ViewModel
         private string floor;
 
         [ObservableProperty]
+        private ObservableCollection<string> floorNames;
+
+        [ObservableProperty]
         private IImage imgSourceData;
 
         [ObservableProperty]
@@ -56,9 +58,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
 
-        private List<Rectangle> ListRectangles;
+        private List<Rectangle> listRectangles;
 
-        private List<FloorInfo> ListfloorInfos { get; set; }
+        private List<FloorInfo> listfloorInfos;
 
         private byte[] imageData;
 
@@ -81,7 +83,8 @@ namespace ParkEase.ViewModel
             rectHeight = 50;
             rectangles = new ObservableCollection<RectF>();
 
-            ListfloorInfos = new List<FloorInfo>();
+            listfloorInfos = new List<FloorInfo>();
+            FloorNames = new ObservableCollection<string>();
         }
 
         public ICommand UploadImageClick => new RelayCommand(async () =>
@@ -130,15 +133,12 @@ namespace ParkEase.ViewModel
                 {
                     var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
                     Rectangles.Add(rect);
-                    //RectCount = RectCount + 1;
                 }
             }
             catch (Exception ex)
             {
                 dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-
-
         }
 
         public ICommand RemoveRectangleClick => new RelayCommand(async () =>
@@ -188,18 +188,19 @@ namespace ParkEase.ViewModel
             {
                 if (Rectangles.Count > 0)
                 {
-                    ListRectangles = new List<Rectangle>();
+                    listRectangles = new List<Rectangle>();
                     for (int i = 0; i < Rectangles.Count; i++)
                     {
                         var insertedRect = new Rectangle(i + 1, Rectangles[i]);
-                        ListRectangles.Add(insertedRect);
+                        listRectangles.Add(insertedRect);
                     };
                 }
 
-                if (Floor != null && ListRectangles.Count > 0 && imageData != null)
+                if (Floor != null && listRectangles.Count > 0 && imageData != null)
                 {
-                    var floorInfo = new FloorInfo(Floor, ListRectangles, Rectangles.Count, imageData);
-                    ListfloorInfos.Add(floorInfo);
+                    var floorInfo = new FloorInfo(Floor, listRectangles, Rectangles.Count, imageData);
+                    listfloorInfos.Add(floorInfo);
+                    FloorNames.Add(floorInfo.Floor);
 
                     ResetFloorInfo();
                 }
@@ -232,7 +233,7 @@ namespace ParkEase.ViewModel
                             LimitedHour = LimitHour
                         },
 
-                        FloorInfo = ListfloorInfos
+                        FloorInfo = listfloorInfos
 
                     };
                     await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
@@ -255,10 +256,8 @@ namespace ParkEase.ViewModel
         // Edit Command
         public ICommand EditMapCommand => new RelayCommand(async () =>
         {
-            // 1 Admid can have many different parking places
-            // - Option 1: there is a form (same as create map) but dropdown selection
-            // where users can select address, city of a specific parking lot  -> click EDIT
-            // in Manage Property, they can select from a list of property
+            // 1. In CreateMapPage, they can edit foor they already save  -> click EDIT
+            // 2. Admid can have many different parking places -> in Manage Property, they can select a specific property to edit from a list
             try
             {
                 var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
@@ -270,22 +269,41 @@ namespace ParkEase.ViewModel
                     City = loadedData.City;
                     Fee = loadedData.ParkingInfo.Fee;
                     LimitHour = loadedData.ParkingInfo.LimitedHour;
-                    ListfloorInfos = loadedData.FloorInfo;
-                    
-                    
-                    foreach (FloorInfo floorInfo in ListfloorInfos)
+                    listfloorInfos = loadedData.FloorInfo;
+
+                    foreach (FloorInfo floorInfo in listfloorInfos)
                     {
                         if (floorInfo != null)
                         {
                             Floor = floorInfo.Floor;
-                            ListRectangles = floorInfo.Rectangles;
-                            foreach (Rectangle rectangle in ListRectangles)
+                            listRectangles = floorInfo.Rectangles;
+                            foreach (Rectangle rectangle in listRectangles)
                             {
-                                Rectangles.Add(rectangle.Rect);
+                                float pointX = rectangle.Rect.X;
+                                float pointY = rectangle.Rect.Y;
+                                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
+                                Rectangles.Add(rect);
+
+                                // Can Delete, but cannot Clear (maybe after Clear, it doesn't re-draw bc Rectangles = 0) -> need to be fixed
                             }
                             
                             // <Not completed> change byte[] to IImage
-                            ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
+                            //ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
+                            /*try
+                            {
+                                byte[] imageByte = floorInfo.ImageData;
+                                IImage ImgSourceData;
+                                Assembly assembly = GetType().GetTypeInfo().Assembly;
+                                using (Stream stream = assembly.GetManifestResourceStream(imageByte.ToString()))
+                                {
+                                    if (stream == null) await dialogService.ShowAlertAsync("Error", "Stream is null", "OK");
+                                    ImgSourceData = PlatformImage.FromStream(stream);
+                                }
+                            } catch (Exception ex)
+                            {
+                                await dialogService.ShowAlertAsync("Error in Load edit image", ex.Message, "OK");
+                            }*/
+
                         }
                     }
                 }
@@ -301,7 +319,7 @@ namespace ParkEase.ViewModel
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
                     !string.IsNullOrEmpty(City) &&
-                    ListfloorInfos.Count() > 0;
+                    listfloorInfos.Count() > 0;
         }
 
         private void ResetAfterSubmit()
@@ -311,7 +329,7 @@ namespace ParkEase.ViewModel
             City = string.Empty;
             Fee = 0;
             LimitHour = 0;
-            ListfloorInfos.Clear();
+            listfloorInfos.Clear();
         }
 
         private void ResetFloorInfo()
