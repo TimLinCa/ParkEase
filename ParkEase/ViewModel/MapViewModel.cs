@@ -185,6 +185,8 @@ namespace ParkEase.ViewModel
             SelectedParkingData = null;
         }
 
+
+        // From Chatgpt: Gain data from MongoDB and draw lines on the map 
         public ICommand MapNavigatedCommand => new RelayCommand<WebNavigatedEventArgs>(async e =>
         {
             try
@@ -237,7 +239,7 @@ namespace ParkEase.ViewModel
                         int newIndex = lineIndex;
                         foreach (var line in remainingLines.Where(line => line.Index > newIndex).OrderBy(l => l.Index))
                         {
-
+                            // create new filters for each line to update the index 
                             var updateFilter = Builders<ParkingData>.Filter.Eq(p => p.Id, line.Id);
                             var update = Builders<ParkingData>.Update.Set(p => p.Index, newIndex);
                             await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);

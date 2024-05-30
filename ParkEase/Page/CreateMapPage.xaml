@@ -89,18 +89,18 @@
                     HorizontalOptions="Start"
                     Style="{StaticResource SecondaryDarkText}"
                     Text="Enter your parking level (ex: B1, B2, F1, F2, or Ground)" />
-                
-                    <material:TextField
+
+                <material:TextField
                     Title="Level"
                     Margin="20,4,20,10"
                     AllowClear="True"
                     IsReadOnly="False"
                     Text="{Binding Floor}"
                     WidthRequest="200">
-                        <validation:RequiredValidation />
-                    </material:TextField>
+                    <validation:RequiredValidation />
+                </material:TextField>
 
-                    <!--  Create map section  -->
+                <!--  Create map section  -->
 
                 <Button
                     x:Name="UploadBtn"
@@ -192,11 +192,18 @@
                     VerticalOptions="Center"
                     WidthRequest="200" />
 
-                <Picker ItemsSource="{Binding FloorNames}"  Title="Select an Item" >
-
+                <!-- FloorName Picker https://www.youtube.com/watch?v=gnKkUtBK23A -->
+                <Picker ItemsSource="{Binding FloorNames}"  Title="Select an floor">
                 </Picker>
 
-                
+                <!--  Load Map  -->
+                <Button
+                x:Name="LoadBtn"
+                Margin="50,50,50,30"
+                Text="Load"
+                VerticalOptions="Center"
+                WidthRequest="200" />
+
                 <!--  Edit map  -->
                 <Button
                     x:Name="EditBtn"
