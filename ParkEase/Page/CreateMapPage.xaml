@@ -109,7 +109,7 @@
                     VerticalOptions="Center" />
 
                 </HorizontalStackLayout>
-            
+
                 <!--  Create map section  -->
 
                 <Button
@@ -202,11 +202,17 @@
                     VerticalOptions="Center"
                     WidthRequest="200" />
 
-                <Picker ItemsSource="{Binding FloorNames}"  Title="Select an Item" TitleColor="Red">
-
+                <!-- FloorName Picker https://www.youtube.com/watch?v=gnKkUtBK23A -->
+                <Picker ItemsSource="{Binding FloorNames}"  Title="Select an floor">
                 </Picker>
 
-                
+                <!--  Load Map  -->
+                <Button
+                x:Name="LoadBtn"
+                Margin="50,50,50,30"
+                Text="Load"
+                VerticalOptions="Center"
+                WidthRequest="200" />
 
                 <!--  Edit map  -->
                 <Button

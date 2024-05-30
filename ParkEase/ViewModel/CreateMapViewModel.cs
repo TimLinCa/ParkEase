@@ -21,7 +21,6 @@ using Microsoft.Maui.Graphics.Platform;
 using System.Reflection;
 using Microsoft.Maui.Graphics;
 
-
 namespace ParkEase.ViewModel
 {
     public partial class CreateMapViewModel : ObservableObject
@@ -271,8 +270,7 @@ namespace ParkEase.ViewModel
                     Fee = loadedData.ParkingInfo.Fee;
                     LimitHour = loadedData.ParkingInfo.LimitedHour;
                     listfloorInfos = loadedData.FloorInfo;
-                    
-                    
+
                     foreach (FloorInfo floorInfo in listfloorInfos)
                     {
                         if (floorInfo != null)
