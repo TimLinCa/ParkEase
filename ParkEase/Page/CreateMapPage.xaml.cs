@@ -2,31 +2,50 @@ using ParkEase.Utilities;
 using ParkEase.ViewModel;
 using System.Timers;
 using ParkEase.Core.Services;
-namespace ParkEase.Page;
+using Syncfusion.Maui.TabView;
+using Microsoft.Maui.Controls;
 
-public partial class CreateMapPage : ContentPage
+
+namespace ParkEase.Page
 {
-    public CreateMapPage()
+    public partial class CreateMapPage : ContentPage
     {
-        InitializeComponent();
 
-    }
-
-    public void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
-    {
-        var viewModel = BindingContext as CreateMapViewModel;
-        var touchPosition = args.GetPosition(RectangleDrawableView);
-
-        if (viewModel != null && touchPosition.HasValue)
+        public CreateMapPage()
         {
-            viewModel.AddRectangle(touchPosition.Value);
+            InitializeComponent();
+            //var viewModel = new CreateMapViewModel();
+           
+
         }
 
+
+
+
+        public void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
+        {
+            var viewModel = BindingContext as CreateMapViewModel;
+            var touchPosition = args.GetPosition(RectangleDrawableView);
+
+            if (viewModel != null && touchPosition.HasValue)
+            {
+                viewModel.AddRectangle(touchPosition.Value);
+            }
+        }
+
+        /*public void Additem_Clicked(object sender, EventArgs e)
+        {
+            SfTabItem insertItem = new SfTabItem();
+            insertItem.Header = "New Item Inserted";
+            StackLayout stacklayout1 = new StackLayout();
+            stacklayout1.BackgroundColor = Colors.PaleGreen;
+            insertItem.Content = stacklayout1;
+            if (tabView.Items.Count > 0)
+                tabView.Items.Insert(1, insertItem);
+            else
+                tabView.Items.Insert(0, insertItem);
+        }*/
     }
-
-    /* https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/tap?view=net-maui-8.0#get-the-gesture-position
-    https://github.com/Programming-With-Chris/MauiDemos/blob/main/MeterGraphicsExample/MainPage.xaml.cs */
-
 }
 
 

@@ -9,6 +9,7 @@
     xmlns:sliders="clr-namespace:Syncfusion.Maui.Sliders;assembly=Syncfusion.Maui.Sliders"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+    xmlns:tabView="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:CreateMapViewModel">
 
@@ -90,6 +91,7 @@
                     Text="Enter your parking level (ex: B1, B2, F1, F2, etc.) or 'Ground' if it's on ground level." />
 
                 <material:TextField
+                    x:Name="Level"
                     Title="Level"
                     Margin="20,4,20,10"
                     AllowClear="True"
@@ -104,6 +106,9 @@
                     Margin="50,50,50,0"
                     Text="Add Level"
                     VerticalOptions="Center" />
+
+
+
 
                 <!--  Create map section  -->
 
@@ -197,6 +202,12 @@
                     VerticalOptions="Center"
                     WidthRequest="200" />
 
+                <Picker ItemsSource="{Binding FloorNames}"  Title="Select an Item" TitleColor="Red">
+
+                </Picker>
+
+                
+
                 <!--  Edit map  -->
                 <Button
                     x:Name="EditBtn"
@@ -256,22 +267,13 @@
                             </VerticalStackLayout>
                         </sf:SfTabItem.Content>
                     </sf:SfTabItem>
-
-                    <sf:SfTabItem Header="second">
-                        <sf:SfTabItem.Content>
-                            <VerticalStackLayout>
-                                <BindableLayout.ItemsSource>
-                                    <x:Array Type="{x:Type x:String}">
-                                        <x:String>Richard</x:String>
-                                        <x:String>Steve</x:String>
-                                    </x:Array>
-                                </BindableLayout.ItemsSource>
-                            </VerticalStackLayout>
-                        </sf:SfTabItem.Content>
-                    </sf:SfTabItem>
-                </sf:SfTabView.Items>
+                    </sf:SfTabView.Items>
             </sf:SfTabView>
-        </Border>
+
+                 </Border>
+
+
+
 
 
 

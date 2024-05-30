@@ -20,6 +20,11 @@ using Microsoft.Maui.Media;
 using Microsoft.Maui.Graphics.Platform;
 using System.Reflection;
 using Microsoft.Maui.Graphics;
+using Syncfusion.Maui.TabView;
+using UraniumUI.Material.Controls;
+
+
+
 
 
 namespace ParkEase.ViewModel
@@ -45,6 +50,9 @@ namespace ParkEase.ViewModel
         private string floor;
 
         [ObservableProperty]
+        private ObservableCollection<string> floorNames;
+
+        [ObservableProperty]
         private IImage imgSourceData;
 
         [ObservableProperty]
@@ -56,7 +64,7 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
 
-        private List<Rectangle> ListRectangles;
+        private List<Rectangle> ListRectangles { get; set; }
 
         private List<FloorInfo> ListfloorInfos { get; set; }
 
@@ -67,6 +75,44 @@ namespace ParkEase.ViewModel
         private readonly IDialogService dialogService;
 
         private Task drawTask = null;
+
+
+
+        //new code
+
+        /*private ObservableCollection<TabItem> _tabItems;
+        public ObservableCollection<TabItem> TabItems
+        {
+            get => _tabItems;
+            set
+            {
+                _tabItems = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand AddTabCommand { get; }
+
+        public CreateMapViewModel()
+        {
+            TabItems = new ObservableCollection<TabItem>();
+            AddTabCommand = new Command(AddTab);
+        }
+
+        private void AddTab()
+        {
+            var newTabItem = new TabItem
+            {
+                Title = $"Tab {TabItems.Count + 1}",
+                Content = "New Tab Content"
+            };
+            TabItems.Add(newTabItem);
+        }*/
+
+        //
+
+
+
 
         public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
         {
@@ -82,45 +128,47 @@ namespace ParkEase.ViewModel
             rectangles = new ObservableCollection<RectF>();
 
             ListfloorInfos = new List<FloorInfo>();
+            FloorNames = new ObservableCollection<string>();
+
         }
 
         public ICommand UploadImageClick => new RelayCommand(async () =>
+        {
+            try
             {
-                try
+                if (MediaPicker.Default.IsCaptureSupported)
                 {
-                    if (MediaPicker.Default.IsCaptureSupported)
+                    FileResult myPhoto = await MediaPicker.PickPhotoAsync();
+                    if (myPhoto != null)
                     {
-                        FileResult myPhoto = await MediaPicker.PickPhotoAsync();
-                        if (myPhoto != null)
+                        string imgPath = myPhoto.FullPath;
+                        Microsoft.Maui.Graphics.IImage image;
+                        Assembly assembly = GetType().GetTypeInfo().Assembly;
+                        using (Stream fileStream = File.OpenRead(imgPath))
                         {
-                            string imgPath = myPhoto.FullPath;
-                            Microsoft.Maui.Graphics.IImage image;
-                            Assembly assembly = GetType().GetTypeInfo().Assembly;
-                            using (Stream fileStream = File.OpenRead(imgPath))
-                            {
-                                ImgSourceData = PlatformImage.FromStream(fileStream);
-                            }
-
-                            using var stream = await myPhoto.OpenReadAsync();
-                            using var memoryStream = new MemoryStream();
-                            await stream.CopyToAsync(memoryStream);
-                            var imageBytes = memoryStream.ToArray();
-
-                            // Convert byte array to Base64 string and assign to ImageData
-                            imageData = imageBytes;
+                            ImgSourceData = PlatformImage.FromStream(fileStream);
                         }
-                    }
-                    else
-                    {
-                        await dialogService.ShowAlertAsync("OOPS", "Your device isn't supported", "OK");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-                }
 
-            });
+                        using var stream = await myPhoto.OpenReadAsync();
+                        using var memoryStream = new MemoryStream();
+                        await stream.CopyToAsync(memoryStream);
+                        var imageBytes = memoryStream.ToArray();
+
+                        // Convert byte array to Base64 string and assign to ImageData
+                        imageData = imageBytes;
+                    }
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("OOPS", "Your device isn't supported", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
+        });
 
         public void AddRectangle(PointF point)
         {
@@ -130,17 +178,13 @@ namespace ParkEase.ViewModel
                 {
                     var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
                     Rectangles.Add(rect);
-                    //RectCount = RectCount + 1;
                 }
             }
             catch (Exception ex)
             {
                 dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-
-
         }
-
         public ICommand RemoveRectangleClick => new RelayCommand(async () =>
         {
             try
@@ -186,6 +230,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
+
                 if (Rectangles.Count > 0)
                 {
                     ListRectangles = new List<Rectangle>();
@@ -200,6 +245,7 @@ namespace ParkEase.ViewModel
                 {
                     var floorInfo = new FloorInfo(Floor, ListRectangles, Rectangles.Count, imageData);
                     ListfloorInfos.Add(floorInfo);
+                    FloorNames.Add(floorInfo.Floor);
 
                     ResetFloorInfo();
                 }
@@ -207,7 +253,8 @@ namespace ParkEase.ViewModel
                 {
                     await dialogService.ShowAlertAsync("Warning", "One of these information is missing. Please check the following:\n1. Is floor typed?\n2. Do you upload Image?\n3. Do you create at least one rectangle?", "OK");
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
@@ -269,8 +316,8 @@ namespace ParkEase.ViewModel
                     Fee = loadedData.ParkingInfo.Fee;
                     LimitHour = loadedData.ParkingInfo.LimitedHour;
                     ListfloorInfos = loadedData.FloorInfo;
-                    
-                    
+
+
                     foreach (FloorInfo floorInfo in ListfloorInfos)
                     {
                         if (floorInfo != null)
@@ -286,7 +333,7 @@ namespace ParkEase.ViewModel
 
                                 // Can Delete, but cannot Clear (maybe after Clear, it doesn't re-draw bc Rectangles = 0) -> need to be fixed
                             }
-                            
+
                             // <Not completed> change byte[] to IImage
                             //ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
                             /*try
@@ -314,7 +361,8 @@ namespace ParkEase.ViewModel
             }
         });
 
-            private bool IsValid()
+
+        private bool IsValid()
         {
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
@@ -340,7 +388,12 @@ namespace ParkEase.ViewModel
             RectHeight = 50;
             Rectangles.Clear();
         }
+    }
 
+    public class TabItem
+    {
+        public string Title { get; set; }
+        public string Content { get; set; }
     }
 
 }
