@@ -27,9 +27,6 @@ namespace ParkEase.ViewModel
         private string parkingCapacity;
 
         [ObservableProperty]
-        private string locationInfo;
-
-        [ObservableProperty]
         private Location? startLocation; // The starting point of the line
 
         [ObservableProperty]
@@ -52,11 +49,6 @@ namespace ParkEase.ViewModel
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
-        private static int currentMaxIndex = 0; // Initialize the index counter
-
-        // Action to evaluate JavaScript - run js code in Webview
-        public Func<string, Task<string>> EvaluateJavaScript { get; set; }
-
 
         public ObservableCollection<string> ParkingTimes { get; }
 
@@ -80,7 +72,6 @@ namespace ParkEase.ViewModel
             this.dialogService = dialogService;
             parkingSpot = "";
             parkingCapacity = "";
-            locationInfo = "";
             startLocation = null;
 
             ParkingTimes = new ObservableCollection<string>   /*https://www.calgaryparking.com/find-parking/on-street.html*/
@@ -97,15 +88,6 @@ namespace ParkEase.ViewModel
                 "$1.50 per hour",
                 "$2.00 per hour"
             };
-
-            //InitializeIndexCounter();
-        }
-
-        // retrieve parking data from MongoDB to initialize currentMaxIndex
-        private async void InitializeIndexCounter()
-        {
-            var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
-            currentMaxIndex = data.Any() ? data.Max(d => d.Index) : 0;
         }
 
         // Loads parking data for selected line
@@ -195,40 +177,6 @@ namespace ParkEase.ViewModel
 
         }
 
-        //Delete Parking data and updates indexes of remaining lines
-        public async Task DeleteLineDataAsync(int lineIndex)
-        {
-            try
-            {
-                // Create a filter to match the line with the specified index
-                var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, lineIndex);
-
-                // Delete the line data from MongoDB
-                var result = await mongoDBService.DeleteData(CollectionName.ParkingData, filter);
-
-                if (result.DeletedCount > 0)
-                {
-                    // Reload all remaining lines from the database
-                    var remainingLines = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
-
-                    // Reassign indexes to be consecutive starting from 1
-                    int newIndex = lineIndex;
-                    foreach (var line in remainingLines.Where(line => line.Index > newIndex).OrderBy(l => l.Index))
-                    {
-
-                        var updateFilter = Builders<ParkingData>.Filter.Eq(p => p.Id, line.Id);
-                        var update = Builders<ParkingData>.Update.Set(p => p.Index, newIndex);
-                        await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);
-                        newIndex++;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle any errors that occur during the deletion process
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-        }
 
         // Reset selected parking data in side panel
         public void ResetSidePanelData()
@@ -294,6 +242,9 @@ namespace ParkEase.ViewModel
                             await mongoDBService.UpdateData(CollectionName.ParkingData, updateFilter, update);
                             newIndex++;
                         }
+
+                        // Reset side panel data after successful deletion
+                        ResetSidePanelData();
                     }
                 }
             }
