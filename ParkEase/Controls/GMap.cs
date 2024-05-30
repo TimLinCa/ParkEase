@@ -104,6 +104,7 @@ namespace ParkEase.Controls
                             });
                         }
 
+                        // GPS marker for the user
                         function addUserMarker(lat, lng) {
                             if (userMarker) {
                                 userMarker.setMap(null);
@@ -246,7 +247,7 @@ namespace ParkEase.Controls
             }
             ObservableCollection<MapLine> lines = (ObservableCollection<MapLine>)newValue;
             lines.CollectionChanged += Lines_CollectionChanged;
-            if(!selfUpdatingLines)
+            if(!selfUpdatingLines) // update operation and make sure the lines on the map are displays are the same with lines conllection
             {
                 foreach (MapLine line in lines.Where(l => l.Points.Count > 1))
                 {
@@ -351,6 +352,7 @@ namespace ParkEase.Controls
             }
         }
 
+        // From ChatGPT: how to save the drawn lines on the map to a database
         private async Task UpdateLines()
         {
             selfUpdatingLines = true;
