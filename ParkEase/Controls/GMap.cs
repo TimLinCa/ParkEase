@@ -87,6 +87,7 @@ namespace ParkEase.Controls
                                 zoom: 10, // Set the initial zoom level
                             });
 
+                            // GPS marker for the user 
                             addUserMarker(lat, lng);
 
                             // Add a click event listener to the map
@@ -97,7 +98,7 @@ namespace ParkEase.Controls
                                     if (selectedPoints.length == 2) {
                                         drawLine(selectedPoints[0].lat, selectedPoints[0].lng, selectedPoints[1].lat, selectedPoints[1].lng,""green"");
                                         selectedPoints = [];
-                                        start = false;
+                                        start = false; 
                                         window.location.href = 'myapp://lineDrawn';
                                     }
                                 }
@@ -352,7 +353,7 @@ namespace ParkEase.Controls
             }
         }
 
-        // From ChatGPT: how to save the drawn lines on the map to a database
+        
         private async Task UpdateLines()
         {
             selfUpdatingLines = true;
