@@ -19,6 +19,7 @@ namespace ParkEase.ViewModel
 {
     public partial class MapViewModel : ObservableObject
     {
+        //https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/generators/observableproperty
         // Automatically generate property change notification - any changes to the properties update UI
         [ObservableProperty]
         private string parkingSpot;
@@ -26,8 +27,8 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string parkingCapacity;
 
-        [ObservableProperty]
-        private Location? startLocation; // The starting point of the line
+        //[ObservableProperty]
+        //private Location? startLocation; 
 
         [ObservableProperty]
         private ObservableCollection<MapLine> mapLines;  //list on map
@@ -50,11 +51,12 @@ namespace ParkEase.ViewModel
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
 
+        //https://wellsb.com/csharp/maui/observablecollection-dotnet-maui
         public ObservableCollection<string> ParkingTimes { get; }
 
         public ObservableCollection<string> ParkingFees { get; }
 
-        private object mapWebView;
+        //private object mapWebView;
         public class Polyline
         {
             public int Index { get; set; }
@@ -72,7 +74,7 @@ namespace ParkEase.ViewModel
             this.dialogService = dialogService;
             parkingSpot = "";
             parkingCapacity = "";
-            startLocation = null;
+            //startLocation = null;
 
             ParkingTimes = new ObservableCollection<string>   /*https://www.calgaryparking.com/find-parking/on-street.html*/
             {
@@ -118,8 +120,8 @@ namespace ParkEase.ViewModel
                         Points = SelectedMapLine.Points
                     };
 
-                    var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, parkingData.Index);
-                    var update = Builders<ParkingData>.Update
+                    var filter = Builders<ParkingData>.Filter.Eq(p => p.Index, parkingData.Index); /*https://www.mongodb.com/docs/drivers/csharp/current/fundamentals/builders/*/
+                    var update = Builders<ParkingData>.Update      /* https://www.mongodb.com/docs/drivers/csharp/current/usage-examples/updateOne/*/
                         .Set(p => p.ParkingSpot, parkingData.ParkingSpot)
                         .Set(p => p.ParkingTime, parkingData.ParkingTime)
                         .Set(p => p.ParkingFee, parkingData.ParkingFee)
@@ -137,7 +139,7 @@ namespace ParkEase.ViewModel
                         await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
-                    await LoadParkingData(SelectedMapLine.Index);
+                    await LoadParkingData(SelectedMapLine.Index); /*reload the data to ensure the update data is retrieved*/
                 }
                 else
                 {
@@ -166,7 +168,7 @@ namespace ParkEase.ViewModel
         public async Task LoadParkingData(int index)
         {
             var data = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
-            SelectedParkingData = data.FirstOrDefault(d => d.Index == index);
+            SelectedParkingData = data.FirstOrDefault(d => d.Index == index);     /*https://stackoverflow.com/questions/1024559/when-to-use-first-and-when-to-use-firstordefault-with-linq*/
             if (SelectedParkingData != null)
             {
                 ParkingSpot = SelectedParkingData.ParkingSpot;
@@ -176,7 +178,6 @@ namespace ParkEase.ViewModel
             }
 
         }
-
 
         // Reset selected parking data in side panel
         public void ResetSidePanelData()
