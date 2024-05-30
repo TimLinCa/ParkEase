@@ -89,10 +89,8 @@
                     HorizontalOptions="Start"
                     Style="{StaticResource SecondaryDarkText}"
                     Text="Enter your parking level (ex: B1, B2, F1, F2, or Ground)" />
-                
-                <HorizontalStackLayout HorizontalOptions="Start" VerticalOptions="Center">
-                    
-                    <material:TextField
+
+                <material:TextField
                     Title="Level"
                     Margin="20,4,20,10"
                     AllowClear="True"
@@ -101,14 +99,6 @@
                     WidthRequest="200">
                     <validation:RequiredValidation />
                 </material:TextField>
-
-                <Button
-                    x:Name="CreateLevelBtn"
-                    Margin="0,0,0,0"
-                    Text="Add Level"
-                    VerticalOptions="Center" />
-
-                </HorizontalStackLayout>
 
                 <!--  Create map section  -->
 
