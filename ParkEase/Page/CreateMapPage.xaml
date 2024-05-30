@@ -6,10 +6,10 @@
     xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:sf="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
+    xmlns:tabView="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
     xmlns:sliders="clr-namespace:Syncfusion.Maui.Sliders;assembly=Syncfusion.Maui.Sliders"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
-    xmlns:tabView="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:CreateMapViewModel">
 
@@ -88,33 +88,33 @@
                     FontSize="14"
                     HorizontalOptions="Start"
                     Style="{StaticResource SecondaryDarkText}"
-                    Text="Enter your parking level (ex: B1, B2, F1, F2, etc.) or 'Ground' if it's on ground level." />
-
-                <material:TextField
-                    x:Name="Level"
+                    Text="Enter your parking level (ex: B1, B2, F1, F2, or Ground)" />
+                
+                <HorizontalStackLayout HorizontalOptions="Start" VerticalOptions="Center">
+                    
+                    <material:TextField
                     Title="Level"
                     Margin="20,4,20,10"
                     AllowClear="True"
                     IsReadOnly="False"
                     Text="{Binding Floor}"
-                    WidthRequest="350">
+                    WidthRequest="200">
                     <validation:RequiredValidation />
                 </material:TextField>
 
                 <Button
                     x:Name="CreateLevelBtn"
-                    Margin="50,50,50,0"
+                    Margin="0,0,0,0"
                     Text="Add Level"
                     VerticalOptions="Center" />
 
-
-
-
+                </HorizontalStackLayout>
+            
                 <!--  Create map section  -->
 
                 <Button
                     x:Name="UploadBtn"
-                    Margin="50,50,50,50"
+                    Margin="50,30,50,40"
                     Command="{Binding UploadImageClick}"
                     Text="Upload Image"
                     VerticalOptions="Center" />
@@ -237,19 +237,39 @@
                         WidthRequest="180" />
                 </Frame>
 
-
             </StackLayout>
         </ScrollView>
 
 
-        <Border
+        <!-- GraphicsView -->
+        <Border Grid.Column="1"
+                Stroke="#512BD4"
+                BackgroundColor="WhiteSmoke">
+
+            <controls:RecGraphicsView
+                x:Name="RectangleDrawableView"
+                ImageSource="{Binding ImgSourceData}"
+                MinimumHeightRequest="700"
+                MinimumWidthRequest="700"
+                Rectangles="{Binding Rectangles}">
+                <controls:RecGraphicsView.Drawable>
+                    <controls:RectDrawable />
+                </controls:RecGraphicsView.Drawable>
+                <GraphicsView.GestureRecognizers>
+                    <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped" />
+                </GraphicsView.GestureRecognizers>
+            </controls:RecGraphicsView>
+        </Border>
+
+        <!--<Border
             Grid.Column="1"
             BackgroundColor="WhiteSmoke"
             Stroke="#512BD4">
-            <sf:SfTabView>
-                <sf:SfTabView.Items>
-                    <sf:SfTabItem Header="first">
-                        <sf:SfTabItem.Content>
+            <tabView:SfTabView x:Name="tabView">
+                <tabView:SfTabView.Items>
+
+                    <tabView:SfTabItem Header="first">
+                        <tabView:SfTabItem.Content>
                             <VerticalStackLayout>
                                 <controls:RecGraphicsView
                                     x:Name="RectangleDrawableView"
@@ -265,21 +285,9 @@
                                     </GraphicsView.GestureRecognizers>
                                 </controls:RecGraphicsView>
                             </VerticalStackLayout>
-                        </sf:SfTabItem.Content>
-                    </sf:SfTabItem>
-                    </sf:SfTabView.Items>
-            </sf:SfTabView>
-
-                 </Border>
-
-
-
-
-
-
-
-
-
+                </tabView:SfTabView.Items>
+            </tabView:SfTabView>
+        </Border>-->
 
     </Grid>
 </ContentPage>

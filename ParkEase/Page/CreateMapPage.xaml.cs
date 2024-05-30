@@ -6,6 +6,7 @@ using Syncfusion.Maui.TabView;
 using Microsoft.Maui.Controls;
 
 
+
 namespace ParkEase.Page
 {
     public partial class CreateMapPage : ContentPage
@@ -14,13 +15,7 @@ namespace ParkEase.Page
         public CreateMapPage()
         {
             InitializeComponent();
-            //var viewModel = new CreateMapViewModel();
-           
-
         }
-
-
-
 
         public void OnTapGestureRecognizerTapped(object sender, TappedEventArgs args)
         {
@@ -33,18 +28,37 @@ namespace ParkEase.Page
             }
         }
 
+        /* https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/tap?view=net-maui-8.0#get-the-gesture-position
+        https://github.com/Programming-With-Chris/MauiDemos/blob/main/MeterGraphicsExample/MainPage.xaml.cs */
+
         /*public void Additem_Clicked(object sender, EventArgs e)
         {
-            SfTabItem insertItem = new SfTabItem();
-            insertItem.Header = "New Item Inserted";
-            StackLayout stacklayout1 = new StackLayout();
-            stacklayout1.BackgroundColor = Colors.PaleGreen;
-            insertItem.Content = stacklayout1;
-            if (tabView.Items.Count > 0)
-                tabView.Items.Insert(1, insertItem);
-            else
-                tabView.Items.Insert(0, insertItem);
+            var viewModel = BindingContext as CreateMapViewModel;
+
+            SfTabItem tabItem = new();
+            tabItem.Header = viewModel.Floor;
+            RecGraphicsView graphicsView = new();
+            graphicsView.SetBinding(RecGraphicsView.ImageSourceProperty,"ImgSourceData");
+            graphicsView.SetBinding(RecGraphicsView.RectanglesProperty, "Rectangles");
+
+            // add tap gesture recognizer
+            TapGestureRecognizer tapGestureRecognizer = new TapGestureRecognizer();
+            tapGestureRecognizer.Tapped += OnTapGestureRecognizerTapped;
+            graphicsView.GestureRecognizers.Add(tapGestureRecognizer);
+
+            // Add the RecGraphicsView to a StackLayout
+            StackLayout stackLayout = new StackLayout
+            {
+                Children = { graphicsView }
+            };
+
+            tabItem.Content = stackLayout;
+            tabView.Items.Add(tabItem);
         }*/
+
+        /*https://github.com/SyncfusionExamples/getting-started-with-the-.net-maui-tab-view/blob/master/MauiProject/DataViewModel.cs
+        https://github.com/SyncfusionExamples/How-to-add-or-remove-Tabs-from-Tab-View-in-.NET-MAUI/tree/master/SfTabviewSample*/
+
     }
 }
 
