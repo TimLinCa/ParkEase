@@ -286,7 +286,7 @@ class videoThreadClass(QThread):
 class camTestThreadClass(QThread):
     def run(self):
         self.ThreadActive = True
-        parkingLot_detect_cam(camIndex,self.txt_testConfigPath.text())
+        parkingLot_detect_cam(camIndex,self.data)
     def stop(self):
         self.ThreadActive = False
         self.quit()
@@ -437,10 +437,17 @@ class MainWindow(QMainWindow):
         if self.rab_cam.isChecked():
             global camIndex
             camIndex = self.camlist.currentIndex()
-            if self.txt_testConfigPath.text() == '':
+            if self.label_configPath.text() == '':
+                self.showMessageDialog("Please load or save the config file","Error")
                 return
+            fileName = self.getConfigFileName()
+            file = configGridFs.find_one({"filename": fileName})
+            if not file:
+                self.showMessageDialog("Config file not found","Error")
+                return
+            data = pickle.loads(file.read())
             self.Worker_Test = camTestThreadClass()
-            self.Worker_Test.txt_testConfigPath = self.txt_testConfigPath
+            self.Worker_Test.data = data
             self.Worker_Test.start()
         else:
             self.rab_video.isChecked()
@@ -573,7 +580,6 @@ class MainWindow(QMainWindow):
         data = None
         if self.rab_cam.isChecked():
             areaType = self.cmb_areaType.currentText()
-
             fileName = self.getConfigFileName()
             file = configGridFs.find_one({"filename": fileName})
             if not file:
