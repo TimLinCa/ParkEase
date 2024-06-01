@@ -87,6 +87,7 @@ namespace ParkEase.Controls
                                 zoom: 10, // Set the initial zoom level
                             });
 
+                            // GPS marker for the user 
                             addUserMarker(lat, lng);
 
                             // Add a click event listener to the map
@@ -97,13 +98,14 @@ namespace ParkEase.Controls
                                     if (selectedPoints.length == 2) {
                                         drawLine(selectedPoints[0].lat, selectedPoints[0].lng, selectedPoints[1].lat, selectedPoints[1].lng,""green"");
                                         selectedPoints = [];
-                                        start = false;
+                                        start = false; 
                                         window.location.href = 'myapp://lineDrawn';
                                     }
                                 }
                             });
                         }
 
+                        // GPS marker for the user
                         function addUserMarker(lat, lng) {
                             if (userMarker) {
                                 userMarker.setMap(null);
@@ -246,7 +248,7 @@ namespace ParkEase.Controls
             }
             ObservableCollection<MapLine> lines = (ObservableCollection<MapLine>)newValue;
             lines.CollectionChanged += Lines_CollectionChanged;
-            if(!selfUpdatingLines)
+            if(!selfUpdatingLines) // update operation and make sure the lines on the map are displays are the same with lines conllection
             {
                 foreach (MapLine line in lines.Where(l => l.Points.Count > 1))
                 {
@@ -351,6 +353,7 @@ namespace ParkEase.Controls
             }
         }
 
+        
         private async Task UpdateLines()
         {
             selfUpdatingLines = true;

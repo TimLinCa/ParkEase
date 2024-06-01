@@ -6,7 +6,6 @@ namespace ParkEase.Core.Data;
 public class Line : IEquatable<Line>
 {
     public ObjectId Id { get; set; }
-    public int Index { get; set; }  // Index of the line, used for identification
     public List<MapPoint> Points { get; set; }
 
     public string ParkingSpot { get; set; }

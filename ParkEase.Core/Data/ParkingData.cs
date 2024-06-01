@@ -11,8 +11,6 @@ namespace ParkEase.Core.Data
         [BsonRepresentation(BsonType.ObjectId)]
         public ObjectId Id { get; set; }
 
-        public int Index { get; set; }
-
         public List<MapPoint> Points { get; set; }
 
         public string ParkingSpot { get; set; }
