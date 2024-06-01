@@ -370,11 +370,11 @@
          <string>Camera Name</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="btn_binding">
+       <widget class="QPushButton" name="btn_bind">
         <property name="geometry">
          <rect>
           <x>260</x>
-          <y>170</y>
+          <y>200</y>
           <width>75</width>
           <height>23</height>
          </rect>
@@ -387,7 +387,7 @@
         <property name="geometry">
          <rect>
           <x>180</x>
-          <y>170</y>
+          <y>200</y>
           <width>69</width>
           <height>22</height>
          </rect>
@@ -403,17 +403,17 @@
          </rect>
         </property>
        </widget>
-       <widget class="QLabel" name="label_8">
+       <widget class="QLabel" name="label_lotId">
         <property name="geometry">
          <rect>
           <x>90</x>
-          <y>170</y>
-          <width>47</width>
+          <y>200</y>
+          <width>81</width>
           <height>16</height>
          </rect>
         </property>
         <property name="text">
-         <string>1</string>
+         <string/>
         </property>
        </widget>
        <widget class="QLabel" name="label_4">
@@ -433,8 +433,8 @@
         <property name="geometry">
          <rect>
           <x>90</x>
-          <y>110</y>
-          <width>47</width>
+          <y>170</y>
+          <width>151</width>
           <height>16</height>
          </rect>
         </property>
@@ -442,7 +442,7 @@
          <string/>
         </property>
        </widget>
-       <widget class="QLineEdit" name="txt_camaraName">
+       <widget class="QLineEdit" name="txt_cameraName">
         <property name="geometry">
          <rect>
           <x>90</x>
@@ -492,7 +492,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>110</y>
+          <y>170</y>
           <width>71</width>
           <height>16</height>
          </rect>
@@ -505,7 +505,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>170</y>
+          <y>200</y>
           <width>51</width>
           <height>16</height>
          </rect>
@@ -540,19 +540,6 @@
          <string>Load Config</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="bnt_loadCam">
-        <property name="geometry">
-         <rect>
-          <x>290</x>
-          <y>20</y>
-          <width>41</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
        <widget class="QPushButton" name="bnt_loadArea">
         <property name="geometry">
          <rect>
@@ -570,36 +557,62 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>140</y>
+          <y>110</y>
           <width>71</width>
           <height>16</height>
          </rect>
         </property>
         <property name="text">
-         <string>Binding Floor:</string>
+         <string>Floor:</string>
         </property>
        </widget>
        <widget class="QComboBox" name="cmb_floor">
         <property name="geometry">
          <rect>
-          <x>180</x>
-          <y>140</y>
-          <width>69</width>
+          <x>268</x>
+          <y>110</y>
+          <width>61</width>
           <height>22</height>
          </rect>
         </property>
        </widget>
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="label_floor">
         <property name="geometry">
          <rect>
           <x>90</x>
-          <y>140</y>
-          <width>47</width>
+          <y>110</y>
+          <width>161</width>
           <height>16</height>
          </rect>
         </property>
         <property name="text">
-         <string>1</string>
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_12">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>140</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>ConfigPath:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_configPath">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>140</y>
+          <width>241</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </widget>
