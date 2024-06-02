@@ -108,7 +108,7 @@ namespace ParkEase.ViewModel
             PropertyAddresses = new ObservableCollection<string>();
 
             _ = GetUserDataFromDatabase();
-            _ = GetPropertyAddress();
+            
         }
 
         // Get User's data from database
@@ -118,6 +118,8 @@ namespace ParkEase.ViewModel
             {
                 var filter = Builders<PrivateParking>.Filter.Eq(data => data.CreatedBy, parkEaseModel.User.Email);
                 userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
+
+                _ = GetPropertyAddress();
             }
             catch (Exception ex)
             {

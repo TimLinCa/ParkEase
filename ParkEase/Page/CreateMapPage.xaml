@@ -207,15 +207,6 @@
                 VerticalOptions="Center"
                 WidthRequest="200" />
 
-                <!--  Edit map  -->
-                <Button
-                    x:Name="EditBtn"
-                    Margin="50,50,50,30"
-                    Command="{Binding EditMapCommand}"
-                    Text="Edit Map"
-                    VerticalOptions="Center"
-                    WidthRequest="200" />
-
                 <!--  Submit Button  -->
                 <Frame
                     BackgroundColor="#ac99ea"
