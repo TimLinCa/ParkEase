@@ -5,10 +5,8 @@ import pandas as pd
 from ultralytics import YOLO
 import cvzone
 
-def parkingLot_detect_cam(cam_index,config_file_path):
-    with open(config_file_path,"rb") as f:
-        data = pickle.load(f)
-        polylines,area_names=data['polylines'],data['area_names']
+def parkingLot_detect_cam(cam_index,config_data):
+    polylines,area_names=config_data['polylines'],config_data['area_names']
 
     with open("coco.txt", "r") as my_file:
         data = my_file.read()
