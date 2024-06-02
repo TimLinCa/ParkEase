@@ -31,6 +31,9 @@
                     HorizontalOptions="Center"
                     Text="Create Map Editor" />
 
+                <Picker ItemsSource="{Binding PropertyAddresses}"  Title="Select a property address">
+                </Picker>
+
                 <material:TextField
                     Title="Company Name"
                     Margin="20,8"
@@ -224,7 +227,7 @@
                         Margin="0,0,0,0"
                         Padding="0"
                         BackgroundColor="WhiteSmoke"
-                        Command="{Binding AddParkingInfoAsync}"
+                        Command="{Binding SubmitCommand}"
                         FontAttributes="Bold"
                         FontSize="18"
                         Text="Submit"
@@ -256,34 +259,6 @@
                 </GraphicsView.GestureRecognizers>
             </controls:RecGraphicsView>
         </Border>
-
-        <!--<Border
-            Grid.Column="1"
-            BackgroundColor="WhiteSmoke"
-            Stroke="#512BD4">
-            <tabView:SfTabView x:Name="tabView">
-                <tabView:SfTabView.Items>
-
-                    <tabView:SfTabItem Header="first">
-                        <tabView:SfTabItem.Content>
-                            <VerticalStackLayout>
-                                <controls:RecGraphicsView
-                                    x:Name="RectangleDrawableView"
-                                    ImageSource="{Binding ImgSourceData}"
-                                    MinimumHeightRequest="700"
-                                    MinimumWidthRequest="700"
-                                    Rectangles="{Binding Rectangles}">
-                                    <controls:RecGraphicsView.Drawable>
-                                        <controls:RectDrawable />
-                                    </controls:RecGraphicsView.Drawable>
-                                    <GraphicsView.GestureRecognizers>
-                                        <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped" />
-                                    </GraphicsView.GestureRecognizers>
-                                </controls:RecGraphicsView>
-                            </VerticalStackLayout>
-                </tabView:SfTabView.Items>
-            </tabView:SfTabView>
-        </Border>-->
 
     </Grid>
 </ContentPage>

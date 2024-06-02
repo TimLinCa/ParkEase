@@ -39,7 +39,7 @@ namespace ParkEase.Controls
         private static void Rectangles_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             //Triger reRender
-            if (sender is ObservableCollection<RectF> rectangles && rectangles.Count > 0)
+            if (sender is ObservableCollection<RectF> rectangles && rectangles.Count >= 0)
             {
                 reRender(_currentInstance);
             }

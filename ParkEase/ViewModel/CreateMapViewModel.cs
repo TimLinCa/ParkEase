@@ -20,6 +20,10 @@ using Microsoft.Maui.Media;
 using Microsoft.Maui.Graphics.Platform;
 using System.Reflection;
 using Microsoft.Maui.Graphics;
+using ParkEase.Core.Model;
+using Amazon.SecurityToken.Model;
+using MongoDB.Driver;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ParkEase.ViewModel
 {
@@ -58,6 +62,19 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
 
+        [ObservableProperty]
+        private ObservableCollection<string> propertyAddresses;
+
+        [ObservableProperty]
+        private string selectedAddress;
+
+        [ObservableProperty]
+        private string selectedFloorName;
+
+        private string selectedPropertyId;
+
+        private List<PrivateParking> userData;
+
         private List<Rectangle> listRectangles;
 
         private List<FloorInfo> listfloorInfos;
@@ -70,10 +87,13 @@ namespace ParkEase.ViewModel
 
         private Task drawTask = null;
 
-        public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
+        private ParkEaseModel parkEaseModel;
+
+        public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
+            this.parkEaseModel = model;
             companyName = string.Empty;
             address = string.Empty;
             city = string.Empty;
@@ -85,8 +105,131 @@ namespace ParkEase.ViewModel
 
             listfloorInfos = new List<FloorInfo>();
             FloorNames = new ObservableCollection<string>();
+            PropertyAddresses = new ObservableCollection<string>();
+
+            _ = GetUserDataFromDatabase();
+            _ = GetPropertyAddress();
         }
 
+        // Get User's data from database
+        private async Task GetUserDataFromDatabase()
+        {
+            try
+            {
+                var filter = Builders<PrivateParking>.Filter.Eq(data => data.CreatedBy, parkEaseModel.User.Email);
+                userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+
+        // List of User's parking property address
+        private async Task GetPropertyAddress()
+        {
+            try
+            {
+                if (userData != null)
+                {
+                    PropertyAddresses.Clear();
+                    foreach (var item in userData)
+                    {
+                        PropertyAddresses.Add(item.Address);
+                    }
+                }
+            } catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
+        }
+
+        // Load Parking Information base on Address
+        public ICommand LoadParkingInfoCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (userData != null)
+                {
+                    var selectedProperty = userData.FirstOrDefault(data => data.Address == SelectedAddress);
+                    if (selectedProperty != null)
+                    {
+                        selectedPropertyId = selectedProperty.Id;
+                        CompanyName = selectedProperty.CompanyName;
+                        Address = selectedProperty.Address;
+                        City = selectedProperty.City;
+                        Fee = selectedProperty.ParkingInfo.Fee;
+                        LimitHour = selectedProperty.ParkingInfo.LimitedHour;
+                        listfloorInfos = selectedProperty.FloorInfo;
+                    }
+                    _ = GetFloorNames();
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
+        });
+
+        // Load list of Floor name to display in dropdown selection
+        private async Task GetFloorNames()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(Address))
+                {
+                    foreach (FloorInfo item in  listfloorInfos)
+                    {
+                        FloorNames.Add(item.Floor);
+                    }
+                }
+
+            } catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+        // Load Floor Information from database
+        public ICommand LoadFloorInfoCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (listfloorInfos != null)
+                {
+                    var selectedFloor = listfloorInfos.FirstOrDefault(data => data.Floor == SelectedFloorName);
+                    if (selectedFloor != null)
+                    {
+                        // Load image
+                        byte[] imageByte = selectedFloor.ImageData;
+                        using (MemoryStream ms = new MemoryStream(imageByte))
+                        {
+                            ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
+                        }
+
+                        // Load rectangles
+                        listRectangles = selectedFloor.Rectangles;
+                        foreach (Rectangle rectangle in listRectangles)
+                        {
+                            float pointX = rectangle.Rect.X;
+                            float pointY = rectangle.Rect.Y;
+                            var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
+                            Rectangles.Add(rect);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
+        });
+
+        // Upload parking map
         public ICommand UploadImageClick => new RelayCommand(async () =>
             {
                 try
@@ -125,62 +268,6 @@ namespace ParkEase.ViewModel
 
             });
 
-        public void AddRectangle(PointF point)
-        {
-            try
-            {
-                if (ImgSourceData != null)
-                {
-                    var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
-                    Rectangles.Add(rect);
-                }
-            }
-            catch (Exception ex)
-            {
-                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-        }
-
-        public ICommand RemoveRectangleClick => new RelayCommand(async () =>
-        {
-            try
-            {
-                if (Rectangles.Count > 0)
-                {
-                    Rectangles.RemoveAt(Rectangles.Count - 1);
-                }
-                else
-                {
-                    await dialogService.ShowAlertAsync("Error", "There is nothing to deldete.\nPlease draw the map first!", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-
-        });
-
-        public ICommand ClearAllRectangleClick => new RelayCommand(async () =>
-        {
-            try
-            {
-                if (Rectangles.Count > 0)
-                {
-                    Rectangles.Clear();
-                }
-                else
-                {
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-
-        });
-
         // Save Floor Information Command
         public ICommand SaveFloorInfoCommand => new RelayCommand(async () =>
         {
@@ -216,31 +303,51 @@ namespace ParkEase.ViewModel
         );
 
         // Submit Command
-        public ICommand AddParkingInfoAsync => new RelayCommand(async () =>
+        public ICommand SubmitCommand => new RelayCommand(async () =>
         {
             try
             {
                 if (IsValid())
                 {
-                    var privateParkingInfo = new PrivateParking
+                    // if UPDATING existing data
+                    if (selectedPropertyId != null && (SelectedAddress != null || SelectedFloorName != null)) 
                     {
-                        CompanyName = CompanyName,
-                        Address = Address,
-                        City = City,
-                        ParkingInfo = new ParkingInfo
+                        var filter = Builders<PrivateParking>.Filter.Eq(data => data.Id, selectedPropertyId);
+                        var update = Builders<PrivateParking>.Update
+                                        .Set(i => i.CompanyName, CompanyName)
+                                        .Set(i => i.Address, Address)
+                                        .Set(i => i.City, City)
+                                        .Set(i => i.CreatedBy, parkEaseModel.User.Email)
+                                        .Set(i => i.ParkingInfo, new ParkingInfo { Fee = Fee, LimitedHour = LimitHour })
+                                        .Set(i => i.FloorInfo, listfloorInfos);
+                        await mongoDBService.UpdateData<PrivateParking>(CollectionName.PrivateParking, filter, update);
+                        await dialogService.ShowAlertAsync("", "Your data is updated.", "OK");
+
+                        ResetAfterSubmit();
+                    }
+                    // if INSERT new data
+                    else
+                    {
+                        var privateParkingInfo = new PrivateParking
                         {
-                            Fee = Fee,
-                            LimitedHour = LimitHour
-                        },
+                            CompanyName = CompanyName,
+                            Address = Address,
+                            City = City,
+                            CreatedBy = parkEaseModel.User.Email,
+                            ParkingInfo = new ParkingInfo
+                            {
+                                Fee = Fee,
+                                LimitedHour = LimitHour
+                            },
 
-                        FloorInfo = listfloorInfos
+                            FloorInfo = listfloorInfos
 
-                    };
-                    await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
-                    var TEST = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                    await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
+                        };
+                        await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
+                        await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
 
-                    ResetAfterSubmit();
+                        ResetAfterSubmit();
+                    }
                 }
                 else
                 {
@@ -253,68 +360,68 @@ namespace ParkEase.ViewModel
             }
         });
 
-        // Edit Command
-        public ICommand EditMapCommand => new RelayCommand(async () =>
+
+        // Control rectangle drawing
+        // Add rectangle
+        public void AddRectangle(PointF point)
         {
-            // 1. In CreateMapPage, they can edit foor they already save  -> click EDIT
-            // 2. Admid can have many different parking places -> in Manage Property, they can select a specific property to edit from a list
             try
             {
-                var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                var loadedData = data.FirstOrDefault(data => data.Address == "16 Ave NW");
-                if (loadedData != null)
+                if (ImgSourceData != null)
                 {
-                    CompanyName = loadedData.CompanyName;
-                    Address = loadedData.Address;
-                    City = loadedData.City;
-                    Fee = loadedData.ParkingInfo.Fee;
-                    LimitHour = loadedData.ParkingInfo.LimitedHour;
-                    listfloorInfos = loadedData.FloorInfo;
+                    var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
+                    Rectangles.Add(rect);
+                }
+            }
+            catch (Exception ex)
+            {
+                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
 
-                    foreach (FloorInfo floorInfo in listfloorInfos)
-                    {
-                        if (floorInfo != null)
-                        {
-                            Floor = floorInfo.Floor;
-                            listRectangles = floorInfo.Rectangles;
-                            foreach (Rectangle rectangle in listRectangles)
-                            {
-                                float pointX = rectangle.Rect.X;
-                                float pointY = rectangle.Rect.Y;
-                                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
-                                Rectangles.Add(rect);
-
-                                // Can Delete, but cannot Clear (maybe after Clear, it doesn't re-draw bc Rectangles = 0) -> need to be fixed
-                            }
-                            
-                            // <Not completed> change byte[] to IImage
-                            //ImgSourceData = (IImage)ImageSource.FromStream(() => new MemoryStream(floorInfo.ImageData));
-                            /*try
-                            {
-                                byte[] imageByte = floorInfo.ImageData;
-                                IImage ImgSourceData;
-                                Assembly assembly = GetType().GetTypeInfo().Assembly;
-                                using (Stream stream = assembly.GetManifestResourceStream(imageByte.ToString()))
-                                {
-                                    if (stream == null) await dialogService.ShowAlertAsync("Error", "Stream is null", "OK");
-                                    ImgSourceData = PlatformImage.FromStream(stream);
-                                }
-                            } catch (Exception ex)
-                            {
-                                await dialogService.ShowAlertAsync("Error in Load edit image", ex.Message, "OK");
-                            }*/
-
-                        }
-                    }
+        // Remove a rectangle
+        public ICommand RemoveRectangleClick => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (Rectangles.Count > 0)
+                {
+                    Rectangles.RemoveAt(Rectangles.Count - 1);
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Error", "There is nothing to deldete.\nPlease draw the map first!", "OK");
                 }
             }
             catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
+
         });
 
-            private bool IsValid()
+        // Clear all rectangle
+        public ICommand ClearAllRectangleClick => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (Rectangles.Count > 0)
+                {
+                    Rectangles.Clear();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
+        });
+
+        private bool IsValid()
         {
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
@@ -340,6 +447,55 @@ namespace ParkEase.ViewModel
             RectHeight = 50;
             Rectangles.Clear();
         }
+
+        /*// Edit Command
+        public ICommand EditMapCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                var loadedData = data.FirstOrDefault(data => data.Address == "16 Ave NW");
+                if (loadedData != null)
+                {
+                    CompanyName = loadedData.CompanyName;
+                    Address = loadedData.Address;
+                    City = loadedData.City;
+                    Fee = loadedData.ParkingInfo.Fee;
+                    LimitHour = loadedData.ParkingInfo.LimitedHour;
+                    listfloorInfos = loadedData.FloorInfo;
+
+                    foreach (FloorInfo floorInfo in listfloorInfos)
+                    {
+                        if (floorInfo != null)
+                        {
+                            Floor = floorInfo.Floor;
+
+                            // Load image
+                            byte[] imageByte = floorInfo.ImageData;
+                            using (MemoryStream ms = new MemoryStream(imageByte))
+                            {
+                                ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
+                            }
+
+                            // Load rectangles
+                            listRectangles = floorInfo.Rectangles;
+                            foreach (Rectangle rectangle in listRectangles)
+                            {
+                                float pointX = rectangle.Rect.X;
+                                float pointY = rectangle.Rect.Y;
+                                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
+                                Rectangles.Add(rect);
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        });*/
 
     }
 

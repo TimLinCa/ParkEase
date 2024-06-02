@@ -40,6 +40,13 @@ namespace ParkEase.Core.Services
             return result.ToList();
         }
 
+        public async Task<List<T>> GetDataFilter<T>(string collectionName, FilterDefinition<T> filter) where T : class
+        {
+            var collection = getCollection<T>(collectionName);
+            var result = await collection.FindAsync(filter);
+            return result.ToList();
+        }
+
         public async Task<DeleteResult> DeleteData<T>(string collectionName, FilterDefinition<T> filter) where T : class
         {
             var collection = getCollection<T>(collectionName);
