@@ -631,7 +631,7 @@
        <widget class="QPushButton" name="bnt_test">
         <property name="geometry">
          <rect>
-          <x>130</x>
+          <x>60</x>
           <y>80</y>
           <width>81</width>
           <height>23</height>
@@ -701,6 +701,19 @@
         </property>
         <property name="text">
          <string/>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bnt_dbTest">
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>80</y>
+          <width>81</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Db Test</string>
         </property>
        </widget>
       </widget>
