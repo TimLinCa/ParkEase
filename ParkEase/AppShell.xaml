@@ -25,6 +25,11 @@
             WidthRequest="100" />
     </Shell.FlyoutHeader>
 
+    <FlyoutItem Title="UserMap">
+        <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMap" />
+    </FlyoutItem>
+
+
     <FlyoutItem Title="Map">
         <ShellContent ContentTemplate="{DataTemplate page:MapPage}" Route="MapPage" />
     </FlyoutItem>
@@ -33,9 +38,6 @@
         <ShellContent ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap" />
     </FlyoutItem>
 
-    <FlyoutItem Title="UserMap">
-        <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMap" />
-    </FlyoutItem>
 
     <MenuFlyoutSubItem />
 
