@@ -61,7 +61,7 @@ namespace ParkEase.ViewModel
 
         partial void OnEmailChanged(string? value)
         {
-            EmailExists();
+            _ = EmailExists();
         }
 
         private async Task EmailExists()

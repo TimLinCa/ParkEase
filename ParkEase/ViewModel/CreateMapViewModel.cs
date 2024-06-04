@@ -53,10 +53,10 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private IImage imgSourceData;
 
-        [ObservableProperty]
+        //[ObservableProperty]
         private float rectWidth;
 
-        [ObservableProperty]
+        //[ObservableProperty]
         private float rectHeight;
 
         [ObservableProperty]
@@ -111,6 +111,38 @@ namespace ParkEase.ViewModel
             
         }
 
+        public float RectWidth
+        {
+            get => rectWidth;
+            set
+            {
+                if(rectWidth != value)
+                {
+                    rectWidth = value;
+                    OnPropertyChanged(nameof(RectWidth));
+                }
+            }
+        }
+        public float RectHeight
+        {
+            get => rectHeight;
+            set
+            {
+                if (rectHeight != value)
+                {
+                    rectHeight = value;
+                    OnPropertyChanged(nameof(RectHeight));
+                }
+            }
+        }
+
+        public event PropertyChangingEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+        }
+        //https://stackoverflow.com/questions/76846770/how-to-useonpropertychanged-net-maui
+
         // Get User's data from database
         private async Task GetUserDataFromDatabase()
         {
@@ -126,6 +158,7 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         }
+        //https://www.mongodb.com/docs/drivers/csharp/current/usage-examples/updateOne/
 
 
         // List of User's parking property address
