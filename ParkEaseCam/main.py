@@ -13,13 +13,12 @@ import gridfs
 from enum import Enum
 from functools import partial
 import pickle
-from yolo import parkingLot_detect_video,parkingLot_detect_cam
+from yolo import parkingLot_detect_video,parkingLot_detect_cam,start_detect_video,stopTesting
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
 db = client.ParkEase
 CamConfig = db.CamConfig
-ConfigFs = db.ConfigFs
 configGridFs = gridfs.GridFS(db)
 publicArea = db.ParkingData
 privateArea = db.PrivateParking
@@ -299,6 +298,15 @@ class videoTestThreadClass(QThread):
         self.ThreadActive = False
         self.quit()
 
+class videoDbTestThreadClass(QThread):
+    def run(self):
+        self.ThreadActive = True
+        start_detect_video(videoPath,self.txt_testConfigPath.text(),db,'Private','665101b7810e1e0f193f5b19')
+    def stop(self):
+        self.ThreadActive = False
+        stopTesting()
+        self.quit()
+
 class webcamThreadClass(QThread):
     ImageUpdate = pyqtSignal(np.ndarray)
     FPS = pyqtSignal(int)
@@ -353,6 +361,7 @@ class MainWindow(QMainWindow):
         self.bnt_importTestConfig.clicked.connect(self.importTestConfig)
         self.bnt_loadArea.clicked.connect(self.loadPrivateArea)
         self.btn_bind.clicked.connect(self.bindCam)
+        self.bnt_dbTest.clicked.connect(self.DbTest)
         # Set command for when combobox is changed
         self.cmb_areaType.currentIndexChanged.connect(self.areaTypeChanged)
         self.cmb_floor.currentIndexChanged.connect(self.floorChanged)
@@ -634,6 +643,7 @@ class MainWindow(QMainWindow):
                 self.cmb_areaName.clear()   
             if self.cmb_areaType.currentIndex() == 0:
                 pas = publicArea.find()
+                
                 for pa in pas:
                     self.cmb_areaName.addItem(pa.get('ParkingSpot'))
             else:
@@ -691,7 +701,7 @@ class MainWindow(QMainWindow):
             mydict = {"name": fileName,
                       "displayName": cameraName,
                       "type": areaType,
-                      "areaName": area._id,
+                      "areaId": area._id,
                       "camIndex": self.camlist.currentIndex()}
             if config:
                 CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
@@ -710,7 +720,7 @@ class MainWindow(QMainWindow):
                 mydict = {"name": fileName,
                       "displayName": cameraName,
                       "type": areaType,
-                      "areaName": area.get('_id'),
+                      "areaId": area.get('_id'),
                       "camIndex": self.camlist.currentIndex(),
                       "lotIds": lotIds}
                 CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
@@ -720,12 +730,32 @@ class MainWindow(QMainWindow):
                 mydict = {"name": fileName, 
                  "displayName": cameraName,
                  "type": areaType,
-                 "areaName": area.get('_id'),
+                 "areaId": area.get('_id'),
                  "camIndex": self.camlist.currentIndex(),
                  "lotIds": lotIds}
                 CamConfig.insert_one(mydict)
                 self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
             self.label_lotId.setText(lotId)
+    
+    def DbTest(self):
+        if hasattr(self, 'Worker_Test') and self.Worker_Test.isRunning():
+            self.Worker_Test.stop()
+            return
+        
+        if self.rab_cam.isChecked():
+            global camIndex
+            camIndex = self.camlist.currentIndex()
+            self.Worker_Opencv = camTestThreadClass()
+            self.Worker_Opencv.start()
+        else:
+            global videoPath
+            if videoPath == '':
+                return
+            if self.txt_testConfigPath.text() == '':
+                return
+            self.Worker_Test = videoDbTestThreadClass()
+            self.Worker_Test.txt_testConfigPath = self.txt_testConfigPath
+            self.Worker_Test.start()
 
     def showMessageDialog(self, msg, title):
         msgBox = QMessageBox()
