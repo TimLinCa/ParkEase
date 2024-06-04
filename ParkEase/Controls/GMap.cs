@@ -236,8 +236,10 @@ namespace ParkEase.Controls
             };
 
             Source = htmlSource; // Set the source of the WebView to the HTML content.
+            Reload();
             Navigating += GMap_Navigating;
             Navigated += GMap_Navigated;
+         
         }
 
         private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
