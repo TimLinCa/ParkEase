@@ -23,6 +23,9 @@ namespace ParkEase.Core.Data
         [BsonElement("city")]
         public string City { get; set; }
 
+        [BsonElement("createdBy")]
+        public string CreatedBy {  get; set; }
+
         public ParkingInfo ParkingInfo { get; set; }
 
         public List<FloorInfo> FloorInfo { get; set; }

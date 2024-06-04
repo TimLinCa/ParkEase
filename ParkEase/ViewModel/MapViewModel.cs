@@ -221,7 +221,7 @@ namespace ParkEase.ViewModel
                 if (SelectedMapLine != null)
                 {
                     MapLines.Remove(SelectedMapLine);
-                    int lineIndex = SelectedMapLine.Index;
+                   
                     // Create a filter to match the line with the specified index
                     var filter = Builders<ParkingData>.Filter.Eq(p => p.Points, SelectedMapLine.Points);
 

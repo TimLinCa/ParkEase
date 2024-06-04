@@ -64,6 +64,9 @@ namespace ParkEase.ViewModel
         {
             if (parkEaseModel.developerMode)
             {
+                User user = new User();
+                user.Email = "Test123@gmail.com";
+                parkEaseModel.User = user;
                 await Shell.Current.GoToAsync($"//{nameof(MapPage)}",
                                 new Dictionary<string, object>
                                 {
@@ -84,6 +87,9 @@ namespace ParkEase.ViewModel
 
                 if (accountExists)
                 {
+                    User user = new User();
+                    user.Email = Email;
+                    parkEaseModel.User = user;
                     await Shell.Current.GoToAsync($"//{nameof(MapPage)}",
                                     new Dictionary<string, object>
                                     {
