@@ -94,9 +94,12 @@
             </sfTabView:SfTabItem>
 
             <sfTabView:SfTabItem Header="Floor Info">
+                <ScrollView>
                 <StackLayout Padding="20">
                     <!--  Create floor section  -->
-                    <Label
+                        <Picker ItemsSource="{Binding FloorNames}" Title="Select a property address">
+                        </Picker>
+                        <Label
                         Margin="20,20,20,4"
                         FontSize="14"
                         HorizontalOptions="Start"
@@ -114,50 +117,53 @@
                     </material:TextField>
                     <Button
                         x:Name="UploadBtn"
+                        Margin="0, 20, 0, 0"
+                        Style="{StaticResource SecondaryButtonStyle}"
                         Command="{Binding UploadImageClick}"
                         Text="Upload Image"
-                        VerticalOptions="Center" />
+                        VerticalOptions="Center"
+                        WidthRequest="200"/>
                     <Button
-                    Margin="50,50,50,30"
                     Command="{Binding SaveFloorInfoCommand}"
+                    Margin="50,50,50,30"
                     Text="Save"
                     VerticalOptions="Center"
                     WidthRequest="200" />
                 </StackLayout>
+                </ScrollView>
             </sfTabView:SfTabItem>
         </sfTabView:SfTabView>
 
         <!-- Bottom Row -->
         <Border Grid.Row="1" Grid.Column="0"
         Stroke="#512BD4">
-            <ScrollView>
-                <StackLayout>
-                        <!--  Rectangle Width Slider  -->
-                        <Label x:Name="widthLabel"
+                <StackLayout Margin="20, 20, 20, 20">
+                <!--  Rectangle Width Slider  -->
+                <Label x:Name="widthLabel"
                              Text="{Binding Source={x:Reference RectWidth},
                                      Path=Value,
                                      StringFormat='Width value: {0:F0}'}"
                              HorizontalOptions="Center"
                              VerticalOptions="Center" />
-                        <Slider x:Name="RectWidth"
-                         Margin="0,0,0,20"
-                         Minimum="10"
-                         Maximum="250"
-                         Value="{Binding RectWidth}"/>  
+                <Slider x:Name="RectWidth"
+                            Margin="0,0,0,20"
+                            Minimum="10"
+                            Maximum="250"
+                            Value="{Binding RectWidth}"/>
 
-                    <!--  Rectangle Height Slider  -->
-                    <Label x:Name="heightLabel"
-                     Text="{Binding Source={x:Reference RectHeight},
-                             Path=Value,
-                             StringFormat='Height value: {0:F0}'}"
-                     HorizontalOptions="Center"
-                     VerticalOptions="Center" />
-                    <Slider x:Name="RectHeight"
-                     Minimum="10"
-                     Maximum="250"
-                     Value="{Binding RectHeight}"/>
+                <!--  Rectangle Height Slider  -->
+                <Label x:Name="heightLabel"
+                            Text="{Binding Source={x:Reference RectHeight},
+                                    Path=Value,
+                                    StringFormat='Height value: {0:F0}'}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                <Slider x:Name="RectHeight"
+                            Minimum="10"
+                            Maximum="250"
+                            Value="{Binding RectHeight}" />
 
-                    <HorizontalStackLayout HorizontalOptions="Center">
+                <HorizontalStackLayout HorizontalOptions="Center">
                         <Button
                             x:Name="DeleteBtn"
                             Margin="10,20,0,0"
@@ -165,7 +171,8 @@
                             HorizontalOptions="Center"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Text="Delete"
-                            WidthRequest="100" />
+                            WidthRequest="80"
+                            HeightRequest="20"/>
                         <Button
                             x:Name="ClearBtn"
                             Margin="10,20,10,0"
@@ -173,18 +180,21 @@
                             HorizontalOptions="Center"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Text="Clear"
-                            WidthRequest="100" />
+                            WidthRequest="80"
+                            HeightRequest="20"/>
                     
                     </HorizontalStackLayout>
                     <Button
                         x:Name="SubmitBtn"
-                        Margin="10"
+                        Margin="0, 20, 0, 0"
                         Command="{Binding SubmitCommand}"
                         Text="Submit"
-                        WidthRequest="200"
+                        FontSize="Medium"
+                        FontAttributes="Bold"
+                        
+                        WidthRequest="300"
                         HorizontalOptions="Center" />   
                 </StackLayout>
-            </ScrollView>
         </Border>
 
         <!-- GraphicsView -->

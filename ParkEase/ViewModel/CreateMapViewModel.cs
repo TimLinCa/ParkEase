@@ -48,9 +48,6 @@ namespace ParkEase.ViewModel
         private string floor;
 
         [ObservableProperty]
-        private ObservableCollection<string> floorNames;
-
-        [ObservableProperty]
         private IImage imgSourceData;
 
         //[ObservableProperty]
@@ -64,6 +61,9 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private ObservableCollection<string> propertyAddresses;
+
+        [ObservableProperty]
+        private ObservableCollection<string> floorNames;
 
         [ObservableProperty]
         private string selectedAddress;
