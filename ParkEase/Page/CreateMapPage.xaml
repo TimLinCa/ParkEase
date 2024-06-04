@@ -5,234 +5,191 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:sf="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
-    xmlns:tabView="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
-    xmlns:sliders="clr-namespace:Syncfusion.Maui.Sliders;assembly=Syncfusion.Maui.Sliders"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
+    xmlns:sfTabView="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
     x:DataType="vm:CreateMapViewModel">
 
-
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="300" />
+        </Grid.RowDefinitions>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!--  Form  -->
-        <ScrollView Grid.Column="0">
-            <StackLayout Padding="10" BackgroundColor="#EFEFEF">
+        <!--  Tabs  -->
+        <sfTabView:SfTabView Grid.Row="0" Grid.Column="0">
+            <sfTabView:SfTabItem Header="Details">
+                <ScrollView>
+                    <StackLayout Padding="10" BackgroundColor="#EFEFEF">
+                        <!--  General information  -->
+                        <Label
+                            Margin="10"
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            Text="Create Map Editor" />
 
-                <!--  General information  -->
-                <Label
-                    Margin="10"
-                    FontSize="20"
-                    HorizontalOptions="Center"
-                    Text="Create Map Editor" />
+                        <Picker ItemsSource="{Binding PropertyAddresses}" Title="Select a property address">
+                        </Picker>
 
-                <Picker ItemsSource="{Binding PropertyAddresses}"  Title="Select a property address">
-                </Picker>
+                        <material:TextField
+                            Title="Company Name"
+                            Margin="20,8"
+                            AllowClear="True"
+                            IsReadOnly="False"
+                            Text="{Binding CompanyName}"
+                            WidthRequest="350">
+                            <validation:RequiredValidation />
+                        </material:TextField>
 
-                <material:TextField
-                    Title="Company Name"
-                    Margin="20,8"
-                    AllowClear="True"
-                    IsReadOnly="False"
-                    Text="{Binding CompanyName}"
-                    WidthRequest="350">
-                    <validation:RequiredValidation />
-                </material:TextField>
+                        <material:TextField
+                            Title="Address"
+                            Margin="0,8"
+                            AllowClear="True"
+                            IsReadOnly="False"
+                            Text="{Binding Address}"
+                            WidthRequest="350">
+                            <validation:RequiredValidation />
+                        </material:TextField>
 
-                <material:TextField
-                    Title="Address"
-                    Margin="0,8"
-                    AllowClear="True"
-                    IsReadOnly="False"
-                    Text="{Binding Address}"
-                    WidthRequest="350">
-                    <validation:RequiredValidation />
-                </material:TextField>
+                        <material:TextField
+                            Title="City"
+                            Margin="0,8"
+                            AllowClear="True"
+                            IsReadOnly="False"
+                            Text="{Binding City}"
+                            WidthRequest="350">
+                            <validation:RequiredValidation />
+                        </material:TextField>
 
-                <material:TextField
-                    Title="City"
-                    Margin="0,8"
-                    AllowClear="True"
-                    IsReadOnly="False"
-                    Text="{Binding City}"
-                    WidthRequest="350">
-                    <validation:RequiredValidation />
-                </material:TextField>
+                        <material:TextField
+                            Title="Parking Fee"
+                            Margin="0,8"
+                            AllowClear="True"
+                            IsReadOnly="False"
+                            Text="{Binding Fee}"
+                            WidthRequest="350">
+                            <validation:RequiredValidation />
+                        </material:TextField>
 
-                <material:TextField
-                    Title="Parking Fee"
-                    Margin="0,8"
-                    AllowClear="True"
-                    IsReadOnly="False"
-                    Text="{Binding Fee}"
-                    WidthRequest="350">
-                    <validation:RequiredValidation />
-                </material:TextField>
+                        <material:TextField
+                            Title="Limit Hour"
+                            Margin="0,20"
+                            AllowClear="True"
+                            IsReadOnly="False"
+                            Text="{Binding LimitHour}"
+                            WidthRequest="350">
+                            <validation:RequiredValidation />
+                        </material:TextField>
 
-                <material:TextField
-                    Title="Limit Hour"
-                    Margin="0,20"
-                    AllowClear="True"
-                    IsReadOnly="False"
-                    Text="{Binding LimitHour}"
-                    WidthRequest="350">
-                    <validation:RequiredValidation />
-                </material:TextField>
+                        
 
+                    </StackLayout>
+                </ScrollView>
+            </sfTabView:SfTabItem>
 
-                <!--  Create floor section  -->
-                <Label
-                    Margin="20,20,20,4"
-                    FontSize="14"
-                    HorizontalOptions="Start"
-                    Style="{StaticResource SecondaryDarkText}"
-                    Text="Enter your parking level (ex: B1, B2, F1, F2, or Ground)" />
+            <sfTabView:SfTabItem Header="Floor Info">
+                <StackLayout Padding="20">
+                    <!--  Create floor section  -->
+                    <Label
+                        Margin="20,20,20,4"
+                        FontSize="14"
+                        HorizontalOptions="Start"
+                        Style="{StaticResource SecondaryDarkText}"
+                        Text="Enter your parking level (ex: B1, B2, F1, F2, or Ground)" />
 
-                <material:TextField
-                    Title="Level"
-                    Margin="20,4,20,10"
-                    AllowClear="True"
-                    IsReadOnly="False"
-                    Text="{Binding Floor}"
-                    WidthRequest="200">
-                    <validation:RequiredValidation />
-                </material:TextField>
-
-                <!--  Create map section  -->
-
-                <Button
-                    x:Name="UploadBtn"
-                    Margin="50,30,50,40"
-                    Command="{Binding UploadImageClick}"
-                    Text="Upload Image"
-                    VerticalOptions="Center" />
-
-
-                <!--  Rectangle Width Slider  -->
-                <Label
-                    FontAttributes="Bold"
-                    HorizontalOptions="Start"
-                    Text="Width" />
-
-                <sliders:SfSlider
-                    Margin="0,0,0,30"
-                    Maximum="300"
-                    Minimum="0"
-                    MinorTicksPerInterval="1"
-                    ShowDividers="True"
-                    ShowLabels="True"
-                    ShowTicks="True"
-                    Value="{Binding RectWidth}">
-                    <sliders:SfSlider.Tooltip>
-                        <sliders:SliderTooltip Fill="#9F9F9F" />
-                    </sliders:SfSlider.Tooltip>
-                    <sliders:SfSlider.TrackStyle>
-                        <sliders:SliderTrackStyle ActiveFill="#512BD4" InactiveFill="#ac99ea" />
-                    </sliders:SfSlider.TrackStyle>
-                    <sliders:SfSlider.ThumbStyle>
-                        <sliders:SliderThumbStyle Fill="#512BD4" OverlapStroke="#9880e5" />
-                    </sliders:SfSlider.ThumbStyle>
-                </sliders:SfSlider>
-
-
-                <!--  Rectangle Height Slider  -->
-                <Label
-                    FontAttributes="Bold"
-                    HorizontalOptions="Start"
-                    Text="Height" />
-
-                <sliders:SfSlider
-                    Maximum="300"
-                    Minimum="0"
-                    MinorTicksPerInterval="1"
-                    ShowDividers="True"
-                    ShowLabels="True"
-                    ShowTicks="True"
-                    Value="{Binding RectHeight}">
-                    <sliders:SfSlider.Tooltip>
-                        <sliders:SliderTooltip Fill="#9F9F9F" />
-                    </sliders:SfSlider.Tooltip>
-                    <sliders:SfSlider.TrackStyle>
-                        <sliders:SliderTrackStyle ActiveFill="#512BD4" InactiveFill="#ac99ea" />
-                    </sliders:SfSlider.TrackStyle>
-                    <sliders:SfSlider.ThumbStyle>
-                        <sliders:SliderThumbStyle Fill="#512BD4" OverlapStroke="#9880e5" />
-                    </sliders:SfSlider.ThumbStyle>
-                </sliders:SfSlider>
-
-                <HorizontalStackLayout HorizontalOptions="Center">
+                    <material:TextField
+                        Title="Level"
+                        Margin="20,4,20,10"
+                        AllowClear="True"
+                        IsReadOnly="False"
+                        Text="{Binding Floor}"
+                        WidthRequest="200">
+                        <validation:RequiredValidation />
+                    </material:TextField>
                     <Button
-                        x:Name="DeleteBtn"
-                        Margin="10,20,0,0"
-                        Command="{Binding RemoveRectangleClick}"
-                        HorizontalOptions="Center"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Text="Delete"
-                        WidthRequest="100" />
-
+                        x:Name="UploadBtn"
+                        Command="{Binding UploadImageClick}"
+                        Text="Upload Image"
+                        VerticalOptions="Center" />
                     <Button
-                        x:Name="ClearBtn"
-                        Margin="10,20,10,0"
-                        Command="{Binding ClearAllRectangleClick}"
-                        HorizontalOptions="Center"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Text="Clear"
-                        WidthRequest="100" />
-                </HorizontalStackLayout>
-
-
-                <!--  Save map for one tab/floor before creating a new one  -->
-                <Button
-                    x:Name="SaveBtn"
                     Margin="50,50,50,30"
                     Command="{Binding SaveFloorInfoCommand}"
                     Text="Save"
                     VerticalOptions="Center"
                     WidthRequest="200" />
+                </StackLayout>
+            </sfTabView:SfTabItem>
+        </sfTabView:SfTabView>
 
-                <!-- FloorName Picker https://www.youtube.com/watch?v=gnKkUtBK23A -->
-                <Picker ItemsSource="{Binding FloorNames}"  Title="Select an floor">
-                </Picker>
+        <!-- Bottom Row -->
+        <Border Grid.Row="1" Grid.Column="0"
+        Stroke="#512BD4">
+            <ScrollView>
+                <StackLayout>
+                        <!--  Rectangle Width Slider  -->
+                        <Label x:Name="widthLabel"
+                             Text="{Binding Source={x:Reference RectWidth},
+                                     Path=Value,
+                                     StringFormat='Width value: {0:F0}'}"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center" />
+                        <Slider x:Name="RectWidth"
+                         Margin="0,0,0,20"
+                         Minimum="10"
+                         Maximum="250"
+                         Value="{Binding RectWidth}"/>  
 
-                <!--  Load Map  -->
-                <Button
-                x:Name="LoadBtn"
-                Margin="50,50,50,30"
-                Text="Load"
-                VerticalOptions="Center"
-                WidthRequest="200" />
+                    <!--  Rectangle Height Slider  -->
+                    <Label x:Name="heightLabel"
+                     Text="{Binding Source={x:Reference RectHeight},
+                             Path=Value,
+                             StringFormat='Height value: {0:F0}'}"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center" />
+                    <Slider x:Name="RectHeight"
+                     Minimum="10"
+                     Maximum="250"
+                     Value="{Binding RectHeight}"/>
 
-                <!--  Submit Button  -->
-                <Frame
-                    BackgroundColor="#ac99ea"
-                    CornerRadius="10"
-                    HeightRequest="90"
-                    WidthRequest="350">
+                    <HorizontalStackLayout HorizontalOptions="Center">
+                        <Button
+                            x:Name="DeleteBtn"
+                            Margin="10,20,0,0"
+                            Command="{Binding RemoveRectangleClick}"
+                            HorizontalOptions="Center"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Text="Delete"
+                            WidthRequest="100" />
+                        <Button
+                            x:Name="ClearBtn"
+                            Margin="10,20,10,0"
+                            Command="{Binding ClearAllRectangleClick}"
+                            HorizontalOptions="Center"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Text="Clear"
+                            WidthRequest="100" />
+                    
+                    </HorizontalStackLayout>
                     <Button
                         x:Name="SubmitBtn"
-                        Margin="0,0,0,0"
-                        Padding="0"
-                        BackgroundColor="WhiteSmoke"
+                        Margin="10"
                         Command="{Binding SubmitCommand}"
-                        FontAttributes="Bold"
-                        FontSize="18"
                         Text="Submit"
-                        TextColor="Black"
-                        VerticalOptions="Center"
-                        WidthRequest="180" />
-                </Frame>
-
-            </StackLayout>
-        </ScrollView>
-
+                        WidthRequest="200"
+                        HorizontalOptions="Center" />   
+                </StackLayout>
+            </ScrollView>
+        </Border>
 
         <!-- GraphicsView -->
-        <Border Grid.Column="1"
+        <Border Grid.Row="0" Grid.Column="1"
+                Grid.RowSpan="2"
                 Stroke="#512BD4"
                 BackgroundColor="WhiteSmoke">
 
