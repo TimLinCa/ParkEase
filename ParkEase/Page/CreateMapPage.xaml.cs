@@ -5,8 +5,6 @@ using ParkEase.Core.Services;
 using Syncfusion.Maui.TabView;
 using Microsoft.Maui.Controls;
 
-
-
 namespace ParkEase.Page
 {
     public partial class CreateMapPage : ContentPage
