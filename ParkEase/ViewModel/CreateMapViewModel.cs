@@ -89,6 +89,8 @@ namespace ParkEase.ViewModel
 
         private ParkEaseModel parkEaseModel;
 
+        private bool addNewFloorClicked;
+
         public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
             this.mongoDBService = mongoDBService;
@@ -106,6 +108,7 @@ namespace ParkEase.ViewModel
             listFloorInfos = new List<FloorInfo>();
             FloorNames = new ObservableCollection<string>();
             PropertyAddresses = new ObservableCollection<string>();
+            addNewFloorClicked = false;
 
             _ = GetUserDataFromDatabase();
             
@@ -308,6 +311,29 @@ namespace ParkEase.ViewModel
 
             });
 
+        public ICommand AddNewFloorCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(Floor))
+                {
+                    if (FloorNames.Contains(Floor))
+                    {
+                        await dialogService.ShowAlertAsync("Warning", "This floor name already existed in database.\nPlease enter another one!", "OK");
+                        addNewFloorClicked = false;
+                    }
+                    else
+                    {
+                        await dialogService.ShowAlertAsync("", "Please upload parking map image.", "OK");
+                        addNewFloorClicked = true;
+                    }
+                }
+            } catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        });
+
         // Save Floor Information Command
         public ICommand SaveFloorInfoCommand => new RelayCommand(async () =>
         {
@@ -323,9 +349,19 @@ namespace ParkEase.ViewModel
                     };
                 }
 
-                if (SelectedFloorName != null && FloorNames.Contains(SelectedFloorName) || (Floor != null && Floor.Equals(SelectedFloorName)) && listRectangles.Count > 0 && imageData != null)
+                // Add new floor information
+                if (addNewFloorClicked)
                 {
-                    var existingFloorInfo  = listFloorInfos.FirstOrDefault(item => item.Floor == SelectedFloorName);
+                    var floorInfo = new FloorInfo(Floor, listRectangles, Rectangles.Count, imageData);
+                    listFloorInfos.Add(floorInfo);
+                    FloorNames.Add(floorInfo.Floor);
+
+                    ResetFloorInfo();
+                }
+                // Edit existing floor information
+                else if (!string.IsNullOrEmpty(SelectedFloorName) && !addNewFloorClicked)
+                {
+                    var existingFloorInfo = listFloorInfos.FirstOrDefault(item => item.Floor == SelectedFloorName);
                     if (existingFloorInfo != null)
                     {
                         existingFloorInfo.Rectangles = listRectangles;
@@ -335,29 +371,14 @@ namespace ParkEase.ViewModel
                         ResetFloorInfo();
                     }
                 }
-                /*if (Rectangles.Count > 0)
-                {
-                    listRectangles = new List<Rectangle>();
-                    for (int i = 0; i < Rectangles.Count; i++)
-                    {
-                        var insertedRect = new Rectangle(i + 1, Rectangles[i]);
-                        listRectangles.Add(insertedRect);
-                    };
-                }*/
-
-                else if (Floor != null && !Floor.Equals(SelectedFloorName) && listRectangles.Count > 0 && imageData != null)
-                {
-                    var floorInfo = new FloorInfo(Floor, listRectangles, Rectangles.Count, imageData);
-                    listFloorInfos.Add(floorInfo);
-                    FloorNames.Add(floorInfo.Floor);
-
-                    ResetFloorInfo();
-                }
                 else
                 {
-                    await dialogService.ShowAlertAsync("Warning", "One of these information is missing. Please check the following:\n1. Is floor typed?\n2. Do you upload Image?\n3. Do you create at least one rectangle?", "OK");
+                    await dialogService.ShowAlertAsync("Warning", "Something went wrong." +
+                        "                               \nIf you want to edit existing map, select one floor from dropdown." +
+                        "                               \nIf you want to add new map, please enter floor name and click Add button.", "OK");
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
@@ -503,6 +524,9 @@ namespace ParkEase.ViewModel
             listFloorInfos.Clear();
             SelectedFloorName = string.Empty;
             FloorNames.Clear();
+            Rectangles.Clear();
+            ImgSourceData = null;
+            imageData = null;
         }
 
         private void ResetFloorInfo()
@@ -512,6 +536,7 @@ namespace ParkEase.ViewModel
             RectWidth = 100;
             RectHeight = 50;
             Rectangles.Clear();
+            addNewFloorClicked = false;
         }
 
         /*// Edit Command

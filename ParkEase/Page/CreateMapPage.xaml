@@ -116,7 +116,7 @@
                             FontSize="14"
                             HorizontalOptions="Start"
                             Style="{StaticResource SecondaryDarkText}"
-                            Text="Enter your parking level (ex: B1, B2, F1, F2, or Ground)" />
+                            Text="Add a new parking level (ex: B1, B2, F1, F2, or Ground)" />
 
                         <material:TextField
                             Title="Level"
@@ -127,6 +127,11 @@
                             WidthRequest="200">
                             <validation:RequiredValidation />
                         </material:TextField>
+                        <Button 
+                            Command="{Binding AddNewFloorCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Text="Add"
+                            WidthRequest="200" />
                         <Button
                             x:Name="UploadBtn"
                             Margin="0,20,0,0"
@@ -156,7 +161,7 @@
                 <Label
                     x:Name="widthLabel"
                     HorizontalOptions="Center"
-                    Text="{Binding Source={x:Reference RectWidth}, Path=Value, StringFormat='Width value: {0:F0}'}"
+                    Text="{Binding Source={x:Reference RectWidth}, Path=Value, StringFormat='Width value: {0:F0}', Mode=TwoWay}"
                     VerticalOptions="Center" />
                 <Slider
                     x:Name="RectWidth"
@@ -169,7 +174,7 @@
                 <Label
                     x:Name="heightLabel"
                     HorizontalOptions="Center"
-                    Text="{Binding Source={x:Reference RectHeight}, Path=Value, StringFormat='Height value: {0:F0}'}"
+                    Text="{Binding Source={x:Reference RectHeight}, Path=Value, StringFormat='Height value: {0:F0}', Mode=TwoWay}"
                     VerticalOptions="Center" />
                 <Slider
                     x:Name="RectHeight"
