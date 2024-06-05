@@ -34,7 +34,14 @@
                             HorizontalOptions="Center"
                             Text="Create Map Editor" />
 
-                        <Picker Title="Select a property address" ItemsSource="{Binding PropertyAddresses}" />
+                        <Picker Title="Select a property address" ItemsSource="{Binding PropertyAddresses}" SelectedItem="{Binding SelectedAddress}" />
+                        <Button
+                        Margin="0,20,0,0"
+                        Command="{Binding LoadParkingInfoCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Text="Load"
+                        VerticalOptions="Center"
+                        WidthRequest="200" />
 
                         <material:TextField
                             Title="Company Name"
@@ -96,7 +103,14 @@
                 <ScrollView>
                     <StackLayout Padding="20">
                         <!--  Create floor section  -->
-                        <Picker Title="Select a property address" ItemsSource="{Binding FloorNames}" />
+                        <Picker Title="Select the floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}"/>
+                        <Button
+                            Margin="0,20,0,0"
+                            Command="{Binding LoadFloorInfoCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Text="Load"
+                            VerticalOptions="Center"
+                            WidthRequest="200" />
                         <Label
                             Margin="20,20,20,4"
                             FontSize="14"
