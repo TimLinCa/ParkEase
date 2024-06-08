@@ -67,7 +67,7 @@ namespace ParkEase.ViewModel
                 User user = new User();
                 user.Email = "Test123@gmail.com";
                 parkEaseModel.User = user;
-                await Shell.Current.GoToAsync($"{nameof(UserMapPage)}");
+                await Shell.Current.GoToAsync($"//{nameof(MapPage)}");
             }
         });
 

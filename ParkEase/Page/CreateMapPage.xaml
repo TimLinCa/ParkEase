@@ -118,6 +118,7 @@
                                 WidthRequest="200" />
 
                             <Button
+                                Margin="0,15,0,0"
                                 Command="{Binding LoadFloorInfoCommand}"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Text="Load Floor"

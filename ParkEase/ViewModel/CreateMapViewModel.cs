@@ -324,11 +324,12 @@ namespace ParkEase.ViewModel
                     }
                     else
                     {
-                        await dialogService.ShowAlertAsync("", "Please upload parking map image.", "OK");
+                        //await dialogService.ShowAlertAsync("", "Please upload parking map image.", "OK");
                         addNewFloorClicked = true;
                     }
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
@@ -436,7 +437,7 @@ namespace ParkEase.ViewModel
                 }
                 else
                 {
-                    await dialogService.ShowAlertAsync("Warning", "Please fill in all fields.", "OK");
+                    await dialogService.ShowAlertAsync("Warning", "Please check if all fields is filled up or if you click Add button to add a new floor.", "OK");
                 }
             }
             catch (Exception ex)
@@ -516,13 +517,13 @@ namespace ParkEase.ViewModel
 
         private void ResetAfterSubmit()
         {
-            CompanyName = string.Empty;
-            Address = string.Empty;
-            City = string.Empty;
+            CompanyName = "";
+            Address = "";
+            City = "";
             Fee = 0;
             LimitHour = 0;
             listFloorInfos.Clear();
-            SelectedFloorName = string.Empty;
+            SelectedFloorName = "";
             FloorNames.Clear();
             Rectangles.Clear();
             ImgSourceData = null;
@@ -531,7 +532,7 @@ namespace ParkEase.ViewModel
 
         private void ResetFloorInfo()
         {
-            Floor = string.Empty;
+            Floor = "";
             ImgSourceData = null;
             RectWidth = 100;
             RectHeight = 50;
