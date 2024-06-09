@@ -14,7 +14,7 @@ namespace ParkEase
             Routing.RegisterRoute(Routes.MapPage, typeof(MapPage));
             Routing.RegisterRoute(Routes.ForgotPasswordPage, typeof(ForgotPasswordPage));
             Routing.RegisterRoute(Routes.UserMapPage, typeof(UserMapPage));
-
+            Routing.RegisterRoute(Routes.PrivateMapPage, typeof(PrivateMapPage));
         }
     }
 }

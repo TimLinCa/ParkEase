@@ -38,6 +38,10 @@
         <ShellContent ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap" />
     </FlyoutItem>
 
+    <FlyoutItem Title="PrivateMap">
+        <ShellContent ContentTemplate="{DataTemplate page:PrivateMapPage}" Route="PrivateMap" />
+    </FlyoutItem>
+
 
     <MenuFlyoutSubItem />
 
