@@ -14,7 +14,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="300" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="220" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -34,7 +35,14 @@
                             HorizontalOptions="Center"
                             Text="Create Map Editor" />
 
-                        <Picker Title="Select a property address" ItemsSource="{Binding PropertyAddresses}" />
+                        <Picker Title="Select a property address" ItemsSource="{Binding PropertyAddresses}" SelectedItem="{Binding SelectedAddress}" />
+                        <Button
+                        Margin="0,20,0,10"
+                        Command="{Binding LoadParkingInfoCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Text="Load"
+                        VerticalOptions="Center"
+                        WidthRequest="200" />
 
                         <material:TextField
                             Title="Company Name"
@@ -96,13 +104,34 @@
                 <ScrollView>
                     <StackLayout Padding="20">
                         <!--  Create floor section  -->
-                        <Picker Title="Select a property address" ItemsSource="{Binding FloorNames}" />
+
+                        <HorizontalStackLayout 
+                            Margin="20, 0, 0, 20"
+                            HorizontalOptions="Start"
+                            Spacing="20">
+
+                            <Picker 
+                                Title="Select floor" 
+                                ItemsSource="{Binding FloorNames}" 
+                                SelectedItem="{Binding SelectedFloorName}" 
+                                VerticalOptions="Center" 
+                                WidthRequest="200" />
+
+                            <Button
+                                Margin="0,15,0,0"
+                                Command="{Binding LoadFloorInfoCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Text="Load Floor"
+                                VerticalOptions="Center"
+                                WidthRequest="100" />
+                        </HorizontalStackLayout>
+
                         <Label
                             Margin="20,20,20,4"
                             FontSize="14"
                             HorizontalOptions="Start"
                             Style="{StaticResource SecondaryDarkText}"
-                            Text="Enter your parking level (ex: B1, B2, F1, F2, or Ground)" />
+                            Text="Add a new parking level (ex: B1, B2, F1, F2, or Ground)" />
 
                         <material:TextField
                             Title="Level"
@@ -113,14 +142,28 @@
                             WidthRequest="200">
                             <validation:RequiredValidation />
                         </material:TextField>
-                        <Button
-                            x:Name="UploadBtn"
-                            Margin="0,20,0,0"
-                            Command="{Binding UploadImageClick}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Text="Upload Image"
-                            VerticalOptions="Center"
-                            WidthRequest="200" />
+
+                        <HorizontalStackLayout 
+                            Margin="0, 10, 0, 0" 
+                            HorizontalOptions="Center"
+                            Spacing="20">
+
+                            <Button 
+                                Command="{Binding AddNewFloorCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Text="Add"
+                                WidthRequest="130" 
+                                VerticalOptions="Center" />
+                            <Button
+                                x:Name="UploadBtn"
+                                Command="{Binding UploadImageClick}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Text="Upload Image"
+                                VerticalOptions="Center"
+                                WidthRequest="130" />
+                        </HorizontalStackLayout>
+
+                        <!-- save button -->
                         <Button
                             Margin="50,50,50,30"
                             Command="{Binding SaveFloorInfoCommand}"
@@ -131,18 +174,32 @@
                 </ScrollView>
             </sfTabView:SfTabItem>
         </sfTabView:SfTabView>
+        
+        <!-- Middle Row -->
+            <StackLayout
+                Grid.Row="1"
+                Grid.Column="0">
+                <Button
+                 x:Name="SubmitBtn"
+                 Command="{Binding SubmitCommand}"
+                 FontAttributes="Bold"
+                 FontSize="Medium"
+                 HorizontalOptions="Center"
+                 Text="Submit"
+                 WidthRequest="400"/>
+            </StackLayout>
 
         <!--  Bottom Row  -->
         <Border
-            Grid.Row="1"
+            Grid.Row="2"
             Grid.Column="0"
             Stroke="#512BD4">
-            <StackLayout Margin="20,20,20,20">
+            <StackLayout Margin="40,10,40,0">
                 <!--  Rectangle Width Slider  -->
                 <Label
                     x:Name="widthLabel"
                     HorizontalOptions="Center"
-                    Text="{Binding Source={x:Reference RectWidth}, Path=Value, StringFormat='Width value: {0:F0}'}"
+                    Text="{Binding Source={x:Reference RectWidth}, Path=Value, StringFormat='Width value: {0:F0}', Mode=TwoWay}"
                     VerticalOptions="Center" />
                 <Slider
                     x:Name="RectWidth"
@@ -155,7 +212,7 @@
                 <Label
                     x:Name="heightLabel"
                     HorizontalOptions="Center"
-                    Text="{Binding Source={x:Reference RectHeight}, Path=Value, StringFormat='Height value: {0:F0}'}"
+                    Text="{Binding Source={x:Reference RectHeight}, Path=Value, StringFormat='Height value: {0:F0}', Mode=TwoWay}"
                     VerticalOptions="Center" />
                 <Slider
                     x:Name="RectHeight"
@@ -184,22 +241,13 @@
                         WidthRequest="80" />
 
                 </HorizontalStackLayout>
-                <Button
-                    x:Name="SubmitBtn"
-                    Margin="0,20,0,0"
-                    Command="{Binding SubmitCommand}"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    HorizontalOptions="Center"
-                    Text="Submit"
-                    WidthRequest="300" />
             </StackLayout>
         </Border>
 
         <!--  GraphicsView  -->
         <Border
             Grid.Row="0"
-            Grid.RowSpan="2"
+            Grid.RowSpan="3"
             Grid.Column="1"
             BackgroundColor="WhiteSmoke"
             Stroke="#512BD4">
