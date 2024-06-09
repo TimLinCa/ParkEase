@@ -5,6 +5,7 @@ using ParkEase.Core.Services;
 using ParkEase.Page;
 using ParkEase.Services;
 using ParkEase.ViewModel;
+using ParkEase.Utilities;
 using UraniumUI;
 using epj.RouteGenerator;
 using ParkEase.Core.Model;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Amazon.Runtime;
 using Amazon.SimpleSystemsManagement;
 using Amazon;
+using The49.Maui.BottomSheet;
 
 namespace ParkEase
 {
@@ -39,6 +41,7 @@ namespace ParkEase
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .UseMauiCommunityToolkit()
+                .UseBottomSheet()
                 .ConfigureSyncfusionCore()
                 .ConfigureFonts(fonts =>
                 {
@@ -85,6 +88,13 @@ namespace ParkEase
             {
                 BindingContext = provider.GetRequiredService<UserMapViewModel>()
             });
+
+            builder.Services.AddSingleton<PrivateMapViewModel>();
+            builder.Services.AddSingleton(provider => new PrivateMapPage
+            {
+                BindingContext = provider.GetRequiredService<PrivateMapViewModel>()
+            });
+            builder.Services.AddSingleton<MyBottomSheet>();
             #endregion
 
             builder.Services.AddSingleton(provider => new ParkEaseModel(developerMode));
