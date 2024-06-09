@@ -9,7 +9,7 @@
     Title="UserMap"
     x:DataType="vm:UserMapViewModel">
     <Grid>
-        <controls:GMapMobile Lines="{Binding MapLines}">
+        <controls:GMapMobile Lines="{Binding MapLines}" SelectedLine="{Binding SelectedMapLine}">
             <controls:GMapMobile.Behaviors>
                 <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
             </controls:GMapMobile.Behaviors>

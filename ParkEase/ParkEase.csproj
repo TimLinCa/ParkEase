@@ -58,10 +58,12 @@
 
 	<ItemGroup>
 	  <None Remove="appsettings.json" />
+	  <None Remove="appsettingsCopy.json" />
 	  <None Remove="Resources\Images\parkease_logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="appsettingsCopy.json" />
 	  <EmbeddedResource Include="appsettings.json" />
 	</ItemGroup>
 

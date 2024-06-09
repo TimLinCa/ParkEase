@@ -33,6 +33,11 @@ namespace ParkEase.ViewModel
             this.dialogService = dialogService;
         }
 
+        partial void OnSelectedMapLineChanged(MapLine? value)
+        {
+
+        }
+
         public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
         {
             try
