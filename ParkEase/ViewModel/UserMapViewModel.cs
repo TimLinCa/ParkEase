@@ -33,7 +33,7 @@ namespace ParkEase.ViewModel
             this.dialogService = dialogService;
         }
 
-        public ICommand MapNavigatedCommand => new RelayCommand<WebNavigatedEventArgs>(async e =>
+        public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
         {
             try
             {

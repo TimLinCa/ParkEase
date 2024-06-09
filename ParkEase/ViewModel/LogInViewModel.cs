@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
@@ -67,7 +68,7 @@ namespace ParkEase.ViewModel
                 User user = new User();
                 user.Email = "Test123@gmail.com";
                 parkEaseModel.User = user;
-                await Shell.Current.GoToAsync($"{nameof(UserMapPage)}");
+                await DirectToMainPage();
             }
         });
 
@@ -86,11 +87,7 @@ namespace ParkEase.ViewModel
                     User user = new User();
                     user.Email = Email;
                     parkEaseModel.User = user;
-                    await Shell.Current.GoToAsync($"//{nameof(MapPage)}",
-                                    new Dictionary<string, object>
-                                    {
-                    {"Email",Email }
-                                    });
+                    await DirectToMainPage();
                 }
                 else
                 {
@@ -104,7 +101,6 @@ namespace ParkEase.ViewModel
             }
 
         });
-
 
         public ICommand SignUpCommand => new RelayCommand(async () =>
         {
@@ -147,6 +143,18 @@ namespace ParkEase.ViewModel
                         Email = emailInStoreage;
                     }
                 }
+            }
+        }
+
+        private async Task DirectToMainPage()
+        {
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                await Shell.Current.GoToAsync($"//{nameof(UserMapPage)}");
+            }
+            else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+            {
+                await Shell.Current.GoToAsync($"//{nameof(MapPage)}");
             }
         }
 

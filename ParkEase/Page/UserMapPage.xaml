@@ -8,17 +8,11 @@
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     Title="UserMap"
     x:DataType="vm:UserMapViewModel">
-    <ScrollView>
-        <Grid>
-            <controls:GMap
-                Grid.Column="1"
-                Lines="{Binding MapLines}"
-                SelectedLine="{Binding SelectedMapLine}">
-                <controls:GMap.Behaviors>
-                    <toolkit:EventToCommandBehavior Command="{Binding MapNavigatedCommand}" EventName="NavigatedEvent" />
-                </controls:GMap.Behaviors>
-            </controls:GMap>
-        </Grid>
-
-    </ScrollView>
+    <Grid>
+        <controls:GMapMobile Lines="{Binding MapLines}">
+            <controls:GMapMobile.Behaviors>
+                <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
+            </controls:GMapMobile.Behaviors>
+        </controls:GMapMobile>
+    </Grid>
 </ContentPage>

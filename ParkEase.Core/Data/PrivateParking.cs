@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace ParkEase.Core.Data
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
+        [JsonProperty("_id")]
         public string Id { get; set; }
 
         [BsonElement("companyName")]
@@ -30,6 +32,10 @@ namespace ParkEase.Core.Data
 
         public List<FloorInfo> FloorInfo { get; set; }
 
+        public bool ShouldSerializeId()
+        {
+            return false;
+        }
     }
 
     public class ParkingInfo

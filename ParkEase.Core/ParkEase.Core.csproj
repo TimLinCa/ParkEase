@@ -19,9 +19,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.304.21" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="MongoDB.Driver" Version="2.25.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="RestSharp" Version="111.2.0" />
 		<PackageReference Include="Syncfusion.Maui.Core" Version="25.2.6" />
 		<PackageReference Include="Syncfusion.Maui.Inputs" Version="25.2.6" />
 		<PackageReference Include="Syncfusion.Maui.Sliders" Version="25.2.5" />

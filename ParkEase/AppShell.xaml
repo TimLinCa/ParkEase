@@ -26,7 +26,7 @@
     </Shell.FlyoutHeader>
 
     <FlyoutItem Title="UserMap">
-        <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMap" />
+        <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMapPage" />
     </FlyoutItem>
 
 

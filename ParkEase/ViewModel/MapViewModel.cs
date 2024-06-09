@@ -135,7 +135,7 @@ namespace ParkEase.ViewModel
                     }
                     else
                     {
-                        await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
+                        var response = await mongoDBService.InsertData(CollectionName.ParkingData, parkingData);
                         await dialogService.ShowAlertAsync("Success", "Your information is submitted.", "OK");
                     }
                     await LoadParkingData(SelectedMapLine.Points); /*reload the data to ensure the update data is retrieved*/
@@ -221,14 +221,14 @@ namespace ParkEase.ViewModel
                 if (SelectedMapLine != null)
                 {
                     MapLines.Remove(SelectedMapLine);
-                   
                     // Create a filter to match the line with the specified index
                     var filter = Builders<ParkingData>.Filter.Eq(p => p.Points, SelectedMapLine.Points);
+                    //var filter = Builders<ParkingData>.Filter.Eq(p => p.ParkingSpot, "T1");
 
                     // Delete the line data from MongoDB
                     var result = await mongoDBService.DeleteData(CollectionName.ParkingData, filter);
 
-                    if (result.DeletedCount > 0)
+                    if (result.Success && result.DeleteCount > 0)
                     {
                         // Reset side panel data after successful deletion
                         ResetSidePanelData();

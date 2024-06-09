@@ -1,5 +1,10 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Configuration;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 using ParkEase.Core.Contracts.Services;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,58 +15,162 @@ namespace ParkEase.Core.Services
 {
     public class MongoDBService : IMongoDBService
     {
-        private string connectionString = "mongodb://127.0.0.1:27017";
-        private string databaseName = "ParkEase";
-
-        private readonly IMongoDatabase db;
-
-        public MongoDBService()
+        private readonly string apiBase;
+        private readonly string databaseName = "ParkEase";
+        private string APIKey = string.Empty;
+        private IAWSService awsService;
+        public MongoDBService(IConfiguration configuration,IAWSService awsService)
         {
-            var client = new MongoClient(connectionString);
-            db = client.GetDatabase(databaseName);
+            apiBase = configuration["MongoDbRestAPI"];
+            databaseName = configuration["DataBaseName"];
+            this.awsService = awsService;
+            //var client = new MongoClient(connectionUri);
+            //try
+            //{
+            //    db = client.GetDatabase(databaseName);
+            //    Console.WriteLine("Pinged your deployment. You successfully connected to MongoDB!");
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine(ex);
+            //}
         }
 
-        public Task InsertManyData<T>(string collectionName, IEnumerable<T> data) where T : class
-        {
-            var collection = db.GetCollection<T>(collectionName);
-            return collection.InsertManyAsync(data);
-        }
 
-        public Task InsertData<T>(string collectionName, T data) where T : class
+        public async Task<RestResponse> InsertData<T>(string collectionName, T data) where T : class
         {
-            var collection = db.GetCollection<T>(collectionName);
-            return collection.InsertOneAsync(data);
+            await CheckAPIKey();
+            var client = new RestClient($"{apiBase}/insertOne");
+            var request = new RestRequest();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Access-Control-Request-Headers", "*");
+            request.AddHeader("api-key", APIKey);
+            var body = @"{" +
+            $@" ""collection"":""{collectionName}""," +
+            $@" ""database"":""{databaseName}""," +
+            @" ""dataSource"":""ParkEase""," +
+            $@" ""document"": {Newtonsoft.Json.JsonConvert.SerializeObject(data)}" +
+            @"}";
+            request.AddStringBody(body, DataFormat.Json);
+            return await client.PostAsync(request);
         }
 
         public async Task<List<T>> GetData<T>(string collectionName) where T : class
         {
-            var collection = getCollection<T>(collectionName);
-            var result = await collection.FindAsync(FilterDefinition<T>.Empty);
-            return result.ToList();
+            await CheckAPIKey();
+            var client = new RestClient($"{apiBase}/find");
+            var request = new RestRequest();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Access-Control-Request-Headers", "*");
+            request.AddHeader("api-key", APIKey);
+            var body = @"{" +
+            $@" ""collection"":""{collectionName}""," +
+            $@" ""database"":""{databaseName}""," +
+            @" ""dataSource"":""ParkEase""" +
+            @"}";
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.PostAsync(request);
+            Console.WriteLine(response.Content);
+            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<T>>>(response.Content);
+            if (data == null) return new List<T> { };
+            return data["documents"];
+
         }
 
         public async Task<List<T>> GetDataFilter<T>(string collectionName, FilterDefinition<T> filter) where T : class
         {
-            var collection = getCollection<T>(collectionName);
-            var result = await collection.FindAsync(filter);
-            return result.ToList();
+            await CheckAPIKey();
+            var serializerRegistry = BsonSerializer.SerializerRegistry;
+            var documentSerializer = serializerRegistry.GetSerializer<T>();
+            var renderedFilter = filter.Render(documentSerializer, serializerRegistry);
+            var filterString = renderedFilter.ToString();
+            var client = new RestClient($"{apiBase}/find");
+            var request = new RestRequest();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Access-Control-Request-Headers", "*");
+            request.AddHeader("api-key", APIKey);
+            var body = @"{" +
+            $@" ""collection"":""{collectionName}""," +
+            $@" ""database"":""{databaseName}""," +
+            @" ""dataSource"":""ParkEase""," +
+            $@" ""filter"": {filterString}" +
+            @"}";
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.PostAsync(request);
+            Console.WriteLine(response.Content);
+            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<T>>>(response.Content);
+            if (data == null) return new List<T> { };
+            return data["documents"];
         }
 
-        public async Task<DeleteResult> DeleteData<T>(string collectionName, FilterDefinition<T> filter) where T : class
+        public async Task<DeleteDataResult> DeleteData<T>(string collectionName, FilterDefinition<T> filter) where T : class
         {
-            var collection = getCollection<T>(collectionName);
-            return await collection.DeleteOneAsync(filter);
+            await CheckAPIKey();
+            var serializerRegistry = BsonSerializer.SerializerRegistry;
+            var documentSerializer = serializerRegistry.GetSerializer<T>();
+            var renderedFilter = filter.Render(documentSerializer, serializerRegistry);
+            var filterString = renderedFilter.ToString();
+            var client = new RestClient($"{apiBase}/deleteMany");
+            var request = new RestRequest();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Access-Control-Request-Headers", "*");
+            request.AddHeader("api-key", APIKey);
+            var body = @"{" +
+            $@" ""collection"":""{collectionName}""," +
+            $@" ""database"":""{databaseName}""," +
+            @" ""dataSource"":""ParkEase""," +
+            $@" ""filter"": {filterString}" +
+            @"}";
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.PostAsync(request);
+            DeleteDataResult deleteResult = new DeleteDataResult();
+            deleteResult.Success = response.IsSuccessStatusCode;
+
+            if (response.IsSuccessStatusCode)
+            {
+                Dictionary<string, object> responseContent = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                deleteResult.DeleteCount = int.Parse(responseContent["deletedCount"].ToString());
+            }
+            else
+            {
+                deleteResult.DeleteCount = 0;
+            }
+            return deleteResult;
         }
 
         public async Task UpdateData<T>(string collectionName, FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
-            var collection = db.GetCollection<T>(collectionName);
-            await collection.UpdateOneAsync(filter, update);
+            await CheckAPIKey();
+            var serializerRegistry = BsonSerializer.SerializerRegistry;
+            var documentSerializer = serializerRegistry.GetSerializer<T>();
+            var renderedFilter = filter.Render(documentSerializer, serializerRegistry);
+            var filterString = renderedFilter.ToString();
+
+            var renderedUpdate = update.Render(documentSerializer, serializerRegistry);
+            var updateString = renderedUpdate.ToString();
+
+            var client = new RestClient($"{apiBase}/updateMany");
+            var request = new RestRequest();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Access-Control-Request-Headers", "*");
+            request.AddHeader("api-key", APIKey);
+            var body = @"{" +
+            $@" ""collection"":""{collectionName}""," +
+            $@" ""database"":""{databaseName}""," +
+            @" ""dataSource"":""ParkEase""," +
+            $@" ""filter"": {filterString}," +
+            $@" ""update"": {updateString}" +
+            @"}";
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.PostAsync(request);
         }
 
-        private IMongoCollection<T> getCollection<T>(string collectionName)
+        private async Task CheckAPIKey()
         {
-            return db.GetCollection<T>(collectionName);
+            if(APIKey == string.Empty)
+            {
+                APIKey = await awsService.GetParamenter("/ParkEase/APIKeys/mongoDb");
+            }
         }
     }
 
@@ -72,4 +181,6 @@ namespace ParkEase.Core.Services
         public static string PrivateParking = "PrivateParking";
 
     }
+
+  
 }

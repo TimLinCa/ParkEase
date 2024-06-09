@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -9,7 +10,8 @@ namespace ParkEase.Core.Data
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public ObjectId Id { get; set; }
+        [JsonProperty("_id")]
+        public string Id { get; set; }
 
         public List<MapPoint> Points { get; set; }
 
@@ -18,13 +20,19 @@ namespace ParkEase.Core.Data
         public string ParkingFee { get; set; }
         public string ParkingCapacity { get; set; }
         public Roles Role { get; set; } = Roles.Administrator;
+
+        //ShouldSerialize{PropertyName} well tell JsonConvert.SerializeObject if it skips the {PropertyName} property during serialization.
+        public bool ShouldSerializeId()
+        {
+            return false;
+        }
     }
 
     // This class represents a point on the map with latitude and longitude
     public class MapPoint : IEquatable<MapPoint>
     {
-        public double Lat { get; set; }
-        public double Lng { get; set; }
+        public string Lat { get; set; }
+        public string Lng { get; set; }
 
 
         // Determines whether the specified MapPoint is equal to the current MapPoint

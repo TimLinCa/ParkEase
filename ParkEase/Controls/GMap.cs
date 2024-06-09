@@ -386,8 +386,8 @@ namespace ParkEase.Controls
                 // Create a new mapPoint object
                 MapPoint mp = new MapPoint
                 {
-                    Lat = double.Parse(latLng[0]),
-                    Lng = double.Parse(latLng[1])
+                    Lat = latLng[0],
+                    Lng = latLng[1]
                 };
 
                 // Add the mapPoint object to the list

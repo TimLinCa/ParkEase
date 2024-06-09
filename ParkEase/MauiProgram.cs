@@ -10,6 +10,11 @@ using epj.RouteGenerator;
 using ParkEase.Core.Model;
 using CommunityToolkit.Maui;
 using Syncfusion.Maui.Core.Hosting;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
+using Amazon.Runtime;
+using Amazon.SimpleSystemsManagement;
+using Amazon;
 
 namespace ParkEase
 {
@@ -19,10 +24,18 @@ namespace ParkEase
         public static MauiApp CreateMauiApp()
         {
             bool developerMode = true;
-
             var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
+
+            var a = Assembly.GetExecutingAssembly();
+            using var stream = a.GetManifestResourceStream("ParkEase.appsettings.json");
+
+            var config = new ConfigurationBuilder()
+                        .AddJsonStream(stream)
+                        .Build();
+
+            builder.Configuration.AddConfiguration(config);
+
+            builder.UseMauiApp<App>()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .UseMauiCommunityToolkit()
@@ -79,6 +92,7 @@ namespace ParkEase
             #region service
             builder.Services.AddSingleton<IDialogService, DialogService>();
             builder.Services.AddSingleton<IMongoDBService, MongoDBService>();
+            builder.Services.AddSingleton<IAWSService, AWSService>();
             #endregion
 
 #if DEBUG

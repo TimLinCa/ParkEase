@@ -5,7 +5,6 @@ namespace ParkEase.Core.Data;
 // This class represents a line on the map consisting of multiple points
 public class Line : IEquatable<Line>
 {
-    public ObjectId Id { get; set; }
     public List<MapPoint> Points { get; set; }
 
     public string ParkingSpot { get; set; }
