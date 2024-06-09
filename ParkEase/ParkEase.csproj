@@ -96,12 +96,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="AppShellMobile.xaml.cs">
+	    <DependentUpon>AppShellMobile.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Page\UserMapPage.xaml.cs">
 	    <DependentUpon>UserMapPage.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="AppShellMobile.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Page\CreateMapPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

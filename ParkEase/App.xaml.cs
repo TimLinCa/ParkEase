@@ -10,8 +10,14 @@ namespace ParkEase
 
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NBaF5cXmZCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXpcd3ZXQmZYVEF1W0s=");
 
-            MainPage = new AppShell();
-            //MainPage = new TabbedPageFirst();
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                MainPage = new AppShellMobile();
+            }
+            else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+            {
+                MainPage = new AppShell();
+            }
 
         }
     }

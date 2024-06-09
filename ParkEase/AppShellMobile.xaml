@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ParkEase.AppShellMobile"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ParkEase"
+    xmlns:page="clr-namespace:ParkEase.Page"
+    Title="ParkEase">
+
+    <ShellItem Route="LogInPage">
+        <ShellContent
+            ContentTemplate="{DataTemplate page:LogInPage}"
+            FlyoutItemIsVisible="False"
+            NavigationPage.HasNavigationBar="False"
+            Shell.FlyoutBehavior="Disabled" />
+    </ShellItem>
+    <TabBar>
+        <Tab Title="Map">
+            <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMapPage" />
+        </Tab>
+        <Tab Title="CreateMap">
+            <ShellContent ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap" />
+        </Tab>
+    </TabBar>
+</Shell>

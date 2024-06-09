@@ -8,7 +8,6 @@
     Title="ParkEase"
     Shell.FlyoutBehavior="Flyout">
 
-
     <ShellItem Route="LogInPage">
         <ShellContent
             ContentTemplate="{DataTemplate page:LogInPage}"
@@ -25,11 +24,6 @@
             WidthRequest="100" />
     </Shell.FlyoutHeader>
 
-    <FlyoutItem Title="UserMap">
-        <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMapPage" />
-    </FlyoutItem>
-
-
     <FlyoutItem Title="Map">
         <ShellContent ContentTemplate="{DataTemplate page:MapPage}" Route="MapPage" />
     </FlyoutItem>
@@ -37,9 +31,4 @@
     <FlyoutItem Title="CreateMap">
         <ShellContent ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap" />
     </FlyoutItem>
-
-
-    <MenuFlyoutSubItem />
-
-
 </Shell>
