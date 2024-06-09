@@ -194,7 +194,7 @@ publish/
 # checkin your Azure Web App publish settings, but sensitive information contained
 # in these scripts will be unencrypted
 PublishScripts/
-
+appsettings.json
 # NuGet Packages
 *.nupkg
 # NuGet Symbol Packages
@@ -544,3 +544,4 @@ cython_debug/
 #.idea/
 /ParkEaseCam/cam_venv
 ParkEaseCam/.vscode/launch.json
+ParkEase/appsettings.json
