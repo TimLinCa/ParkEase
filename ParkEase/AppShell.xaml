@@ -8,13 +8,24 @@
     Title="ParkEase"
     Shell.FlyoutBehavior="Flyout">
 
-    <ShellItem Route="LogInPage">
-        <ShellContent
-            ContentTemplate="{DataTemplate page:LogInPage}"
-            FlyoutItemIsVisible="False"
-            NavigationPage.HasNavigationBar="False"
-            Shell.FlyoutBehavior="Disabled" />
-    </ShellItem>
+
+    <ShellContent
+        ContentTemplate="{DataTemplate page:LogInPage}"
+        FlyoutItemIsVisible="False"
+        NavigationPage.HasNavigationBar="False"
+        Shell.FlyoutBehavior="Disabled" />
+
+    <ShellContent
+        Title="Public Map"
+        ContentTemplate="{DataTemplate page:MapPage}"
+        Route="MapPage" />
+
+    <ShellContent
+        Title="Private Map"
+        ContentTemplate="{DataTemplate page:CreateMapPage}"
+        Route="CreateMap" />
+
+
 
     <Shell.FlyoutHeader>
         <Image
@@ -24,11 +35,6 @@
             WidthRequest="100" />
     </Shell.FlyoutHeader>
 
-    <FlyoutItem Title="Map">
-        <ShellContent ContentTemplate="{DataTemplate page:MapPage}" Route="MapPage" />
-    </FlyoutItem>
 
-    <FlyoutItem Title="CreateMap">
-        <ShellContent ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap" />
-    </FlyoutItem>
+
 </Shell>

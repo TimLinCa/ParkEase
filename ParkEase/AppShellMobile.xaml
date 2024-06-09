@@ -18,8 +18,8 @@
         <Tab Title="Map">
             <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMapPage" />
         </Tab>
-        <Tab Title="CreateMap">
-            <ShellContent ContentTemplate="{DataTemplate page:CreateMapPage}" Route="CreateMap" />
+        <Tab Title="PrivateMap">
+            <ShellContent ContentTemplate="{DataTemplate page:PrivateMapPage}" Route="PrivateMapPage" />
         </Tab>
     </TabBar>
 </Shell>
