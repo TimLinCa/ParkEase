@@ -14,10 +14,12 @@ from enum import Enum
 from functools import partial
 import pickle
 from yolo import parkingLot_detect_video,parkingLot_detect_cam,start_detect_video,stopTesting
-from pymongo import MongoClient
+from pymongo import MongoClient,ServerApi
 
 client = MongoClient('localhost', 27017)
 db = client.ParkEase
+onlineClient = MongoClient('mongodb+srv://ParkEaseUser:qaz123WSX@parkease.jr1snwe.mongodb.net/?retryWrites=true&w=majority&appName=ParkEase', server_api=ServerApi('1'))
+onlineDb = onlineClient.ParkEase
 CamConfig = db.CamConfig
 configGridFs = gridfs.GridFS(db)
 publicArea = db.ParkingData
