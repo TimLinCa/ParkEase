@@ -70,6 +70,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AppActions.Icons.Maui" Version="1.0.0" />
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
 		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.304.21" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />

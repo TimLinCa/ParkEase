@@ -42,7 +42,7 @@ namespace ParkEase.ViewModel
         private double fee;
 
         [ObservableProperty]
-        private double limitHour;
+        private int limitHour;
 
         [ObservableProperty]
         private string floor;

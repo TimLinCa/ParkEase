@@ -3,14 +3,28 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkEase.Page.PrivateMapPage"
              xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
-             Title="PrivateMapPage"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
              x:DataType="vm:PrivateMapViewModel">
     <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <material:PickerField
+            Title="Pick a floor"
+            ItemsSource="{Binding FloorNames}"
+            SelectedItem="{Binding SelectedFloorName}"
+            AllowClear="True"/>
+        <!--<Border
+            BackgroundColor="WhiteSmoke"
+            Stroke="#512BD4">
+            <controls:RecGraphicsView
+            x:Name="RectangleDrawableView"
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill"
+            Rectangles="{Binding Rectangles}">
+                <controls:RecGraphicsView.Drawable>
+                    <controls:RectDrawable />
+                </controls:RecGraphicsView.Drawable>
+            </controls:RecGraphicsView>
+        </Border>-->
 
         <Button
             Text="Load Data"

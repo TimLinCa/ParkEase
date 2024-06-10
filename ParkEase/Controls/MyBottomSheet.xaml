@@ -13,21 +13,26 @@
         <the49:RatioDetent Ratio="0.8"/>
     </the49:BottomSheet.Detents>
     <VerticalStackLayout>
+        <Label 
+            Text="Parking Lot Details"
+            FontAttributes="Bold"
+            FontSize="Medium"
+            Margin="10,5,0,10"/>
+   
         <Label
             Text="{Binding Address}"
             VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+            HorizontalOptions="Start"
+            Margin="30,10,0,10"/>
         <Label 
             Text="{Binding ParkingFee}"
             VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+            HorizontalOptions="Start"
+            Margin="30,0,0,10"/>
         <Label 
             Text="{Binding LimitHour}"
             VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-        <Label 
-            Text="test Text"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+            HorizontalOptions="Start"
+            Margin="30,0,0,10"/>
     </VerticalStackLayout>
 </the49:BottomSheet>

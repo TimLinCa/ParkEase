@@ -65,25 +65,27 @@ namespace ParkEase.Controls
 
                             canvas.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
-                            if (Rectangles != null)
-                            {
-                                canvas.StrokeColor = Colors.Green;
-                                canvas.StrokeSize = 2;
-                                canvas.FontColor = Colors.Black;
-                                canvas.FontSize = 18;
-                                canvas.Font = Font.DefaultBold;
+                            
+                        }
+                    }
 
-                                for (int i = 0; i < Rectangles.Count; i++)
-                                {
-                                    RectF rect = Rectangles[i];
-                                    canvas.DrawRectangle(rect);
+                    if (Rectangles != null)
+                    {
+                        canvas.StrokeColor = Colors.Green;
+                        canvas.StrokeSize = 2;
+                        canvas.FontColor = Colors.Black;
+                        canvas.FontSize = 18;
+                        canvas.Font = Font.DefaultBold;
 
-                                    var number = (i + 1).ToString();
-                                    var x = rect.X + 10;
-                                    var y = rect.Y + 20;
-                                    canvas.DrawString(number, x, y, HorizontalAlignment.Left);
-                                }
-                            }
+                        for (int i = 0; i < Rectangles.Count; i++)
+                        {
+                            RectF rect = Rectangles[i];
+                            canvas.DrawRectangle(rect);
+
+                            var number = (i + 1).ToString();
+                            var x = rect.X + 10;
+                            var y = rect.Y + 20;
+                            canvas.DrawString(number, x, y, HorizontalAlignment.Left);
                         }
                     }
                 }
