@@ -34,5 +34,10 @@
             VerticalOptions="Center" 
             HorizontalOptions="Start"
             Margin="30,0,0,10"/>
+        <Label 
+            Text="{Binding ParkingCapacity}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start"
+            Margin="30,0,0,10"/>
     </VerticalStackLayout>
 </the49:BottomSheet>

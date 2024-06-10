@@ -10,6 +10,6 @@ namespace ParkEase.Contracts.Services
     {
         Task ShowAlertAsync(string title, string message, string cancel = "OK");
 
-        Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHours);
+        Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHours, string parkingCapacity);
     }
 }
