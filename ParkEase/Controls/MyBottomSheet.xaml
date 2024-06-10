@@ -13,34 +13,7 @@
         <the49:RatioDetent Ratio="0.8"/>
     </the49:BottomSheet.Detents>
     <VerticalStackLayout>
-<<<<<<< Updated upstream
-        <Label 
-            Text="Parking Lot Details"
-            FontAttributes="Bold"
-            FontSize="Medium"
-            Margin="10,5,0,10"/>
-   
-        <Label
-            Text="{Binding Address}"
-            VerticalOptions="Center" 
-            HorizontalOptions="Start"
-            Margin="30,10,0,10"/>
-        <Label 
-            Text="{Binding ParkingFee}"
-            VerticalOptions="Center" 
-            HorizontalOptions="Start"
-            Margin="30,0,0,10"/>
-        <Label 
-            Text="{Binding LimitHour}"
-            VerticalOptions="Center" 
-            HorizontalOptions="Start"
-            Margin="30,0,0,10"/>
-        <Label 
-            Text="{Binding ParkingCapacity}"
-            VerticalOptions="Center" 
-            HorizontalOptions="Start"
-            Margin="30,0,0,10"/>
-=======
+
         <HorizontalStackLayout Spacing="10">
             <Image Source="parkease_logo.png"
                    WidthRequest="50"
@@ -75,6 +48,6 @@
                     </VerticalStackLayout>
         </Frame>
 
->>>>>>> Stashed changes
+
     </VerticalStackLayout>
 </the49:BottomSheet>
