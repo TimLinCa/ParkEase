@@ -5,7 +5,7 @@ using ParkEase.Core.Services;
 using ParkEase.Page;
 using ParkEase.Services;
 using ParkEase.ViewModel;
-using ParkEase.Utilities;
+using ParkEase.Controls;
 using UraniumUI;
 using epj.RouteGenerator;
 using ParkEase.Core.Model;
@@ -94,7 +94,8 @@ namespace ParkEase
             {
                 BindingContext = provider.GetRequiredService<PrivateMapViewModel>()
             });
-            builder.Services.AddSingleton<MyBottomSheet>();
+
+            builder.Services.AddTransient<MyBottomSheet>(provider => new MyBottomSheet(provider.GetRequiredService<BottomSheetViewModel>()));
             #endregion
 
             builder.Services.AddSingleton(provider => new ParkEaseModel(developerMode));

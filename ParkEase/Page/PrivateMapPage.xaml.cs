@@ -7,18 +7,4 @@ public partial class PrivateMapPage : ContentPage
 	{
 		InitializeComponent();
 	}
-
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-
-        // Show the bottom sheets
-        MyBottomSheet sheet = new MyBottomSheet
-        {
-            HasHandle = true,
-            HandleColor = Colors.Black
-        };
-
-        await sheet.ShowAsync();
-    }
 }

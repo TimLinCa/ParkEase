@@ -2,19 +2,27 @@
 <the49:BottomSheet xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
-             x:Class="ParkEase.Utilities.MyBottomSheet"
+             x:Class="ParkEase.Controls.MyBottomSheet"
              xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
-             x:DataType="vm:PrivateMapViewModel"
+             x:DataType="vm:BottomSheetViewModel"
                    Padding="16,32"
                    BackgroundColor="WhiteSmoke">
     <the49:BottomSheet.Detents>
-        <the49:HeightDetent Height="50" IsDefault="True"/>
-        <the49:RatioDetent Ratio="0.8" />
+        <the49:ContentDetent IsDefault="True"/>
+        <the49:RatioDetent Ratio="0.8"/>
     </the49:BottomSheet.Detents>
     <VerticalStackLayout>
-        <Label 
+        <Label
             Text="{Binding Address}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+        <Label 
+            Text="{Binding ParkingFee}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+        <Label 
+            Text="{Binding LimitHour}"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
         <Label 
