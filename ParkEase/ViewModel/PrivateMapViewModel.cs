@@ -64,11 +64,13 @@ namespace ParkEase.ViewModel
 
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
-                if (parkingLotData == null || !parkingLotData.Any())
+                if (parkingLotData == null || parkingLotData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No parking data found.");
                     return;
                 }
+
+                parkingLotData = parkingLotData.Where(p => p.Id == "666763d4d2c61b754e32a094").ToList();
 
                 /*if (parkingLotData.Count > 0)
                 {*/

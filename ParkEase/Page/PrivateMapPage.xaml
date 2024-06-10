@@ -7,11 +7,12 @@
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
              x:DataType="vm:PrivateMapViewModel">
     <VerticalStackLayout>
-        <material:PickerField
+        <Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />
+        <!--<material:PickerField
             Title="Pick a floor"
             ItemsSource="{Binding FloorNames}"
             SelectedItem="{Binding SelectedFloorName}"
-            AllowClear="True"/>
+            AllowClear="True"/>-->
         <!--<Border
             BackgroundColor="WhiteSmoke"
             Stroke="#512BD4">

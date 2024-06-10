@@ -24,6 +24,7 @@ using ParkEase.Core.Model;
 using Amazon.SecurityToken.Model;
 using MongoDB.Driver;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using MongoDB.Bson;
 
 namespace ParkEase.ViewModel
 {
@@ -73,6 +74,7 @@ namespace ParkEase.ViewModel
 
         private string selectedPropertyId;
 
+        private List<PrivateParking> privateData;
         private List<PrivateParking> userData;
 
         private List<Rectangle> listRectangles;
@@ -151,8 +153,16 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                var filter = Builders<PrivateParking>.Filter.Eq(data => data.CreatedBy, parkEaseModel.User.Email);
-                userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
+                //var filter = Builders<PrivateParking>.Filter.Eq(data => data.CreatedBy, parkEaseModel.User.Email);
+                //userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
+                privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+
+                if (privateData == null || privateData.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No parking data found.");
+                    return;
+                }
+                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
 
                 _ = GetPropertyAddress();
             }
