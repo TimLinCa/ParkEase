@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Platform;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using ParkEase.Contracts.Services;
@@ -33,10 +34,10 @@ namespace ParkEase.ViewModel
             this.dialogService = dialogService;
         }
 
-        partial void OnSelectedMapLineChanged(MapLine? value)
-        {
+        //partial void OnSelectedMapLineChanged(MapLine? value)
+        //{
 
-        }
+        //}
 
         public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
         {
@@ -60,5 +61,42 @@ namespace ParkEase.ViewModel
                 System.Diagnostics.Debug.WriteLine($"Error in draw_lines: {ex.Message}");
             }
         });
+
+        public async Task OnLineClicked(MapLine selectedLine)
+        {
+            if (selectedLine != null)
+            {
+                try
+                {
+                    // Create a filter to match the selected line's points
+                    var filter = Builders<ParkingData>.Filter.Eq(pd => pd.Points, selectedLine.Points);                    
+
+                    List<ParkingData> parkingDataList = await mongoDBService.GetDataFilter<ParkingData>(CollectionName.ParkingData, filter);                   
+
+                    if (parkingDataList != null && parkingDataList.Count > 0)
+                    {
+                        var parkingData = parkingDataList.First();                        
+
+                        // Extract necessary information from the parking data
+                        var address = parkingData.ParkingSpot; 
+                        var parkingFee = parkingData.ParkingFee; 
+                        var limitedHour = parkingData.ParkingTime; 
+                        var parkingCapacity = parkingData.ParkingCapacity; 
+
+                        // Show the bottom sheet with the line's information
+                        await dialogService.ShowPrivateMapBottomSheet(address, parkingFee, limitedHour, parkingCapacity);
+                    }
+                    else
+                    {
+                        await dialogService.ShowAlertAsync("No Data Found", "No parking data found for the selected line.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error retrieving parking data: {ex.Message}");
+                }
+            }
+        }
+
     }
 }

@@ -94,7 +94,7 @@ namespace ParkEase.ViewModel
                         Rectangles.Add(rect);
                     }
 
-                    await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}");
+                    await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}","");
                 //}
             }
             catch (Exception ex)

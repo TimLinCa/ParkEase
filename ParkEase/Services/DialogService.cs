@@ -24,6 +24,10 @@ namespace ParkEase.Services
             bottomSheetViewModel.ParkingFee = parkingFee;
             bottomSheetViewModel.LimitHour = limitHours;
             bottomSheetViewModel.ParkingCapacity = parkingCapacity;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
             MyBottomSheet sheet = new MyBottomSheet(bottomSheetViewModel)
             {
                 HasHandle = true,

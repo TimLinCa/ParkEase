@@ -13,6 +13,7 @@
         <the49:RatioDetent Ratio="0.8"/>
     </the49:BottomSheet.Detents>
     <VerticalStackLayout>
+<<<<<<< Updated upstream
         <Label 
             Text="Parking Lot Details"
             FontAttributes="Bold"
@@ -39,5 +40,41 @@
             VerticalOptions="Center" 
             HorizontalOptions="Start"
             Margin="30,0,0,10"/>
+=======
+        <HorizontalStackLayout Spacing="10">
+            <Image Source="parkease_logo.png"
+                   WidthRequest="50"
+                   HeightRequest="50"
+                   Aspect="AspectFit"/>
+            <Label Text="Nearby Parking Spot"
+                   TextColor="#512BD4"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+
+        <Frame BackgroundColor="White"
+               CornerRadius="8"
+               Padding="12"
+               Margin="0,10"
+               HasShadow="True">
+                    <VerticalStackLayout>
+                        <Label Text="{Binding Address}"
+                       FontSize="20"
+                       FontAttributes="Bold"/>
+                        <!-- Light line separator -->
+                        <BoxView HeightRequest="1"
+                 WidthRequest="1000"
+                 BackgroundColor="LightGray"
+                 HorizontalOptions="FillAndExpand"
+                 Margin="0,10"/>
+                        <Label Text="{Binding ParkingFee}"/>
+                        <Label Text="{Binding LimitHour}"/>
+                        <Label Text="{Binding ParkingCapacity}"/>
+
+                    </VerticalStackLayout>
+        </Frame>
+
+>>>>>>> Stashed changes
     </VerticalStackLayout>
 </the49:BottomSheet>

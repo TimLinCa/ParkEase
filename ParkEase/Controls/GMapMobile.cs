@@ -1,6 +1,7 @@
 ﻿using Microsoft.Maui.Controls;
 using Newtonsoft.Json;
 using ParkEase.Core.Data;
+using ParkEase.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -308,6 +309,13 @@ namespace ParkEase.Controls
 
                 // Find the line that matches the selected line based on the points
                 SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
+
+                // Notify the view model about the line click
+                var viewModel = BindingContext as UserMapViewModel;
+                if (viewModel != null && SelectedLine != null)
+                {
+                    await viewModel.OnLineClicked(SelectedLine);
+                }
             }
         }
 
