@@ -165,6 +165,33 @@ namespace ParkEase.Controls
                       }
                       return JSON.stringify(result);
                 }
+
+                let circle;
+
+                function drawCircle(lat, lng, radius) {
+                    // Remove the existing circle if it exists
+                    if (circle) {
+                        circle.setMap(null);
+                    }
+
+                    // Create a new circle
+                    circle = new google.maps.Circle({
+                        map: map,
+                        radius: radius * 1000, // Radius in meters
+                        center: { lat: lat, lng: lng },
+                        fillColor: '#AA0000',
+                        fillOpacity: 0.35,
+                        strokeColor: '#AA0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2
+                    });
+                }
+
+                // Call this function to initialize the map with a circle
+                function initMapWithCircle(lat, lng) {
+                     initMap(lat, lng); // Initialize the map
+                     drawCircle(lat, lng, 0.2); // Draw a 200m radius circle
+                }
          
             </script>
             <script src=""https://maps.googleapis.com/maps/api/js?key=AIzaSyCMPKV70vmSd-153eJsECz6gJD0AipZD-M&callback=initMap"" async defer></script>
@@ -240,7 +267,7 @@ namespace ParkEase.Controls
                 //string jsCommand = $"initMap({location.Latitude}, {location.Longitude});";
 
                 //For test only!!!!
-                string jsCommand = $"initMap({51.06686555416899}, {-114.09486095583466});";
+                string jsCommand = $"initMapWithCircle({51.06686555416899}, {-114.09486095583466});";
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
                 LoadedEvent?.Invoke(sender, e);
             }
