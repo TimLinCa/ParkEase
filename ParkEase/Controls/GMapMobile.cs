@@ -42,7 +42,9 @@ namespace ParkEase.Controls
             {
                 Html = @"
         <!DOCTYPE html>
-        <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml"">  
+        <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml""> 
+        
+
         <head>
             <meta charset=""utf-8"" />
             <title></title>
@@ -73,7 +75,7 @@ namespace ParkEase.Controls
                 function initMap(lat, lng) {
                     map = new google.maps.Map(document.getElementById('map'), {
                         center: { lat: lat, lng: lng  },  // Specify the coordinates for the center of the map
-                        zoom: 15// Specify the zoom level
+                        zoom: 16// Specify the zoom level
                     });
                     // GPS marker for the user 
                     addUserMarker(lat, lng);
@@ -84,12 +86,14 @@ namespace ParkEase.Controls
                     if (userMarker) {
                         userMarker.setMap(null);
                     }
+
                     userMarker = new google.maps.Marker({
                         position: { lat: lat, lng: lng },
                         map: map,
                         title: 'Your Location',
                         icon: {
-                            url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                            url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIgZmlsbD0iIzQyODVmNCIvPjwvc3ZnPg0K',
+                            scaledSize: new google.maps.Size(20, 20) // Adjust the size as needed
                         }
                     });
                 }
