@@ -6,7 +6,6 @@
     xmlns:controls="clr-namespace:ParkEase.Controls"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
-    Title="UserMap"
     x:DataType="vm:UserMapViewModel">
     <Grid>
         <controls:GMapMobile Lines="{Binding MapLines}" SelectedLine="{Binding SelectedMapLine}">

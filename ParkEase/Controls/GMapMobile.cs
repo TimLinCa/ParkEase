@@ -73,7 +73,7 @@ namespace ParkEase.Controls
                 function initMap(lat, lng) {
                     map = new google.maps.Map(document.getElementById('map'), {
                         center: { lat: lat, lng: lng  },  // Specify the coordinates for the center of the map
-                        zoom: 8 // Specify the zoom level
+                        zoom: 15// Specify the zoom level
                     });
                     // GPS marker for the user 
                     addUserMarker(lat, lng);
@@ -265,10 +265,8 @@ namespace ParkEase.Controls
             var location = await Geolocation.GetLocationAsync();
             if (location != null)
             {   
-                //string jsCommand = $"initMap({location.Latitude}, {location.Longitude});";
-
                 //For test only!!!!
-                string jsCommand = $"initMapWithCircle({51.06686555416899}, {-114.09486095583466});";
+                string jsCommand = $"initMapWithCircle({location.Latitude}, {location.Longitude});";
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
                 LoadedEvent?.Invoke(sender, e);
             }
