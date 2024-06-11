@@ -17,9 +17,7 @@ namespace ParkEase.Core.Data
 
         public string ParkingSpot { get; set; }
         public string ParkingTime { get; set; }
-        public string ParkingFee { get; set; }
-        public string ParkingCapacity { get; set; }
-        public Roles Role { get; set; } = Roles.Administrator;
+        public string ParkingFee { get; set; }      
 
         //ShouldSerialize{PropertyName} well tell JsonConvert.SerializeObject if it skips the {PropertyName} property during serialization.
         public bool ShouldSerializeId()

@@ -18,19 +18,13 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string limitHour;
 
-        [ObservableProperty]
-        private string parkingCapacity;
-
-        [ObservableProperty]
-        private bool showParkingCapacity;
 
         public BottomSheetViewModel()
         {
             address = "";
             parkingFee = "";
             limitHour = "";
-            parkingCapacity = "";
-            showParkingCapacity = false;
+            
         }
     }
 }

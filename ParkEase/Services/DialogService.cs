@@ -17,15 +17,14 @@ namespace ParkEase.Services
             return Application.Current.MainPage.DisplayAlert(title, message, cancel);
         }
 
-        public Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour, string parkingCapacity, bool showParkingCapacity)
+        public Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour)
         {
             var bottomSheetViewModel = new BottomSheetViewModel
             {
                 Address = address,
                 ParkingFee = parkingFee,
                 LimitHour = limitHour,
-                ParkingCapacity = parkingCapacity,
-                ShowParkingCapacity = showParkingCapacity
+                
             };
 
             var sheet = new MyBottomSheet(bottomSheetViewModel)

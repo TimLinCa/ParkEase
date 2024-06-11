@@ -25,12 +25,6 @@ namespace ParkEase.ViewModel
         private string parkingSpot;
 
         [ObservableProperty]
-        private string parkingCapacity;
-
-        //[ObservableProperty]
-        //private Location? startLocation; 
-
-        [ObservableProperty]
         private ObservableCollection<MapLine> mapLines;  //list on map
 
         [ObservableProperty]
@@ -73,8 +67,7 @@ namespace ParkEase.ViewModel
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             parkingSpot = "";
-            parkingCapacity = "";
-            //startLocation = null;
+
 
             ParkingTimes = new ObservableCollection<string>   /*https://www.calgaryparking.com/find-parking/on-street.html*/
             {
@@ -115,7 +108,6 @@ namespace ParkEase.ViewModel
                         ParkingSpot = ParkingSpot,
                         ParkingTime = SelectedParkingTime,
                         ParkingFee = SelectedParkingFee,
-                        ParkingCapacity = ParkingCapacity,
                         Points = SelectedMapLine.Points
                     };
 
@@ -124,7 +116,6 @@ namespace ParkEase.ViewModel
                         .Set(p => p.ParkingSpot, parkingData.ParkingSpot)
                         .Set(p => p.ParkingTime, parkingData.ParkingTime)
                         .Set(p => p.ParkingFee, parkingData.ParkingFee)
-                        .Set(p => p.ParkingCapacity, parkingData.ParkingCapacity)
                         .Set(p => p.Points, parkingData.Points);
 
                     var existingData = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
@@ -157,7 +148,6 @@ namespace ParkEase.ViewModel
             return !string.IsNullOrEmpty(ParkingSpot) &&
                    !string.IsNullOrEmpty(SelectedParkingTime) &&
                    !string.IsNullOrEmpty(SelectedParkingFee) &&
-                   !string.IsNullOrEmpty(ParkingCapacity) &&
                    SelectedMapLine != null &&
                    SelectedMapLine.Points != null &&
                    SelectedMapLine.Points.Count == 2;
@@ -173,7 +163,6 @@ namespace ParkEase.ViewModel
                 ParkingSpot = SelectedParkingData.ParkingSpot;
                 SelectedParkingTime = SelectedParkingData.ParkingTime;
                 SelectedParkingFee = SelectedParkingData.ParkingFee;
-                ParkingCapacity = SelectedParkingData.ParkingCapacity;
             }
 
         }

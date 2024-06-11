@@ -82,13 +82,7 @@
                     FontAttributes="Bold"
                     Text="Parking Fee:" />
                 <Label Margin="10,3" Text="{Binding SelectedParkingData.ParkingFee}" />
-
-                <Label
-                    Margin="10,3"
-                    FontAttributes="Bold"
-                    Text="Parking Capacity:" />
-                <Label Margin="10,3,10,40" Text="{Binding SelectedParkingData.ParkingCapacity}" />
-
+              
                 <material:TextField
                     Title="Parking Spot"
                     Margin="10,3"
@@ -116,13 +110,6 @@
                     SelectedItem="{Binding SelectedParkingFee}">
                     <validation:RequiredValidation />
                 </material:PickerField>
-
-                <material:TextField
-                    Title="Parking Capacity"
-                    Margin="10,3"
-                    Text="{Binding ParkingCapacity}">
-                    <validation:RequiredValidation />
-                </material:TextField>
 
                 <Button
                     x:Name="btn_Test"

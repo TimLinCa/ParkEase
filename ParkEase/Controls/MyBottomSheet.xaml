@@ -59,13 +59,6 @@
                          <Label Text="{Binding LimitHour}"/>
                     </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10"  Margin="0,3" IsVisible="{Binding ShowParkingCapacity}">
-                        <Image Source="parking_icon.png"
-                                       WidthRequest="20"
-                                       HeightRequest="20"
-                                       Aspect="AspectFit"/>
-                        <Label Text="{Binding ParkingCapacity}"/>
-                    </HorizontalStackLayout>
             </VerticalStackLayout>
         </Frame>
 
