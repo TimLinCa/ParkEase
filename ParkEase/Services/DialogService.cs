@@ -11,14 +11,21 @@ namespace ParkEase.Services
 {
     public class DialogService : IDialogService
     {
+        private MyBottomSheet currentBottomSheet;
 
         public Task ShowAlertAsync(string title, string message, string cancel = "OK")
         {
             return Application.Current.MainPage.DisplayAlert(title, message, cancel);
         }
 
-        public Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour)
+        public async Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour)
         {
+            // Close the existing bottom sheet if it exists
+            if (currentBottomSheet != null)
+            {
+                await currentBottomSheet.DismissAsync();
+            }
+
             var bottomSheetViewModel = new BottomSheetViewModel
             {
                 Address = address,
@@ -27,13 +34,13 @@ namespace ParkEase.Services
                 
             };
 
-            var sheet = new MyBottomSheet(bottomSheetViewModel)
+            currentBottomSheet = new MyBottomSheet(bottomSheetViewModel)
             {
                 HasHandle = true,
                 HandleColor = Colors.Black
             };
 
-            return sheet.ShowAsync();
+            await currentBottomSheet.ShowAsync();
         }
     }
 }

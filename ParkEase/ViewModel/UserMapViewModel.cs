@@ -71,10 +71,13 @@ namespace ParkEase.ViewModel
                     // Create a filter to match the selected line's points
                     var filter = Builders<ParkingData>.Filter.Eq(pd => pd.Points, selectedLine.Points);                    
 
+                    // Fetch the parking data that matches the filter from MongoDB database
                     List<ParkingData> parkingDataList = await mongoDBService.GetDataFilter<ParkingData>(CollectionName.ParkingData, filter);                   
 
+                    // Check if the parking data is not null and has at least one item
                     if (parkingDataList != null && parkingDataList.Count > 0)
                     {
+                        // Get the first parking data from the list
                         var parkingData = parkingDataList.First();                        
 
                         // Extract necessary information from the parking data
@@ -82,7 +85,6 @@ namespace ParkEase.ViewModel
                         var parkingFee = parkingData.ParkingFee; 
                         var limitedHour = parkingData.ParkingTime; 
                         
-
                         // Show the bottom sheet with the line's information
                         await dialogService.ShowPrivateMapBottomSheet(address, parkingFee, limitedHour); // Public parking
                     }
