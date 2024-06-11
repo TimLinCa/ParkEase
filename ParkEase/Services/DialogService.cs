@@ -17,22 +17,24 @@ namespace ParkEase.Services
             return Application.Current.MainPage.DisplayAlert(title, message, cancel);
         }
 
-        public Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHours, string parkingCapacity)
+        public Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour, string parkingCapacity, bool showParkingCapacity)
         {
-            BottomSheetViewModel bottomSheetViewModel = new BottomSheetViewModel();
-            bottomSheetViewModel.Address = address;
-            bottomSheetViewModel.ParkingFee = parkingFee;
-            bottomSheetViewModel.LimitHour = limitHours;
-            bottomSheetViewModel.ParkingCapacity = parkingCapacity;
+            var bottomSheetViewModel = new BottomSheetViewModel
+            {
+                Address = address,
+                ParkingFee = parkingFee,
+                LimitHour = limitHour,
+                ParkingCapacity = parkingCapacity,
+                ShowParkingCapacity = showParkingCapacity
+            };
 
-            MyBottomSheet sheet = new MyBottomSheet(bottomSheetViewModel)
+            var sheet = new MyBottomSheet(bottomSheetViewModel)
             {
                 HasHandle = true,
                 HandleColor = Colors.Black
             };
 
             return sheet.ShowAsync();
-
         }
     }
 }
