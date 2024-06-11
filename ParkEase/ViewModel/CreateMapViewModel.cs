@@ -549,56 +549,5 @@ namespace ParkEase.ViewModel
             Rectangles.Clear();
             addNewFloorClicked = false;
         }
-
-        /*// Edit Command
-        public ICommand EditMapCommand => new RelayCommand(async () =>
-        {
-            try
-            {
-                var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                var loadedData = data.FirstOrDefault(data => data.Address == "16 Ave NW");
-                if (loadedData != null)
-                {
-                    CompanyName = loadedData.CompanyName;
-                    Address = loadedData.Address;
-                    City = loadedData.City;
-                    Fee = loadedData.ParkingInfo.Fee;
-                    LimitHour = loadedData.ParkingInfo.LimitedHour;
-                    listFloorInfos = loadedData.FloorInfo;
-
-                    foreach (FloorInfo floorInfo in listFloorInfos)
-                    {
-                        if (floorInfo != null)
-                        {
-                            Floor = floorInfo.Floor;
-
-                            // Load image
-                            byte[] imageByte = floorInfo.ImageData;
-                            using (MemoryStream ms = new MemoryStream(imageByte))
-                            {
-                                ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
-                            }
-
-                            // Load rectangles
-                            listRectangles = floorInfo.Rectangles;
-                            foreach (Rectangle rectangle in listRectangles)
-                            {
-                                float pointX = rectangle.Rect.X;
-                                float pointY = rectangle.Rect.Y;
-                                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
-                                Rectangles.Add(rect);
-
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-        });*/
-
     }
-
 }

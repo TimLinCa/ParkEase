@@ -28,15 +28,18 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ObservableCollection<RectF> rectangles;
 
+        [ObservableProperty]
+        private ObservableCollection<Rectangle> listRectangle;
+
         private string selectedPropertyId;
 
         private string rectStrokeColor;
 
-        private List<Rectangle> listRectangles;
+        //private List<Rectangle> listRectangles;
 
         private List<PrivateParking> parkingLotData;
 
-        private List<FloorInfo> listFloorInfos;
+        //private List<FloorInfo> listFloorInfos;
 
         private readonly IMongoDBService mongoDBService;
 
@@ -51,7 +54,7 @@ namespace ParkEase.ViewModel
             this.parkEaseModel = model;
             selectedFloorName = string.Empty;
             FloorNames = new ObservableCollection<string>();
-            rectangles = new ObservableCollection<RectF>();
+            ListRectangle = new ObservableCollection<Rectangle>();
         }
 
         [RelayCommand]
@@ -74,35 +77,56 @@ namespace ParkEase.ViewModel
 
                 /*if (parkingLotData.Count > 0)
                 {*/
-                    var selectedProperty = parkingLotData[0];
-                    string address = selectedProperty.Address;
-                    string city = selectedProperty.City;
-                    double fee = selectedProperty.ParkingInfo.Fee;
-                    string limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
-                    listFloorInfos = selectedProperty.FloorInfo;
-                    foreach (var floor in listFloorInfos)
-                    {
-                        FloorNames.Add(floor.Floor);
-                    }
+                var selectedProperty = parkingLotData[0];
+                string address = selectedProperty.Address;
+                string city = selectedProperty.City;
+                double fee = selectedProperty.ParkingInfo.Fee;
+                string limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
+                List<FloorInfo> listFloorInfos = selectedProperty.FloorInfo;
+                foreach (var floor in listFloorInfos)
+                {
+                    FloorNames.Add(floor.Floor);
+                }
 
-                    listRectangles = listFloorInfos[0].Rectangles;
-                    foreach (Rectangle rectangle in listRectangles)
-                    {
-                        float pointX = rectangle.Rect.X;
-                        float pointY = rectangle.Rect.Y;
-                        var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
-                        Rectangles.Add(rect);
-                    }
+                FloorInfo selectedMap = listFloorInfos.FirstOrDefault(data => data.Floor == "Ground");
+                if (selectedMap == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("No parking map found.");
+                    return;
+                }
 
-                await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", string.Empty, false); // Private parking
-                //}
+                ListRectangle.Clear();
+                foreach (var rectangle in selectedMap.Rectangles)
+                {
+                    ListRectangle.Add(rectangle);
+                }
+
+                await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", "", false);
             }
             catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
+        }
 
-            
+        private void ShowSelectedMap()
+        {
+            /*var selectedMap = listFloorInfos.FirstOrDefault(data => data.Floor == SelectedFloorName);
+            if (selectedMap == null)
+            {
+                System.Diagnostics.Debug.WriteLine("No parking map found.");
+                return;
+            }
+
+            Rectangles.Clear();
+            listRectangles = selectedMap.Rectangles;
+            foreach (Rectangle rectangle in listRectangles)
+            {
+                float pointX = rectangle.Rect.X;
+                float pointY = rectangle.Rect.Y;
+                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
+                Rectangles.Add(rect);
+            }*/
         }
     }
 }

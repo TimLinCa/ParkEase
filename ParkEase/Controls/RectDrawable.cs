@@ -29,78 +29,61 @@ namespace ParkEase.Controls
         {
             lock (drawLock)
             {
-                try
+                if (ImageSource != null)
                 {
-                    if (ImageSource != null)
+                    IImage image = ImageSource;
+
+
+                    if (image != null)
                     {
-                        IImage image = ImageSource;
+                        //Calculate image width and height to show
+                        //https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview
 
+                        float viewRatio = dirtyRect.Width / dirtyRect.Height;
+                        float imageRatio = image.Width / image.Height;
+                        float offsetX, offsetY, drawWidth, drawHeight;
 
-                        if (image != null)
+                        if (imageRatio <= viewRatio)
                         {
-                            //Calculate image width and height to show
-                            //https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview
+                            drawHeight = dirtyRect.Height;
+                            drawWidth = drawHeight / imageRatio;
 
-                            float viewRatio = dirtyRect.Width / dirtyRect.Height;
-                            float imageRatio = image.Width / image.Height;
-                            float offsetX, offsetY, drawWidth, drawHeight;
-
-                            if (imageRatio <= viewRatio)
-                            {
-                                drawHeight = dirtyRect.Height;
-                                drawWidth = drawHeight / imageRatio;
-
-                                offsetY = 0;
-                                offsetX = (dirtyRect.Width - drawWidth) / 2;
-                            }
-                            else
-                            {
-                                drawWidth = dirtyRect.Width;
-                                drawHeight = drawWidth / imageRatio;
-
-                                offsetX = 0;
-                                offsetY = (dirtyRect.Height - drawHeight) / 2;
-                            }
-
-
-                            canvas.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-
-                            
+                            offsetY = 0;
+                            offsetX = (dirtyRect.Width - drawWidth) / 2;
                         }
-                    }
-
-                    if (Rectangles != null)
-                    {
-                        canvas.StrokeColor = Colors.Green;
-                        canvas.StrokeSize = 2;
-                        canvas.FontColor = Colors.Black;
-                        canvas.FontSize = 18;
-                        canvas.Font = Font.DefaultBold;
-
-                        for (int i = 0; i < Rectangles.Count; i++)
+                        else
                         {
-                            RectF rect = Rectangles[i];
-                            canvas.DrawRectangle(rect);
+                            drawWidth = dirtyRect.Width;
+                            drawHeight = drawWidth / imageRatio;
 
-                            var number = (i + 1).ToString();
-                            var x = rect.X + 10;
-                            var y = rect.Y + 20;
-                            canvas.DrawString(number, x, y, HorizontalAlignment.Left);
+                            offsetX = 0;
+                            offsetY = (dirtyRect.Height - drawHeight) / 2;
+                        }
+                        canvas.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+
+                        if (Rectangles != null)
+                        {
+                            canvas.StrokeColor = Color.FromRgba("#009D00");
+                            canvas.StrokeSize = 2;
+                            canvas.FontColor = Colors.Black;
+                            canvas.FontSize = 18;
+                            canvas.Font = Font.DefaultBold;
+
+                            for (int i = 0; i < Rectangles.Count; i++)
+                            {
+                                RectF rect = Rectangles[i];
+                                canvas.DrawRectangle(rect);
+
+                                var number = (i + 1).ToString();
+                                var x = rect.X + 10;
+                                var y = rect.Y + 20;
+                                canvas.DrawString(number, x, y, HorizontalAlignment.Left);
+                            }
                         }
                     }
                 }
-                catch (Exception)
-                {
-
-                }
-
             }
-
-
             // https://github.com/dotnet/maui/issues/10624
-
-
-
         }
     }
 }

@@ -10,7 +10,8 @@
                    BackgroundColor="WhiteSmoke">
     <the49:BottomSheet.Detents>
         <the49:ContentDetent IsDefault="True"/>
-        <the49:RatioDetent Ratio="0.8"/>
+        <the49:HeightDetent Height="30"/>
+        <the49:RatioDetent Ratio="0.8" />
     </the49:BottomSheet.Detents>
     <VerticalStackLayout>
 

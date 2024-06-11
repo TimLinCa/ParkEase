@@ -13,19 +13,19 @@
             ItemsSource="{Binding FloorNames}"
             SelectedItem="{Binding SelectedFloorName}"
             AllowClear="True"/>-->
-        <!--<Border
+        <Border
             BackgroundColor="WhiteSmoke"
             Stroke="#512BD4">
             <controls:RecGraphicsView
             x:Name="RectangleDrawableView"
-            HorizontalOptions="Fill"
-            VerticalOptions="Fill"
-            Rectangles="{Binding Rectangles}">
+            MinimumHeightRequest="650"
+            MinimumWidthRequest="100"
+            ListRectangle="{Binding ListRectangle}">
                 <controls:RecGraphicsView.Drawable>
-                    <controls:RectDrawable />
+                    <controls:RectDrawableMobile />
                 </controls:RecGraphicsView.Drawable>
             </controls:RecGraphicsView>
-        </Border>-->
+        </Border>
 
         <Button
             Text="Load Data"
