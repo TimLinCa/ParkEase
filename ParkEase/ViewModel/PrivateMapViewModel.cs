@@ -39,6 +39,14 @@ namespace ParkEase.ViewModel
 
         private List<PrivateParking> parkingLotData;
 
+        private List<PrivateStatus> privateStatusData;
+
+        private string address;
+        private string city;
+        private double fee;
+        private string limitHour;
+        private List<FloorInfo> listFloorInfos;
+
         //private List<FloorInfo> listFloorInfos;
 
         private readonly IMongoDBService mongoDBService;
@@ -55,16 +63,20 @@ namespace ParkEase.ViewModel
             selectedFloorName = string.Empty;
             FloorNames = new ObservableCollection<string>();
             ListRectangle = new ObservableCollection<Rectangle>();
+            privateStatusData = new List<PrivateStatus>();
         }
 
-        [RelayCommand]
-        public async void LoadData()
+        public ICommand LoadDataCommand => new RelayCommand(async () =>
         {
             try
             {
                 /* var filter = Builders<PrivateParking>.Filter.Eq(data => data.Id, "666763d4d2c61b754e32a094");
                  parkingLotData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);*/
-
+                parkingLotData?.Clear();
+                FloorNames?.Clear();
+                ListRectangle?.Clear();
+                privateStatusData?.Clear();
+                listFloorInfos?.Clear();
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 if (parkingLotData == null || parkingLotData.Count == 0)
@@ -78,55 +90,79 @@ namespace ParkEase.ViewModel
                 /*if (parkingLotData.Count > 0)
                 {*/
                 var selectedProperty = parkingLotData[0];
-                string address = selectedProperty.Address;
-                string city = selectedProperty.City;
-                double fee = selectedProperty.ParkingInfo.Fee;
-                string limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
-                List<FloorInfo> listFloorInfos = selectedProperty.FloorInfo;
+                address = selectedProperty.Address;
+                city = selectedProperty.City;
+                fee = selectedProperty.ParkingInfo.Fee;
+                limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
+                listFloorInfos = selectedProperty.FloorInfo;
                 foreach (var floor in listFloorInfos)
                 {
                     FloorNames.Add(floor.Floor);
                 }
 
-                FloorInfo selectedMap = listFloorInfos.FirstOrDefault(data => data.Floor == "Ground");
-                if (selectedMap == null)
+                // Fetch PrivateStatus data from MongoDB
+                privateStatusData = await mongoDBService.GetData<PrivateStatus>(CollectionName.PrivateStatus);
+                if (privateStatusData == null || privateStatusData.Count == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("No parking map found.");
+                    System.Diagnostics.Debug.WriteLine("No private status data found.");
                     return;
                 }
 
-                ListRectangle.Clear();
-                foreach (var rectangle in selectedMap.Rectangles)
-                {
-                    ListRectangle.Add(rectangle);
-                }
+                // Filter privateStatusData based on selectedPropertyId
+                privateStatusData = privateStatusData.Where(item => item.AreaId == "666763d4d2c61b754e32a094").ToList();
 
-                await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}");
+
+                
+                await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", "");
+
             }
             catch (Exception ex)
             {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+                await dialogService.ShowAlertAsync("Error in Load data", ex.Message, "OK");
             }
+        });
+
+        partial void OnSelectedFloorNameChanged(string? value)
+        {
+            _ = ShowSelectedMap();
         }
 
-        private void ShowSelectedMap()
+        private async Task ShowSelectedMap()
         {
-            /*var selectedMap = listFloorInfos.FirstOrDefault(data => data.Floor == SelectedFloorName);
+            // ShowSelectedMap Function
+            FloorInfo selectedMap = listFloorInfos.FirstOrDefault(data => data.Floor == SelectedFloorName);
             if (selectedMap == null)
             {
                 System.Diagnostics.Debug.WriteLine("No parking map found.");
                 return;
             }
 
-            Rectangles.Clear();
-            listRectangles = selectedMap.Rectangles;
-            foreach (Rectangle rectangle in listRectangles)
+            // Filter by selectedFloorName and Create a dictionary for quick lookup of statuses by index
+            var filterPrivateStatus = privateStatusData
+                .Where(item => item.Floor == SelectedFloorName)
+                .ToDictionary(item => item.Index, item => item.Status);
+
+            // Variable to count availability status (false means available lot)
+            int availabilityCount = 0;
+
+            // Update rectangle colors based on status and add them to ListRectangle
+            foreach (var rectangle in selectedMap.Rectangles)
             {
-                float pointX = rectangle.Rect.X;
-                float pointY = rectangle.Rect.Y;
-                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
-                Rectangles.Add(rect);
-            }*/
+                if (filterPrivateStatus.TryGetValue(rectangle.Index, out bool isAvailable))
+                {
+                    if (!isAvailable)
+                    {
+                        rectangle.Color = "#009D00";
+                        availabilityCount++;
+                    }
+                    else
+                    {
+                        rectangle.Color = "#E11919";
+                    }
+                }
+                ListRectangle.Add(rectangle);
+            }
+            await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots");
         }
     }
 }

@@ -363,7 +363,7 @@ namespace ParkEase.ViewModel
                 // Add new floor information
                 if (addNewFloorClicked)
                 {
-                    var floorInfo = new FloorInfo(Floor, listRectangles, Rectangles.Count, imageData);
+                    var floorInfo = new FloorInfo(Floor, listRectangles, imageData);
                     listFloorInfos.Add(floorInfo);
                     FloorNames.Add(floorInfo.Floor);
 
@@ -376,7 +376,6 @@ namespace ParkEase.ViewModel
                     if (existingFloorInfo != null)
                     {
                         existingFloorInfo.Rectangles = listRectangles;
-                        existingFloorInfo.NumberOfLot = Rectangles.Count;
                         existingFloorInfo.ImageData = imageData;
 
                         ResetFloorInfo();

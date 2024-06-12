@@ -4,18 +4,20 @@
              x:Class="ParkEase.Page.PrivateMapPage"
              xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
              x:DataType="vm:PrivateMapViewModel">
     <VerticalStackLayout>
-        <Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />
-        <!--<material:PickerField
+        <!--<Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />-->
+        <material:PickerField
             Title="Pick a floor"
+            Margin="10,5,10,0"
+            Icon="{FontImageSource FontFamily=MaterialOutlined,
+                       Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
             ItemsSource="{Binding FloorNames}"
             SelectedItem="{Binding SelectedFloorName}"
-            AllowClear="True"/>-->
-        <Border
-            BackgroundColor="WhiteSmoke"
-            Stroke="#512BD4">
+            AllowClear="True"/>
+     
             <controls:RecGraphicsView
             x:Name="RectangleDrawableView"
             MinimumHeightRequest="650"
@@ -25,7 +27,7 @@
                     <controls:RectDrawableMobile />
                 </controls:RecGraphicsView.Drawable>
             </controls:RecGraphicsView>
-        </Border>
+       
 
         <Button
             Text="Load Data"

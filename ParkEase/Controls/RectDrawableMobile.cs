@@ -25,7 +25,7 @@ namespace ParkEase.Controls
             {
                 try
                 {
-                    if (ListRectangle != null)
+                    if (ListRectangle?.Count > 0)
                     {
                         canvas.StrokeSize = 2;
                         canvas.FontColor = Colors.Black;

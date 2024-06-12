@@ -86,7 +86,7 @@ namespace ParkEase.ViewModel
                         var limitedHour = parkingData.ParkingTime; 
                         
                         // Show the bottom sheet with the line's information
-                        await dialogService.ShowPrivateMapBottomSheet(address, parkingFee, limitedHour); // Public parking
+                        //await dialogService.ShowPrivateMapBottomSheet(address, parkingFee, limitedHour); // Public parking
                     }
                     else
                     {
