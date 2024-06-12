@@ -58,10 +58,32 @@ namespace ParkEase.Controls
                     margin: 0;
                     padding: 0;
                 }
+
+                #controls {
+                    height: 20%;
+                    padding: 10px;
+                    background: #f9f9f9;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
             </style>
         </head>
         <body>
             <div id=""map""></div>
+
+            <div id=""controls"">
+                <label for=""rangeSelect"">Select Range: </label>
+                <select id=""rangeSelect"" onchange=""selectRange()"">
+                    <option value=""0.2"">200 meters</option>
+                    <option value=""0.5"">500 meters</option>
+                    <option value=""1"">1000 meters</option>
+                </select>
+                <button onclick=""updateRange()"">Update Range</button>
+
+            </div>
+
             <script>
                 let map;
                 let start = false;
@@ -71,6 +93,10 @@ namespace ParkEase.Controls
                 let hoverLine = null;
                 let initial = true;
                 let userMarker = null;
+                let circle;
+                let currentLat;
+                let currentLng;
+
                 // Initializes the Google Map 
                 function initMap(lat, lng) {
                     map = new google.maps.Map(document.getElementById('map'), {
@@ -78,7 +104,7 @@ namespace ParkEase.Controls
                         zoom: 16// Specify the zoom level
                     });
                     // GPS marker for the user 
-                    addUserMarker(lat, lng);
+                    addUserMarker(lat, lng, 0.2);
                 }
 
                 // GPS marker for the user
@@ -171,8 +197,6 @@ namespace ParkEase.Controls
                       return JSON.stringify(result);
                 }
 
-                let circle;
-
                 function drawCircle(lat, lng, radius) {
                     // Remove the existing circle if it exists
                     if (circle) {
@@ -197,6 +221,34 @@ namespace ParkEase.Controls
                      initMap(lat, lng); // Initialize the map
                      drawCircle(lat, lng, 0.2); // Draw a 200m radius circle
                 }
+
+                function updateRange() {
+                    const rangeSelect = document.getElementById('rangeSelect');
+                    const selectedRange = parseInt(rangeSelect.value);
+                    addUserMarker(currentLat, currentLng, selectedRange);
+                } 
+
+                // Get user's current location
+                function getUserLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            currentLat = position.coords.latitude;
+                            currentLng = position.coords.longitude;
+                            initMapWithCircle(currentLat, currentLng);
+                        }, (error) => {
+                            console.error(""Error getting location: "", error);
+                            // Handle error case, e.g., use a default location
+                        });
+                    } else {
+                        console.error(""Geolocation is not supported by this browser."");
+                        // Handle error case, e.g., use a default location
+                    }
+                }
+
+                // Initialize the map with the user's current location when the page loads
+                window.onload = function() {
+                    getUserLocation();
+                };
          
             </script>
             <script src=""https://maps.googleapis.com/maps/api/js?key=AIzaSyCMPKV70vmSd-153eJsECz6gJD0AipZD-M&callback=initMap"" async defer></script>
