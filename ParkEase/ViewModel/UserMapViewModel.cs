@@ -26,6 +26,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private MapLine selectedMapLine;
 
+        [ObservableProperty]
+        private string availableSpots;
+
         private IMongoDBService mongoDBService;
         private IDialogService dialogService;
         public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
@@ -86,7 +89,7 @@ namespace ParkEase.ViewModel
                         var limitedHour = parkingData.ParkingTime; 
                         
                         // Show the bottom sheet with the line's information
-                        //await dialogService.ShowPrivateMapBottomSheet(address, parkingFee, limitedHour); // Public parking
+                        await dialogService.ShowPrivateMapBottomSheet(address, parkingFee, limitedHour, availableSpots); // Public parking
                     }
                     else
                     {
