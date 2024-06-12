@@ -49,8 +49,38 @@ namespace ParkEase.Controls
             <meta charset=""utf-8"" />
             <title></title>
             <style>
+                #controls {
+                    height: 8%;
+                    padding: 10px;
+                    background: #f9f9f9;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                #controls select {
+                    padding: 5px; /* Increase padding */
+                    font-size: 15px; /* Increase font size */
+                    border-radius: 5px; /* Add rounded corners */
+                }
+
+                #controls button {
+                    background-color: #007BFF; /* Blue background */
+                    color: white; /* White text */
+                    border: none; /* Remove border */
+                    padding: 10px 20px; /* Padding for size */
+                    cursor: pointer; /* Pointer cursor on hover */
+                    border-radius: 5px; /* Rounded corners */
+                    font-size: 15px; /* Font size */
+                }
+
+                #controls button:hover {
+                    background-color: #0056b3; /* Darker blue on hover */
+                }
+
                 #map {
-                    height: 100%;
+                    height: 92%;
                 }
 
                 html, body {
@@ -59,14 +89,7 @@ namespace ParkEase.Controls
                     padding: 0;
                 }
 
-                #controls {
-                    height: 20%;
-                    padding: 10px;
-                    background: #f9f9f9;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
+                
 
             </style>
         </head>
@@ -75,7 +98,7 @@ namespace ParkEase.Controls
 
             <div id=""controls"">
                 <label for=""rangeSelect"">Select Range: </label>
-                <select id=""rangeSelect"" onchange=""selectRange()"">
+                <select id=""rangeSelect"" >
                     <option value=""0.2"">200 meters</option>
                     <option value=""0.5"">500 meters</option>
                     <option value=""1"">1000 meters</option>
@@ -99,12 +122,16 @@ namespace ParkEase.Controls
 
                 // Initializes the Google Map 
                 function initMap(lat, lng) {
+
+                    currentLat = lat;
+                    currentLng = lng;
                     map = new google.maps.Map(document.getElementById('map'), {
                         center: { lat: lat, lng: lng  },  // Specify the coordinates for the center of the map
                         zoom: 16// Specify the zoom level
                     });
                     // GPS marker for the user 
-                    addUserMarker(lat, lng, 0.2);
+                    addUserMarker(lat, lng);
+                    drawCircle(lat, lng, 0.2);
                 }
 
                 // GPS marker for the user
@@ -219,13 +246,13 @@ namespace ParkEase.Controls
                 // Call this function to initialize the map with a circle
                 function initMapWithCircle(lat, lng) {
                      initMap(lat, lng); // Initialize the map
-                     drawCircle(lat, lng, 0.2); // Draw a 200m radius circle
+                     
                 }
 
                 function updateRange() {
                     const rangeSelect = document.getElementById('rangeSelect');
-                    const selectedRange = parseInt(rangeSelect.value);
-                    addUserMarker(currentLat, currentLng, selectedRange);
+                    const selectedRange = parseFloat(rangeSelect.value);
+                    drawCircle(currentLat, currentLng, selectedRange);
                 } 
 
                 // Get user's current location
