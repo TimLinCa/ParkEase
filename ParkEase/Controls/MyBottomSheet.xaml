@@ -32,36 +32,41 @@
                Padding="12"
                Margin="0,10"
                HasShadow="True">
-                    <VerticalStackLayout>
-                        <Label Text="{Binding Address}"
+            <VerticalStackLayout>
+                <Label Text="{Binding Address}"
                            FontSize="20"
                            FontAttributes="Bold"/>
                 <!-- Light line separator -->
-                    <BoxView HeightRequest="1"
+                <BoxView HeightRequest="1"
                          WidthRequest="1000"
                          BackgroundColor="LightGray"
                          HorizontalOptions="FillAndExpand"
                          Margin="0,10"/>
 
                 <HorizontalStackLayout Spacing="10"  Margin="0,3">
-                        <Image Source="dollar_icon.png"
+                    <Image Source="dollar_icon.png"
                                        WidthRequest="20"
                                        HeightRequest="20"
                                        Aspect="AspectFit"/>
-                        <Label Text="{Binding ParkingFee}"/>
-                    </HorizontalStackLayout>
+                    <Label Text="{Binding ParkingFee}"/>
+                </HorizontalStackLayout>
 
                 <HorizontalStackLayout Spacing="10"  Margin="0,3">
-                         <Image Source="clock_icon.png"
+                    <Image Source="clock_icon.png"
                                        WidthRequest="20"
                                        HeightRequest="20"
                                        Aspect="AspectFit"/>
-                         <Label Text="{Binding LimitHour}"/>
-                    </HorizontalStackLayout>
+                    <Label Text="{Binding LimitHour}"/>
+                </HorizontalStackLayout>
 
+                <HorizontalStackLayout Spacing="10"  Margin="0,3">
+                    <Image Source="parking_icon.png"
+                           WidthRequest="20"
+                           HeightRequest="20"
+                           Aspect="AspectFit"/>
+                    <Label Text="{Binding Availability}"/>
+                </HorizontalStackLayout>
             </VerticalStackLayout>
         </Frame>
-
-
     </VerticalStackLayout>
 </the49:BottomSheet>

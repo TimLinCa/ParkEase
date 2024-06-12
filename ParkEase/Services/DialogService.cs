@@ -20,7 +20,7 @@ namespace ParkEase.Services
 
         public async Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour)
         {
-            // Close the existing bottom sheet if it exists
+            
             if (currentBottomSheet != null)
             {
                 await currentBottomSheet.DismissAsync();
