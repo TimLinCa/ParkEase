@@ -69,14 +69,14 @@ namespace ParkEase.Controls
                     background-color: #007BFF; /* Blue background */
                     color: white; /* White text */
                     border: none; /* Remove border */
-                    padding: 10px 20px; /* Padding for size */
-                    cursor: pointer; /* Pointer cursor on hover */
-                    border-radius: 5px; /* Rounded corners */
-                    font-size: 15px; /* Font size */
+                    padding: 10px 20px; 
+                    cursor: pointer; 
+                    border-radius: 5px; 
+                    font-size: 15px; 
                 }
 
                 #controls button:hover {
-                    background-color: #0056b3; /* Darker blue on hover */
+                    background-color: #0056b3; 
                 }
 
                 #map {
@@ -241,7 +241,16 @@ namespace ParkEase.Controls
                         strokeOpacity: 0.8,
                         strokeWeight: 2
                     });
+
+                     // Calculate the circle's bounds
+                        var bounds = new google.maps.LatLngBounds();
+                        bounds.extend(new google.maps.LatLng(lat + (radius / 111), lng + (radius / 111))); // Top right
+                        bounds.extend(new google.maps.LatLng(lat - (radius / 111), lng - (radius / 111))); // Bottom left
+
+                        // Fit the map to the circle's bounds
+                        map.fitBounds(bounds);
                 }
+
 
                 // Call this function to initialize the map with a circle
                 function initMapWithCircle(lat, lng) {
@@ -341,17 +350,20 @@ namespace ParkEase.Controls
                 }
             }
         }
-
+        
+        // async indicates that the method contains asynchronous operations.
         private async void GMapMobile_Loaded(object? sender, EventArgs e)
         {
-            currentInstance = (GMapMobile)sender;
-            var location = await Geolocation.GetLocationAsync();
+            // assigned to the static variable
+            currentInstance = (GMapMobile)sender; //sender the object that raised the event
+            var location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
             if (location != null)
-            {   
-                //For test only!!!!
+            {
+                // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator
                 string jsCommand = $"initMapWithCircle({location.Latitude}, {location.Longitude});";
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
-                LoadedEvent?.Invoke(sender, e);
+                LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
+
             }
         }
 
