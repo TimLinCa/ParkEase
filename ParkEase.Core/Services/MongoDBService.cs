@@ -180,6 +180,7 @@ namespace ParkEase.Core.Services
         public static string ParkingData = "ParkingData";
         public static string PrivateParking = "PrivateParking";
         public static string PrivateStatus = "PrivateStatus";
+        public static string PublicStatus = "PublicStatus";
     }
 
   

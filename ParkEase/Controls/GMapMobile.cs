@@ -166,13 +166,15 @@ namespace ParkEase.Controls
                         strokeWeight: 4
                     });
 
+                    line.originalColor = color; // Store the original color
+
                     line.addListener('click', function() {
                          // If there is a previously selected line, reset its color.
                         if (selectedLine != null) {
-                            selectedLine.setOptions({ strokeColor: ""#097969"" });
+                            selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
                         }
                         selectedLine = line; // Set the clicked line as the selected line
-                        selectedLine.setOptions({ strokeColor: ""red"" });
+                        selectedLine.setOptions({ strokeColor: ""yellow"" });
 
                         let lineInfo = getLineInfo(line);
                         window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
