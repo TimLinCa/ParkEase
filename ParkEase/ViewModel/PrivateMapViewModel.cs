@@ -14,6 +14,8 @@ using ParkEase.Core.Data;
 using System.Collections.ObjectModel;
 using MongoDB.Driver;
 using ParkEase.Core.Services;
+using IImage = Microsoft.Maui.Graphics.IImage;
+using Microsoft.Maui.Graphics.Platform;
 
 namespace ParkEase.ViewModel
 {
@@ -30,6 +32,9 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private ObservableCollection<Rectangle> listRectangle;
+
+        [ObservableProperty]
+        private IImage imgSourceData;
 
         private string selectedPropertyId;
 
@@ -133,7 +138,7 @@ namespace ParkEase.ViewModel
             FloorInfo selectedMap = listFloorInfos.FirstOrDefault(data => data.Floor == SelectedFloorName);
             if (selectedMap == null)
             {
-                System.Diagnostics.Debug.WriteLine("No parking map found.");
+                System.Diagnostics.Debug.WriteLine("No selected floor map found.");
                 return;
             }
 
@@ -141,6 +146,13 @@ namespace ParkEase.ViewModel
             var filterPrivateStatus = privateStatusData
                 .Where(item => item.Floor == SelectedFloorName)
                 .ToDictionary(item => item.Index, item => item.Status);
+
+            // Fetch image data
+            var imageData = selectedMap.ImageData;
+            using (MemoryStream ms = new MemoryStream(imageData))
+            {
+                ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
+            }
 
             // Variable to count availability status (false means available lot)
             int availabilityCount = 0;

@@ -278,7 +278,6 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-
         });
 
         // Upload parking map
