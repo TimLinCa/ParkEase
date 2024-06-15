@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,16 +17,12 @@ namespace ParkEase.Core.Data
         [JsonProperty("_id")]
         public string Id { get; set; }
 
-        [BsonElement("companyName")]
         public string CompanyName { get; set; }
 
-        [BsonElement("address")]
         public string Address { get; set; }
 
-        [BsonElement("city")]
         public string City { get; set; }
 
-        [BsonElement("createdBy")]
         public string CreatedBy {  get; set; }
 
         public ParkingInfo ParkingInfo { get; set; }

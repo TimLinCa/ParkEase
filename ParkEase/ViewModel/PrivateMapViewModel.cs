@@ -115,8 +115,6 @@ namespace ParkEase.ViewModel
 
                 parkingLotData = parkingLotData.Where(p => p.Id == "666763d4d2c61b754e32a094").ToList();
 
-                /*if (parkingLotData.Count > 0)
-                {*/
                 var selectedProperty = parkingLotData[0];
                 address = selectedProperty.Address;
                 city = selectedProperty.City;
@@ -192,7 +190,7 @@ namespace ParkEase.ViewModel
             }
 
             // Filter by selectedFloorName and Create a dictionary for quick lookup of statuses by index
-            var filterPrivateStatus = privateStatusData
+            var matchingStatus = privateStatusData
                 .Where(item => item.Floor == SelectedFloorName)
                 .ToDictionary(item => item.Index, item => item.Status);
 
@@ -209,7 +207,7 @@ namespace ParkEase.ViewModel
             // Update rectangle colors based on status and add them to ListRectangle
             foreach (var rectangle in selectedMap.Rectangles)
             {
-                if (filterPrivateStatus.TryGetValue(rectangle.Index, out bool isAvailable))
+                if (matchingStatus.TryGetValue(rectangle.Index, out bool isAvailable))
                 {
                     if (!isAvailable)
                     {

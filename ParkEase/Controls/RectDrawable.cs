@@ -1,5 +1,6 @@
 ﻿//using AVFoundation;
 using Microsoft.Maui.Graphics.Platform;
+using ParkEase.Core.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,7 +21,8 @@ namespace ParkEase.Controls
 
         public int RectCount { get; set; }
 
-        public ObservableCollection<RectF>? Rectangles { get; set; }
+        public ObservableCollection<Rectangle>? ListRectangle { get; set; }
+        //public ObservableCollection<RectF>? Rectangles { get; set; }
 
         public float RectWidth { get; set; } = 100;
         public float RectHeight { get; set; } = 50;
@@ -61,20 +63,23 @@ namespace ParkEase.Controls
                         }
                         canvas.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
-                        if (Rectangles != null)
+                        if (ListRectangle?.Count > 0)
                         {
-                            canvas.StrokeColor = Color.FromRgba("#009D00");
                             canvas.StrokeSize = 2;
                             canvas.FontColor = Colors.Black;
                             canvas.FontSize = 18;
                             canvas.Font = Font.DefaultBold;
 
-                            for (int i = 0; i < Rectangles.Count; i++)
+                            foreach (Rectangle rectangle in ListRectangle)
                             {
-                                RectF rect = Rectangles[i];
+                                float pointX = rectangle.Rect.X;
+                                float pointY = rectangle.Rect.Y;
+                                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
+                                canvas.StrokeColor = Color.FromRgba(rectangle.Color);
+
                                 canvas.DrawRectangle(rect);
 
-                                var number = (i + 1).ToString();
+                                var number = rectangle.Index.ToString();
                                 var x = rect.X + 10;
                                 var y = rect.Y + 20;
                                 canvas.DrawString(number, x, y, HorizontalAlignment.Left);
@@ -82,8 +87,8 @@ namespace ParkEase.Controls
                         }
                     }
                 }
+                // https://github.com/dotnet/maui/issues/10624
             }
-            // https://github.com/dotnet/maui/issues/10624
         }
     }
 }

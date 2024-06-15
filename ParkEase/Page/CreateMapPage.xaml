@@ -257,7 +257,7 @@
                 ImageSource="{Binding ImgSourceData}"
                 MinimumHeightRequest="700"
                 MinimumWidthRequest="700"
-                Rectangles="{Binding Rectangles}">
+                ListRectangle="{Binding ListRectangle}">
                 <controls:RecGraphicsView.Drawable>
                     <controls:RectDrawable />
                 </controls:RecGraphicsView.Drawable>

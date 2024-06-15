@@ -19,11 +19,8 @@ using ParkEase.Core.Services;
 using Microsoft.Maui.Media;
 using Microsoft.Maui.Graphics.Platform;
 using System.Reflection;
-using Microsoft.Maui.Graphics;
 using ParkEase.Core.Model;
-using Amazon.SecurityToken.Model;
 using MongoDB.Driver;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using MongoDB.Bson;
 
 namespace ParkEase.ViewModel
@@ -57,8 +54,11 @@ namespace ParkEase.ViewModel
         //[ObservableProperty]
         private float rectHeight;
 
+        //[ObservableProperty]
+        //private ObservableCollection<RectF> rectangles;
+
         [ObservableProperty]
-        private ObservableCollection<RectF> rectangles;
+        private ObservableCollection<Rectangle> listRectangle;
 
         [ObservableProperty]
         private ObservableCollection<string> propertyAddresses;
@@ -74,10 +74,9 @@ namespace ParkEase.ViewModel
 
         private string selectedPropertyId;
 
-        private List<PrivateParking> privateData;
         private List<PrivateParking> userData;
 
-        private List<Rectangle> listRectangles;
+        //private List<Rectangle> listRectangles;
 
         private List<FloorInfo> listFloorInfos;
 
@@ -105,8 +104,8 @@ namespace ParkEase.ViewModel
             limitHour = 0;
             rectWidth = 100;
             rectHeight = 50;
-            rectangles = new ObservableCollection<RectF>();
-
+            //rectangles = new ObservableCollection<RectF>();
+            ListRectangle = new ObservableCollection<Rectangle>();
             listFloorInfos = new List<FloorInfo>();
             FloorNames = new ObservableCollection<string>();
             PropertyAddresses = new ObservableCollection<string>();
@@ -154,7 +153,7 @@ namespace ParkEase.ViewModel
             try
             {
 
-                userData = (await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking)).Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
+                //userData = (await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking)).Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
 
 
 
@@ -170,14 +169,17 @@ namespace ParkEase.ViewModel
 
 
 
-                /*privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                //privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                //var filter = Builders<PrivateParking>.Filter.Eq(p => p.CreatedBy, parkEaseModel.User.Email);
+                //userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
+                List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 if (privateData == null || privateData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No parking data found.");
                     return;
                 }
-                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();*/
+                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
 
                 _ = GetPropertyAddress();
             }
@@ -269,7 +271,7 @@ namespace ParkEase.ViewModel
                     var selectedFloor = listFloorInfos.FirstOrDefault(data => data.Floor == SelectedFloorName);
                     if (selectedFloor != null)
                     {
-                        Rectangles.Clear();
+                        ListRectangle?.Clear();
                         // Load image
                         imageData = selectedFloor.ImageData;
                         using (MemoryStream ms = new MemoryStream(imageData))
@@ -278,13 +280,9 @@ namespace ParkEase.ViewModel
                         }
 
                         // Load rectangles
-                        listRectangles = selectedFloor.Rectangles;
-                        foreach (Rectangle rectangle in listRectangles)
+                        foreach (var rectangle in selectedFloor.Rectangles)
                         {
-                            float pointX = rectangle.Rect.X;
-                            float pointY = rectangle.Rect.Y;
-                            var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
-                            Rectangles.Add(rect);
+                           ListRectangle.Add(rectangle);
                         }
                     }
                 }
@@ -305,7 +303,7 @@ namespace ParkEase.ViewModel
                         FileResult myPhoto = await MediaPicker.PickPhotoAsync();
                         if (myPhoto != null)
                         {
-                            Rectangles.Clear();
+                            ListRectangle?.Clear();
                             string imgPath = myPhoto.FullPath;
                             Microsoft.Maui.Graphics.IImage image;
                             Assembly assembly = GetType().GetTypeInfo().Assembly;
@@ -364,35 +362,28 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (Rectangles.Count > 0)
+                if (ListRectangle.Count > 0)
                 {
-                    listRectangles = new List<Rectangle>();
-                    for (int i = 0; i < Rectangles.Count; i++)
+                    // Add new floor information
+                    if (addNewFloorClicked)
                     {
-                        var insertedRect = new Rectangle(i + 1, Rectangles[i]);
-                        listRectangles.Add(insertedRect);
-                    };
-                }
-
-                // Add new floor information
-                if (addNewFloorClicked)
-                {
-                    var floorInfo = new FloorInfo(Floor, listRectangles, imageData);
-                    listFloorInfos.Add(floorInfo);
-                    FloorNames.Add(floorInfo.Floor);
-
-                    ResetFloorInfo();
-                }
-                // Edit existing floor information
-                else if (!string.IsNullOrEmpty(SelectedFloorName) && !addNewFloorClicked)
-                {
-                    var existingFloorInfo = listFloorInfos.FirstOrDefault(item => item.Floor == SelectedFloorName);
-                    if (existingFloorInfo != null)
-                    {
-                        existingFloorInfo.Rectangles = listRectangles;
-                        existingFloorInfo.ImageData = imageData;
+                        var floorInfo = new FloorInfo(Floor, ListRectangle.ToList(), imageData);
+                        listFloorInfos.Add(floorInfo);
+                        FloorNames.Add(floorInfo.Floor);
 
                         ResetFloorInfo();
+                    }
+                    // Edit existing floor information
+                    else if (!string.IsNullOrEmpty(SelectedFloorName) && !addNewFloorClicked)
+                    {
+                        var existingFloorInfo = listFloorInfos.FirstOrDefault(item => item.Floor == SelectedFloorName);
+                        if (existingFloorInfo != null)
+                        {
+                            existingFloorInfo.Rectangles = ListRectangle.ToList();
+                            existingFloorInfo.ImageData = imageData;
+
+                            ResetFloorInfo();
+                        }
                     }
                 }
                 else
@@ -419,14 +410,15 @@ namespace ParkEase.ViewModel
                     // if UPDATING existing data
                     if (selectedPropertyId != null && (SelectedAddress != null || SelectedFloorName != null)) 
                     {
-                        var filter = Builders<PrivateParking>.Filter.Eq(data => data.Id, selectedPropertyId);
+                        var filter = Builders<PrivateParking>.Filter.Eq(p => p.Id, selectedPropertyId);
+                        //System.Diagnostics.Debug.WriteLine($"Id: {selectedPropertyId} - filter: {filter.ToJson()}");
                         var update = Builders<PrivateParking>.Update
-                                        .Set(i => i.CompanyName, CompanyName)
-                                        .Set(i => i.Address, Address)
-                                        .Set(i => i.City, City)
-                                        .Set(i => i.CreatedBy, parkEaseModel.User.Email)
-                                        .Set(i => i.ParkingInfo, new ParkingInfo { Fee = Fee, LimitedHour = LimitHour })
-                                        .Set(i => i.FloorInfo, listFloorInfos);
+                                        .Set(p => p.CompanyName, CompanyName)
+                                        .Set(p => p.Address, Address)
+                                        .Set(p => p.City, City)
+                                        .Set(p => p.CreatedBy, parkEaseModel.User.Email)
+                                        .Set(p => p.ParkingInfo, new ParkingInfo { Fee = Fee, LimitedHour = LimitHour })
+                                        .Set(p => p.FloorInfo, listFloorInfos);
                         await mongoDBService.UpdateData<PrivateParking>(CollectionName.PrivateParking, filter, update);
                         await dialogService.ShowAlertAsync("", "Your data is updated.", "OK");
 
@@ -453,7 +445,7 @@ namespace ParkEase.ViewModel
                         };
                         await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
 
-                        privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                        var privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
                         var parkingInfo = privateData.Where(data => data.Address == privateParkingInfo.Address).First();
 
                         await dialogService.ShowAlertAsync("Success", "Your data is saved.\n" + 
@@ -486,7 +478,7 @@ namespace ParkEase.ViewModel
                 if (ImgSourceData != null)
                 {
                     var rect = new RectF(point.X, point.Y, RectWidth, RectHeight);
-                    Rectangles.Add(rect);
+                    ListRectangle.Add(new Rectangle(ListRectangle.Count + 1, rect));
                 }
             }
             catch (Exception ex)
@@ -500,9 +492,9 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (Rectangles.Count > 0)
+                if (ListRectangle.Count > 0)
                 {
-                    Rectangles.RemoveAt(Rectangles.Count - 1);
+                    ListRectangle.RemoveAt(ListRectangle.Count - 1);
                 }
                 else
                 {
@@ -521,9 +513,9 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (Rectangles.Count > 0)
+                if (ListRectangle.Count > 0)
                 {
-                    Rectangles.Clear();
+                    ListRectangle.Clear();
                 }
                 else
                 {
@@ -555,7 +547,7 @@ namespace ParkEase.ViewModel
             listFloorInfos.Clear();
             SelectedFloorName = "";
             FloorNames.Clear();
-            Rectangles.Clear();
+            ListRectangle.Clear();
             ImgSourceData = null;
             imageData = null;
         }
@@ -566,7 +558,7 @@ namespace ParkEase.ViewModel
             ImgSourceData = null;
             RectWidth = 100;
             RectHeight = 50;
-            Rectangles.Clear();
+            ListRectangle.Clear();
             addNewFloorClicked = false;
         }
     }
