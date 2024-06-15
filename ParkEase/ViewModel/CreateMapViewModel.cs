@@ -152,34 +152,23 @@ namespace ParkEase.ViewModel
         {
             try
             {
+                var filter = Builders<PrivateParking>.Filter.Eq(p => p.CreatedBy, parkEaseModel.User.Email);
+                userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
 
-                //userData = (await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking)).Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
+                if (userData == null || userData.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No data found.");
+                    return;
+                }
 
-
-
-                /*var filter = Builders<PrivateParking>.Filter.Eq(data => data.CreatedBy, parkEaseModel.User.Email);
-                //await dialogService.ShowAlertAsync("Error", $"{filter}", "OK");
-                userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);*/
-
-
-
-                //r userDB = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking, fieldValue);
-                //userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, fieldValue);
-
-
-
-
-                //privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                //var filter = Builders<PrivateParking>.Filter.Eq(p => p.CreatedBy, parkEaseModel.User.Email);
-                //userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
-                List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                /*List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 if (privateData == null || privateData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No parking data found.");
                     return;
                 }
-                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
+                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();*/
 
                 _ = GetPropertyAddress();
             }
