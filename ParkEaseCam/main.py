@@ -1,29 +1,33 @@
 #QtDesinger Reference: https://github.com/Phatthawat/OBJECT-COUNTING-MACHINE-USING-COMPUTER-VISION
 #Parking lot Reference: https://www.youtube.com/watch?v=MyvylXVWYjY&t=3000s
 #Polygon Reference: https://stackoverflow.com/questions/52751121/pyqt-user-editable-polygons
-
+import os
+import subprocess
 import cv2,time,sys,sysinfo,cvzone
+from AWSService import AwsParameterManager
 from PyQt5 import uic,QtGui,QtCore,QtWidgets
 from PyQt5.QtMultimedia import QCameraInfo
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog,QMessageBox
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, QTimer, QDateTime, Qt
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
+from Polygon import AnnotationView, Instructions, GripItem,PolygonAnnotation
 import numpy as np
 import gridfs
-from enum import Enum
 from functools import partial
 import pickle
 from yolo import parkingLot_detect_video,parkingLot_detect_cam,start_detect_video,stopTesting
-from pymongo import MongoClient,ServerApi
+from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
 db = client.ParkEase
-onlineClient = MongoClient('mongodb+srv://ParkEaseUser:qaz123WSX@parkease.jr1snwe.mongodb.net/?retryWrites=true&w=majority&appName=ParkEase', server_api=ServerApi('1'))
-onlineDb = onlineClient.ParkEase
+parameterManager = AwsParameterManager()
+onlineClient = MongoClient(parameterManager.get_parameters('/ParkEase/Configs/ConnectionString'))
+onlineDb = onlineClient[parameterManager.get_parameters('/ParkEase/Configs/DatabaseName')]
+
 CamConfig = db.CamConfig
 configGridFs = gridfs.GridFS(db)
-publicArea = db.ParkingData
-privateArea = db.PrivateParking
+publicArea = onlineDb.ParkingData
+privateArea = onlineDb.PrivateParking
 
 polyitems = []
 area_names=[]
@@ -31,309 +35,7 @@ points = []
 drawing = False
 polygon_index = 1
 config_id = None
-
-class GripItem(QtWidgets.QGraphicsPathItem):
-    circle = QtGui.QPainterPath()
-    circle.addEllipse(QtCore.QRectF(-5, -5, 10, 10))
-    square = QtGui.QPainterPath()
-    square.addRect(QtCore.QRectF(-5, -5, 10, 10))
-
-    def __init__(self, annotation_item, index):
-        super(GripItem, self).__init__()
-        self.m_annotation_item = annotation_item
-        self.m_index = index
-
-        self.setPath(GripItem.circle)
-        self.setBrush(QtGui.QColor("green"))
-        self.setPen(QtGui.QPen(QtGui.QColor("green"), 2))
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges, True)
-        self.setAcceptHoverEvents(True)
-        self.setZValue(11)
-        self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-
-    def hoverEnterEvent(self, event):
-        self.setPath(GripItem.square)
-        self.setBrush(QtGui.QColor("red"))
-        super(GripItem, self).hoverEnterEvent(event)
-
-    def hoverLeaveEvent(self, event):
-        self.setPath(GripItem.circle)
-        self.setBrush(QtGui.QColor("green"))
-        super(GripItem, self).hoverLeaveEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        self.setSelected(False)
-        super(GripItem, self).mouseReleaseEvent(event)
-
-    def itemChange(self, change, value):
-        if change == QtWidgets.QGraphicsItem.ItemPositionChange and self.isEnabled():
-            self.m_annotation_item.movePoint(self.m_index, value)
-        return super(GripItem, self).itemChange(change, value)
-
-class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
-    def __init__(self, parent=None):
-        super(PolygonAnnotation, self).__init__(parent)
-        self.m_points = []
-        self.setZValue(10)
-        self.setPen(QtGui.QPen(QtGui.QColor("green"), 2))
-        self.setAcceptHoverEvents(True)
-
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges, True)
-
-        self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.m_items = []
-        self._index = 0
-         # Create a QGraphicsTextItem
-        self.text_item = QtWidgets.QGraphicsTextItem(self)
-        self.text_item.setDefaultTextColor(QtGui.QColor("green"))
-
-    @property
-    def index(self):
-        return self._index
-
-    def number_of_points(self):
-        return len(self.m_items)
-
-    def addPoint(self, p):
-        self.m_points.append(p)
-        self.setPolygon(QtGui.QPolygonF(self.m_points))
-        item = GripItem(self, len(self.m_points) - 1)
-        self.scene().addItem(item)
-        self.m_items.append(item)
-        item.setPos(p)
-
-        # Update the position of the text item
-        self.updateTextPosition()
-
-    def removeLastPoint(self):
-        if self.m_points:
-            self.m_points.pop()
-            self.setPolygon(QtGui.QPolygonF(self.m_points))
-            it = self.m_items.pop()
-            self.scene().removeItem(it)
-            del it
-
-    def movePoint(self, i, p):
-        if 0 <= i < len(self.m_points):
-            self.m_points[i] = self.mapFromScene(p)
-            self.setPolygon(QtGui.QPolygonF(self.m_points))
-
-        # Update the position of the text item
-        self.updateTextPosition()
-
-    def move_item(self, index, pos):
-        if 0 <= index < len(self.m_items):
-            item = self.m_items[index]
-            item.setEnabled(False)
-            item.setPos(pos)
-            item.setEnabled(True)
-        self.updateTextPosition()
-
-    def itemChange(self, change, value):
-        if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
-            for i, point in enumerate(self.m_points):
-                self.move_item(i, self.mapToScene(point))
-        return super(PolygonAnnotation, self).itemChange(change, value)
-
-    def hoverEnterEvent(self, event):
-        self.setBrush(QtGui.QColor(255, 0, 0, 100))
-        super(PolygonAnnotation, self).hoverEnterEvent(event)
-
-    def hoverLeaveEvent(self, event):
-        self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
-        super(PolygonAnnotation, self).hoverLeaveEvent(event)
-    
-    def updateTextPosition(self):
-        # Adjust the position of the text item
-        self.text_item.setPos(self.boundingRect().center() - self.text_item.boundingRect().center())
-    
-    def setText(self, text):
-        self._index = text
-        self.text_item.setPlainText(text)
-
-class Instructions(Enum):
-    No_Instruction = 0
-    Polygon_Instruction = 1
-
-class AnnotationScene(QtWidgets.QGraphicsScene):
-    def __init__(self, parent=None):
-        super(AnnotationScene, self).__init__(parent)
-        # self.image_item = QtWidgets.QGraphicsPixmapItem()
-        # self.image_item.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
-        # self.addItem(self.image_item)
-        self.current_instruction = Instructions.No_Instruction
-        self.selectionChanged.connect(self.selection_changed)
-       
-    selection_index_changed = pyqtSignal(str)
-
-    def setCurrentInstruction(self, instruction):
-        if instruction == Instructions.No_Instruction:
-            global IsDrawingMode,polygon_index
-            self.polygon_item.removeLastPoint()
-            IsDrawingMode = False
-            
-        self.current_instruction = instruction
-        if instruction == Instructions.Polygon_Instruction:
-            self.polygon_item = PolygonAnnotation()
-            self.addItem(self.polygon_item)
-            polyitems.append(self.polygon_item)
-            self.polygon_item.setText(str(polygon_index))
-            polygon_index += 1
-
-    def mousePressEvent(self, event):
-        if self.current_instruction == Instructions.Polygon_Instruction:
-            self.polygon_item.removeLastPoint()
-            self.polygon_item.addPoint(event.scenePos())
-            # movable element
-            self.polygon_item.addPoint(event.scenePos())
-        super(AnnotationScene, self).mousePressEvent(event)
-
-    def mouseMoveEvent(self, event):
-        if self.current_instruction == Instructions.Polygon_Instruction:
-            self.polygon_item.movePoint(self.polygon_item.number_of_points()-1, event.scenePos())
-        super(AnnotationScene, self).mouseMoveEvent(event)
-    
-    def selection_changed(self):
-        for item in self.selectedItems():
-            if isinstance(item, PolygonAnnotation):
-                self.selection_index_changed.emit(item.index)  # Emit signal with selected index
-                break
-        
-    def clearPolygons(self):
-        global polygon_index
-        
-        for item in self.items():
-            if isinstance(item, PolygonAnnotation) or isinstance(item, GripItem):
-                self.removeItem(item)
-        polyitems.clear()
-        polygon_index = 1
-
-class AnnotationView(QtWidgets.QGraphicsView):
-    factor = 2.0
-
-    def __init__(self, scene, parent=None):
-        super(AnnotationView, self).__init__(parent)
-        self.setRenderHints(QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform)
-        self.setMouseTracking(True)
-        QtWidgets.QShortcut(QtGui.QKeySequence.ZoomIn, self, activated=self.zoomIn)
-        QtWidgets.QShortcut(QtGui.QKeySequence.ZoomOut, self, activated=self.zoomOut)
-        self.setScene(scene)
-
-        self._pixmap_item = QtWidgets.QGraphicsPixmapItem()
-        scene.addItem(self.pixmap_item)
-
-    @property
-    def pixmap_item(self):
-        return self._pixmap_item
-
-    @QtCore.pyqtSlot()
-    def zoomIn(self):
-        self.zoom(AnnotationView.factor)
-
-    @QtCore.pyqtSlot()
-    def zoomOut(self):
-        self.zoom(1 / AnnotationView.factor)
-
-    def zoom(self, f):
-        self.scale(f, f)
-        if self.scene() is not None:
-            self.centerOn(self.scene().image_item)
-            
-    def setPixmap(self, pixmap):
-        self.pixmap_item.setPixmap(pixmap)
-
-class boardInfoClass(QThread):
-    cpu = pyqtSignal(float)
-    ram = pyqtSignal(tuple)
-    temp = pyqtSignal(float)
-    
-    def run(self):
-        self.ThreadActive = True
-        while self.ThreadActive:
-            cpu = sysinfo.getCPU()
-            ram = sysinfo.getRAM()
-            #temp = sysinfo.getTemp()
-            self.cpu.emit(cpu)
-            self.ram.emit(ram)
-            #self.temp.emit(temp)
-
-    def stop(self):
-        self.ThreadActive = False
-        self.quit()
-
-class videoThreadClass(QThread):
-    ImageUpdate = pyqtSignal(np.ndarray)
-    global videoPath
-    def run(self):
-        Capture = cv2.VideoCapture(videoPath)
-        Capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        Capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-        self.ThreadActive = True
-        prev_frame_time = 0
-        new_frame_time = 0
-        while self.ThreadActive: 
-            ret,frame = Capture.read()
-            if ret:
-                self.ImageUpdate.emit(frame)
-    
-    def stop(self):
-        self.ThreadActive = False
-        self.quit()
-
-class camTestThreadClass(QThread):
-    def run(self):
-        self.ThreadActive = True
-        parkingLot_detect_cam(camIndex,self.data)
-    def stop(self):
-        self.ThreadActive = False
-        self.quit()
-
-class videoTestThreadClass(QThread):
-    def run(self):
-        self.ThreadActive = True
-        parkingLot_detect_video(videoPath,self.txt_testConfigPath.text())
-    def stop(self):
-        self.ThreadActive = False
-        self.quit()
-
-class videoDbTestThreadClass(QThread):
-    def run(self):
-        self.ThreadActive = True
-        start_detect_video(videoPath,self.txt_testConfigPath.text(),db,'Private','665101b7810e1e0f193f5b19')
-    def stop(self):
-        self.ThreadActive = False
-        stopTesting()
-        self.quit()
-
-class webcamThreadClass(QThread):
-    ImageUpdate = pyqtSignal(np.ndarray)
-    FPS = pyqtSignal(int)
-    global camIndex
-   
-    def run(self):
-        Capture = cv2.VideoCapture(camIndex,cv2.CAP_DSHOW)
-        Capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        Capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-        self.ThreadActive = True
-        prev_frame_time = 0
-        new_frame_time = 0
-        while self.ThreadActive:
-            ret,frame = Capture.read()
-            if ret:
-                new_frame_time = time.time()
-                fps = 1/(new_frame_time-prev_frame_time)
-                prev_frame_time = new_frame_time
-                self.ImageUpdate.emit(frame)
-                self.FPS.emit(fps)
-    
-    def stop(self):
-        self.ThreadActive = False
-        self.quit()
-        
+camdevicetest = []
 class MainWindow(QMainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -346,6 +48,7 @@ class MainWindow(QMainWindow):
         # Get the list of available cameras
         self.online_cam = QCameraInfo.availableCameras()
         self.camlist.addItems([c.description() for c in self.online_cam])
+
         self.cmb_areaType.addItems(["Public","Private"])
         self.btn_stop.setEnabled(False)
 
@@ -651,7 +354,7 @@ class MainWindow(QMainWindow):
             else:
                 pas = privateArea.find()
                 for pa in pas:
-                    self.cmb_areaName.addItem(pa.get('companyName'))
+                    self.cmb_areaName.addItem(pa.get('CompanyName'))
         except Exception as error:
             print(error)
 
@@ -660,7 +363,7 @@ class MainWindow(QMainWindow):
             if self.cmb_areaName.count() > 0:
                 if self.cmb_areaName.currentText == '':
                     return
-                area = privateArea.find_one({'companyName':self.cmb_areaName.currentText()})
+                area = privateArea.find_one({'CompanyName':self.cmb_areaName.currentText()})
                 self.cmb_floor.clear()
                 self.cmb_lotId.clear()
 
@@ -673,7 +376,7 @@ class MainWindow(QMainWindow):
     def floorChanged(self):
         if self.cmb_floor.currentIndex() == -1:
             return
-        area = privateArea.find_one({'companyName':self.cmb_areaName.currentText()})
+        area = privateArea.find_one({'CompanyName':self.cmb_areaName.currentText()})
         fis = area.get("FloorInfo")
         self.cmb_lotId.clear()
         for rec in fis[self.cmb_floor.currentIndex()].get("Rectangles"):
@@ -694,6 +397,7 @@ class MainWindow(QMainWindow):
         areaType = self.cmb_areaType.currentText()
         areaName = self.cmb_areaName.currentText()
         fileName = cameraName + "_" + areaType + "_" + areaName
+        camDeviceName = self.online_cam[self.camlist.currentIndex()].deviceName()
         if areaType == 'Private':
             floor = self.cmb_floor.currentText()
             fileName = fileName + "_" + floor
@@ -704,7 +408,7 @@ class MainWindow(QMainWindow):
                       "displayName": cameraName,
                       "type": areaType,
                       "areaId": area._id,
-                      "camIndex": self.camlist.currentIndex()}
+                      "camDeviceName": camDeviceName}
             if config:
                 CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
                 self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
@@ -712,7 +416,7 @@ class MainWindow(QMainWindow):
                 CamConfig.insert_one(mydict)
                 self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
         else:
-            area = privateArea.find_one({'companyName':areaName})
+            area = privateArea.find_one({'CompanyName':areaName})
             lotId = self.cmb_lotId.currentText()
             selectedIndex = self.label_seletedIndex.text()
 
@@ -723,7 +427,7 @@ class MainWindow(QMainWindow):
                       "displayName": cameraName,
                       "type": areaType,
                       "areaId": area.get('_id'),
-                      "camIndex": self.camlist.currentIndex(),
+                      "camDeviceName": camDeviceName,
                       "lotIds": lotIds}
                 CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
                 self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
@@ -733,7 +437,7 @@ class MainWindow(QMainWindow):
                  "displayName": cameraName,
                  "type": areaType,
                  "areaId": area.get('_id'),
-                 "camIndex": self.camlist.currentIndex(),
+                 "camDeviceName": camDeviceName,
                  "lotIds": lotIds}
                 CamConfig.insert_one(mydict)
                 self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
@@ -766,6 +470,145 @@ class MainWindow(QMainWindow):
         msgBox.setWindowTitle(title)
         msgBox.setStandardButtons(QMessageBox.Ok)
         msgBox.exec()
+
+class AnnotationScene(QtWidgets.QGraphicsScene):
+    def __init__(self, parent=None):
+        super(AnnotationScene, self).__init__(parent)
+        self.current_instruction = Instructions.No_Instruction
+        self.selectionChanged.connect(self.selection_changed)
+       
+    selection_index_changed = pyqtSignal(str)
+
+    def setCurrentInstruction(self, instruction):
+        if instruction == Instructions.No_Instruction:
+            global IsDrawingMode,polygon_index
+            self.polygon_item.removeLastPoint()
+            IsDrawingMode = False
+            
+        self.current_instruction = instruction
+        if instruction == Instructions.Polygon_Instruction:
+            self.polygon_item = PolygonAnnotation()
+            self.addItem(self.polygon_item)
+            polyitems.append(self.polygon_item)
+            self.polygon_item.setText(str(polygon_index))
+            polygon_index += 1
+
+    def mousePressEvent(self, event):
+        if self.current_instruction == Instructions.Polygon_Instruction:
+            self.polygon_item.removeLastPoint()
+            self.polygon_item.addPoint(event.scenePos())
+            # movable element
+            self.polygon_item.addPoint(event.scenePos())
+        super(AnnotationScene, self).mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self.current_instruction == Instructions.Polygon_Instruction:
+            self.polygon_item.movePoint(self.polygon_item.number_of_points()-1, event.scenePos())
+        super(AnnotationScene, self).mouseMoveEvent(event)
+    
+    def selection_changed(self):
+        for item in self.selectedItems():
+            if isinstance(item, PolygonAnnotation):
+                self.selection_index_changed.emit(item.index)  # Emit signal with selected index
+                break
+        
+    def clearPolygons(self):
+        global polygon_index
+        
+        for item in self.items():
+            if isinstance(item, PolygonAnnotation) or isinstance(item, GripItem):
+                self.removeItem(item)
+        polyitems.clear()
+        polygon_index = 1
+
+class boardInfoClass(QThread):
+    cpu = pyqtSignal(float)
+    ram = pyqtSignal(tuple)
+    temp = pyqtSignal(float)
+    
+    def run(self):
+        self.ThreadActive = True
+        while self.ThreadActive:
+            cpu = sysinfo.getCPU()
+            ram = sysinfo.getRAM()
+            #temp = sysinfo.getTemp()
+            self.cpu.emit(cpu)
+            self.ram.emit(ram)
+            #self.temp.emit(temp)
+
+    def stop(self):
+        self.ThreadActive = False
+        self.quit()
+
+class camTestThreadClass(QThread):
+    def run(self):
+        self.ThreadActive = True
+        parkingLot_detect_cam(camIndex,self.data)
+    def stop(self):
+        self.ThreadActive = False
+        self.quit()
+
+class videoTestThreadClass(QThread):
+    def run(self):
+        self.ThreadActive = True
+        parkingLot_detect_video(videoPath,self.txt_testConfigPath.text())
+    def stop(self):
+        self.ThreadActive = False
+        self.quit()
+
+class videoDbTestThreadClass(QThread):
+    def run(self):
+        self.ThreadActive = True
+        cmd = f'start cmd /k python -c "import yolo; yolo.start_detect_video(\'{videoPath}\', \'{self.txt_testConfigPath.text()}\', \'Private\', \'666763d4d2c61b754e32a094\')"'
+        subprocess.Popen(cmd, shell=True)
+    def stop(self):
+        self.ThreadActive = False
+        stopTesting()
+        self.quit()
+
+class webcamThreadClass(QThread):
+    ImageUpdate = pyqtSignal(np.ndarray)
+    FPS = pyqtSignal(int)
+    global camIndex
+   
+    def run(self):
+        Capture = cv2.VideoCapture(camIndex,cv2.CAP_DSHOW)
+        Capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        Capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+        self.ThreadActive = True
+        prev_frame_time = 0
+        new_frame_time = 0
+        while self.ThreadActive:
+            ret,frame = Capture.read()
+            if ret:
+                new_frame_time = time.time()
+                fps = 1/(new_frame_time-prev_frame_time)
+                prev_frame_time = new_frame_time
+                self.ImageUpdate.emit(frame)
+                self.FPS.emit(fps)
+    
+    def stop(self):
+        self.ThreadActive = False
+        self.quit()
+
+class videoThreadClass(QThread):
+    ImageUpdate = pyqtSignal(np.ndarray)
+    global videoPath
+    def run(self):
+        Capture = cv2.VideoCapture(videoPath)
+        Capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        Capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+        self.ThreadActive = True
+        prev_frame_time = 0
+        new_frame_time = 0
+        while self.ThreadActive: 
+            ret,frame = Capture.read()
+            if ret:
+                self.ImageUpdate.emit(frame)
+    
+    def stop(self):
+        self.ThreadActive = False
+        self.quit() 
 
 if __name__ == '__main__':
     app = QApplication([])

@@ -15,27 +15,17 @@ namespace ParkEase.Core.Services
 {
     public class MongoDBService : IMongoDBService
     {
-        private readonly string apiBase;
-        private readonly string databaseName = "ParkEase";
-        private string APIKey = string.Empty;
+        private string apiBase = string.Empty;
+        private string dataSourceName = string.Empty;
+        private string databaseName = string.Empty;
+        private string apiKey = string.Empty;
         private IAWSService awsService;
         public MongoDBService(IConfiguration configuration,IAWSService awsService)
         {
             apiBase = configuration["MongoDbRestAPI"];
             databaseName = configuration["DataBaseName"];
             this.awsService = awsService;
-            //var client = new MongoClient(connectionUri);
-            //try
-            //{
-            //    db = client.GetDatabase(databaseName);
-            //    Console.WriteLine("Pinged your deployment. You successfully connected to MongoDB!");
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex);
-            //}
         }
-
 
         public async Task<RestResponse> InsertData<T>(string collectionName, T data) where T : class
         {
@@ -44,11 +34,11 @@ namespace ParkEase.Core.Services
             var request = new RestRequest();
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Access-Control-Request-Headers", "*");
-            request.AddHeader("api-key", APIKey);
+            request.AddHeader("api-key", apiKey);
             var body = @"{" +
             $@" ""collection"":""{collectionName}""," +
             $@" ""database"":""{databaseName}""," +
-            @" ""dataSource"":""ParkEase""," +
+            $@" ""dataSource"":""{dataSourceName}""," +
             $@" ""document"": {Newtonsoft.Json.JsonConvert.SerializeObject(data)}" +
             @"}";
             request.AddStringBody(body, DataFormat.Json);
@@ -62,11 +52,11 @@ namespace ParkEase.Core.Services
             var request = new RestRequest();
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Access-Control-Request-Headers", "*");
-            request.AddHeader("api-key", APIKey);
+            request.AddHeader("api-key", apiKey);
             var body = @"{" +
             $@" ""collection"":""{collectionName}""," +
             $@" ""database"":""{databaseName}""," +
-            @" ""dataSource"":""ParkEase""" +
+            $@" ""dataSource"":""{dataSourceName}""" +
             @"}";
             request.AddStringBody(body, DataFormat.Json);
             RestResponse response = await client.PostAsync(request);
@@ -88,11 +78,11 @@ namespace ParkEase.Core.Services
             var request = new RestRequest();
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Access-Control-Request-Headers", "*");
-            request.AddHeader("api-key", APIKey);
+            request.AddHeader("api-key", apiKey);
             var body = @"{" +
             $@" ""collection"":""{collectionName}""," +
             $@" ""database"":""{databaseName}""," +
-            @" ""dataSource"":""ParkEase""," +
+            $@" ""dataSource"":""{dataSourceName}""," +
             $@" ""filter"": {filterString}" +
             @"}";
             request.AddStringBody(body, DataFormat.Json);
@@ -114,11 +104,11 @@ namespace ParkEase.Core.Services
             var request = new RestRequest();
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Access-Control-Request-Headers", "*");
-            request.AddHeader("api-key", APIKey);
+            request.AddHeader("api-key", apiKey);
             var body = @"{" +
             $@" ""collection"":""{collectionName}""," +
             $@" ""database"":""{databaseName}""," +
-            @" ""dataSource"":""ParkEase""," +
+            $@" ""dataSource"":""{dataSourceName}""," +
             $@" ""filter"": {filterString}" +
             @"}";
             request.AddStringBody(body, DataFormat.Json);
@@ -153,11 +143,11 @@ namespace ParkEase.Core.Services
             var request = new RestRequest();
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Access-Control-Request-Headers", "*");
-            request.AddHeader("api-key", APIKey);
+            request.AddHeader("api-key", apiKey);
             var body = @"{" +
             $@" ""collection"":""{collectionName}""," +
             $@" ""database"":""{databaseName}""," +
-            @" ""dataSource"":""ParkEase""," +
+            $@" ""dataSource"":""{dataSourceName}""," +
             $@" ""filter"": {filterString}," +
             $@" ""update"": {updateString}" +
             @"}";
@@ -167,9 +157,12 @@ namespace ParkEase.Core.Services
 
         private async Task CheckAPIKey()
         {
-            if(APIKey == string.Empty)
+            if(apiKey == string.Empty)
             {
-                APIKey = await awsService.GetParamenter("/ParkEase/APIKeys/mongoDb");
+                apiBase = await awsService.GetParamenter("/ParkEase/Configs/DatabaseAPI");
+                apiKey = await awsService.GetParamenter("/ParkEase/APIKeys/mongoDb");
+                databaseName = await awsService.GetParamenter("/ParkEase/Configs/DatabaseName");
+                dataSourceName = await awsService.GetParamenter("/ParkEase/Configs/DatabaseSource");
             }
         }
     }

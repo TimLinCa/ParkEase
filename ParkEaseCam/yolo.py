@@ -5,13 +5,18 @@ import pandas as pd
 from ultralytics import YOLO
 import cvzone
 import gridfs
-
+from pymongo import MongoClient
+from AWSService import AwsParameterManager
+from datetime import datetime
 stopSignal = False
-
+parameterManager = AwsParameterManager()
+onlineClient = MongoClient(parameterManager.get_parameters('/ParkEase/Configs/ConnectionString'))
+onlineDb = onlineClient[parameterManager.get_parameters('/ParkEase/Configs/DatabaseName')]
+client = MongoClient('localhost', 27017)
+localDb = client.ParkEase
 def stopTesting():
     global stopSignal
     stopSignal = True
-
 def parkingLot_detect_cam(cam_index,config_data):
     polylines,area_names=config_data['polylines'],config_data['area_names']
 
@@ -152,9 +157,9 @@ def parkingLot_detect_video(video_filePath,config_file_path):
     cap.release()
     cv2.destroyAllWindows()
 
-def start_detect_cam(configName,local_db,online_db):
-    CamConfig = local_db.CamConfig
-    ConfigGridFs = gridfs.GridFS(local_db)
+def start_detect_cam(configName):
+    CamConfig = localDb.CamConfig
+    ConfigGridFs = gridfs.GridFS(localDb)
     area_config = CamConfig.find_one({"name":configName})
     cam_config = ConfigGridFs.find_one({"filename": configName})
     if(area_config is None or cam_config is None):
@@ -163,19 +168,20 @@ def start_detect_cam(configName,local_db,online_db):
 
     areaType = area_config.get('areaType')
     if(areaType == 'Public'):
-        publicStatus = online_db.PublicStatus
+        publicStatus = onlineDb.PublicStatus
         start_detect_cam_public(area_config,cam_config,publicStatus)
     else:
         # get the floor from spliting the configName by '_' in the last element
         floor = configName.split('_')[-1]
-        privateStatus = online_db.PrivateStatus
+        privateStatus = onlineDb.PrivateStatus
         start_detect_cam_private(area_config,cam_config,privateStatus,floor)
 
-def start_detect_cam_public(area_config,cam_config,statusDC):
+def start_detect_cam_public(area_config,cam_config,logDC):
     global stopSignal
     areaId = area_config.get("areaId")
     cam_index = area_config.get('cam_index')
     cam_name = area_config.get("displayName")
+    statusDC = onlineDb.PublicStatus
     status = statusDC.find()
     local_status = {s['index']: s['status'] for s in status}
     polylines = cam_config['polylines']
@@ -195,7 +201,7 @@ def start_detect_cam_public(area_config,cam_config,statusDC):
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
 
-        results=model.predict(frame)
+        results=model.predict(frame,verbose=False)
         a=results[0].boxes.data
         px=pd.DataFrame(a).astype("float")
         carPosition =[]
@@ -228,14 +234,17 @@ def start_detect_cam_public(area_config,cam_config,statusDC):
                     "areaId":areaId,
                     "index" : i,
                     "camName":cam_name,
-                    "status" : carInside
+                    "status" : carInside,
+                    "timestamp": datetime.now()
                 }
             #if car is inside the polyLine, update the status
             if i in local_status:
                 if local_status[i] != carInside:
-                    statusDC.update_one({"index": i,"camName":cam_name}, {"$set": dir}, upsert=True)  
+                    statusDC.update_one({"index": i,"camName":cam_name}, {"$set": dir}, upsert=True)
+                    logDC.insert_one(dir)
             else:
                 statusDC.insert_one({"index": i, "status": carInside})
+                logDC.insert_one(dir)
             
             local_status[i] = carInside
 
@@ -244,8 +253,9 @@ def start_detect_cam_public(area_config,cam_config,statusDC):
             break
     cap.release()
 
-def start_detect_cam_private(area_config,cam_config,statusDC,floor):
+def start_detect_cam_private(area_config,cam_config,floor,logDC):
     lotIds = area_config.get('lotIds')
+    statusDC = onlineDb.PrivateStatus
     status = statusDC.find()
     local_status = {s['index']: s['status'] for s in status}
     areaId = area_config.get("areaId")
@@ -268,7 +278,7 @@ def start_detect_cam_private(area_config,cam_config,statusDC,floor):
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
 
-        results=model.predict(frame)
+        results=model.predict(frame,verbose=False)
         a=results[0].boxes.data
         px=pd.DataFrame(a).astype("float")
         carPosition =[]
@@ -304,12 +314,15 @@ def start_detect_cam_private(area_config,cam_config,statusDC,floor):
                     "lotId" : lotIds[i],
                     "status" : carInside,
                     "floor" : floor,
+                    "timestamp": datetime.now()
                 }
             if i in local_status:
                 if local_status[i] != carInside:
                     statusDC.update_one({"index": i,"camName":cam_name}, {'$set':dir}, upsert=True)  
+                    logDC.insert_one(dir)
             else:
                 statusDC.insert_one(dir)
+                logDC.insert_one(dir)
 
             local_status[i] = carInside
 
@@ -318,9 +331,13 @@ def start_detect_cam_private(area_config,cam_config,statusDC,floor):
             break
     cap.release()
 
-def start_detect_video(video_filePath,config_file_path,online_db,areaType,id):
+def start_detect_video(video_filePath,config_file_path,areaType,id):
     global stopSignal
-    videoTestDC = online_db.videoTest
+    videoTestDC = onlineDb.videoTest
+    if areaType == 'Public':
+        logDC = onlineDb.PublicLog
+    else:
+        logDC = onlineDb.PrivateLog
     status = videoTestDC.find({"areaId":id,"camName": "test"})
     local_status = {s['index']: s['status'] for s in status}
     with open(config_file_path,"rb") as f:
@@ -336,14 +353,13 @@ def start_detect_video(video_filePath,config_file_path,online_db,areaType,id):
     cap=cv2.VideoCapture(video_filePath)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-
+    print("Camera: test start video detection")
     while True:
         ret, frame = cap.read()
         if not ret:
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
-
-        results=model.predict(frame)
+        results=model.predict(frame,verbose=False)
         a=results[0].boxes.data
         px=pd.DataFrame(a).astype("float")
         carPosition =[]
@@ -382,39 +398,46 @@ def start_detect_video(video_filePath,config_file_path,online_db,areaType,id):
                             "status" : carInside
                         }
                         videoTestDC.update_one({"index": i,"camName": "test"}, {"$set": dir}, upsert=True)
-                        local_status[i] = carInside
+                        logDC.insert_one(dir)    
                     else:
+                        lotId = i + 1
                         dir = {
                             "areaId":id,
                             "index" : i,
                             "camName": "test",
-                            "lotId" : i,
+                            "lotId" : lotId,
                             "status" : carInside,
-                            "floor" : 'B1',
+                            "floor" : 'Ground',
+                            "timestamp": datetime.now(),
                         }
                         videoTestDC.update_one({"index": i,"camName": "test"}, {'$set':dir}, upsert=True)
-                        local_status[i] = carInside
+                        logDC.insert_one(dir)
+                    local_status[i] = carInside    
             else:
                 if areaType == 'Public':
                     dir = {
                             "areaId":id,
                             "index" : i,
                             "camName": "test",
-                            "status" : carInside
+                            "status" : carInside,
+                            "timestamp": datetime.now()
                         }
                     videoTestDC.insert_one(dir)
-                    local_status[i] = carInside
+                    logDC.insert_one(dir)
                 else:
+                    lotId = i + 1
                     dir = {
                         "areaId":id,
                         "index" : i,
                         "camName": "test",
-                        "lotId" : i,
+                        "lotId" : lotId,
                         "status" : carInside,
-                        "floor" : 'B1',
+                        "floor" : 'Ground',
+                        "timestamp": datetime.now()
                     }
                     videoTestDC.insert_one(dir)
-                    local_status[i] = carInside
+                    logDC.insert_one(dir)
+                local_status[i] = carInside    
 
         if stopSignal == True:
             cv2.imwrite("TestLast.jpg", frame) 
