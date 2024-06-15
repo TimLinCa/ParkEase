@@ -154,7 +154,7 @@ namespace ParkEase.Controls
 
                             // Add mouseover and mouseout event listeners to the polyline
                             line.addListener('mouseover', function() {
-                                line.setOptions({ strokeColor: ""yellow"" }); // Change color to red on mouseover
+                                line.setOptions({ strokeColor: ""yellow"" }); // Change color to yellow on mouseover
                             });
 
                             line.addListener('mouseout', function() {
@@ -162,7 +162,7 @@ namespace ParkEase.Controls
                                     line.setOptions({ strokeColor: ""#097969"" }); // Change color back to original on mouseout
                                 }
                                 if(selectedLine != null){
-                                    selectedLine.setOptions({ strokeColor: ""red"" }); // Change color of selectedLine to red
+                                    selectedLine.setOptions({ strokeColor: ""yellow"" }); // Change color of selectedLine to yellow
                                 }
                             });
 
@@ -172,7 +172,7 @@ namespace ParkEase.Controls
                                     selectedLine.setOptions({ strokeColor: ""#097969"" });
                                 }
                                 selectedLine = line; // Set the clicked line as the selected line
-                                selectedLine.setOptions({ strokeColor: ""red"" });
+                                selectedLine.setOptions({ strokeColor: ""yellow"" });
 
                                 let lineInfo = getLineInfo(line);
                                 window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
@@ -415,13 +415,14 @@ namespace ParkEase.Controls
     {
         public int Index { get; set; }
         public List<MapPoint> Points { get; set; }
-        public string Color { get; set; } = "green";
+        public string Color { get; set; }
 
-        public MapLine(List<MapPoint> points)
+        public MapLine(List<MapPoint> points, string color = "green")
         {
             if (points == null) throw new ArgumentNullException();
             if (points.Count != 2) throw new ArgumentException("Count of Points is not equal to 2");
             Points = points;
+            Color = color;
         }
         public bool Equals(MapLine? other)
         {

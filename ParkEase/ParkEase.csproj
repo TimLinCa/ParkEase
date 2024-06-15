@@ -70,6 +70,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AppActions.Icons.Maui" Version="1.0.0" />
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
 		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.304.21" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -92,6 +93,7 @@
 		<PackageReference Include="The49.Maui.BottomSheet" Version="8.0.3" />
 		<PackageReference Include="UraniumUI.Icons.MaterialIcons" Version="2.8.1" />
 		<PackageReference Include="UraniumUI.Material" Version="2.8.1" />
+		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -32,6 +32,7 @@
 		<PackageReference Include="Syncfusion.Maui.Sliders" Version="25.2.5" />
 		<PackageReference Include="Syncfusion.Maui.TabView" Version="25.2.6" />
 		<PackageReference Include="The49.Maui.BottomSheet" Version="8.0.3" />
+		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 	</ItemGroup>
 
 </Project>

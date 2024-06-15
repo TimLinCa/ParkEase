@@ -1,6 +1,7 @@
 ﻿using Microsoft.Maui.Controls;
 using Newtonsoft.Json;
 using ParkEase.Core.Data;
+using ParkEase.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -41,13 +42,45 @@ namespace ParkEase.Controls
             {
                 Html = @"
         <!DOCTYPE html>
-        <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml"">  
+        <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml""> 
+        
+
         <head>
             <meta charset=""utf-8"" />
             <title></title>
             <style>
+                #controls {
+                    height: 8%;
+                    padding: 10px;
+                    background: #f9f9f9;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                #controls select {
+                    padding: 5px; /* Increase padding */
+                    font-size: 15px; /* Increase font size */
+                    border-radius: 5px; /* Add rounded corners */
+                }
+
+                #controls button {
+                    background-color: #007BFF; /* Blue background */
+                    color: white; /* White text */
+                    border: none; /* Remove border */
+                    padding: 10px 20px; 
+                    cursor: pointer; 
+                    border-radius: 5px; 
+                    font-size: 15px; 
+                }
+
+                #controls button:hover {
+                    background-color: #0056b3; 
+                }
+
                 #map {
-                    height: 100%;
+                    height: 92%;
                 }
 
                 html, body {
@@ -55,10 +88,25 @@ namespace ParkEase.Controls
                     margin: 0;
                     padding: 0;
                 }
+
+                
+
             </style>
         </head>
         <body>
             <div id=""map""></div>
+
+            <div id=""controls"">
+                <label for=""rangeSelect"">Select Range: </label>
+                <select id=""rangeSelect"" >
+                    <option value=""0.2"">200 meters</option>
+                    <option value=""0.5"">500 meters</option>
+                    <option value=""1"">1000 meters</option>
+                </select>
+                <button onclick=""updateRange()"">Update Range</button>
+
+            </div>
+
             <script>
                 let map;
                 let start = false;
@@ -68,14 +116,22 @@ namespace ParkEase.Controls
                 let hoverLine = null;
                 let initial = true;
                 let userMarker = null;
+                let circle;
+                let currentLat;
+                let currentLng;
+
                 // Initializes the Google Map 
                 function initMap(lat, lng) {
+
+                    currentLat = lat;
+                    currentLng = lng;
                     map = new google.maps.Map(document.getElementById('map'), {
                         center: { lat: lat, lng: lng  },  // Specify the coordinates for the center of the map
-                        zoom: 8 // Specify the zoom level
+                        zoom: 16// Specify the zoom level
                     });
                     // GPS marker for the user 
                     addUserMarker(lat, lng);
+                    drawCircle(lat, lng, 0.2);
                 }
 
                 // GPS marker for the user
@@ -83,12 +139,14 @@ namespace ParkEase.Controls
                     if (userMarker) {
                         userMarker.setMap(null);
                     }
+
                     userMarker = new google.maps.Marker({
                         position: { lat: lat, lng: lng },
                         map: map,
                         title: 'Your Location',
                         icon: {
-                            url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                            url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIgZmlsbD0iIzQyODVmNCIvPjwvc3ZnPg0K',
+                            scaledSize: new google.maps.Size(20, 20) // Adjust the size as needed
                         }
                     });
                 }
@@ -108,13 +166,15 @@ namespace ParkEase.Controls
                         strokeWeight: 4
                     });
 
+                    line.originalColor = color; // Store the original color
+
                     line.addListener('click', function() {
                          // If there is a previously selected line, reset its color.
                         if (selectedLine != null) {
-                            selectedLine.setOptions({ strokeColor: ""#097969"" });
+                            selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
                         }
                         selectedLine = line; // Set the clicked line as the selected line
-                        selectedLine.setOptions({ strokeColor: ""red"" });
+                        selectedLine.setOptions({ strokeColor: ""yellow"" });
 
                         let lineInfo = getLineInfo(line);
                         window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
@@ -165,6 +225,68 @@ namespace ParkEase.Controls
                       }
                       return JSON.stringify(result);
                 }
+
+                function drawCircle(lat, lng, radius) {
+                    // Remove the existing circle if it exists
+                    if (circle) {
+                        circle.setMap(null);
+                    }
+
+                    // Create a new circle
+                    circle = new google.maps.Circle({
+                        map: map,
+                        radius: radius * 1000, // Radius in meters
+                        center: { lat: lat, lng: lng },
+                        fillColor: '#AA0000',
+                        fillOpacity: 0.35,
+                        strokeColor: '#AA0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2
+                    });
+
+                     // Calculate the circle's bounds
+                        var bounds = new google.maps.LatLngBounds();
+                        bounds.extend(new google.maps.LatLng(lat + (radius / 111), lng + (radius / 111))); // Top right
+                        bounds.extend(new google.maps.LatLng(lat - (radius / 111), lng - (radius / 111))); // Bottom left
+
+                        // Fit the map to the circle's bounds
+                        map.fitBounds(bounds);
+                }
+
+
+                // Call this function to initialize the map with a circle
+                function initMapWithCircle(lat, lng) {
+                     initMap(lat, lng); // Initialize the map
+                     
+                }
+
+                function updateRange() {
+                    const rangeSelect = document.getElementById('rangeSelect');
+                    const selectedRange = parseFloat(rangeSelect.value);
+                    drawCircle(currentLat, currentLng, selectedRange);
+                } 
+
+                // Get user's current location
+                function getUserLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            currentLat = position.coords.latitude;
+                            currentLng = position.coords.longitude;
+                            initMapWithCircle(currentLat, currentLng);
+                        }, (error) => {
+                            console.error(""Error getting location: "", error);
+                            // Handle error case, e.g., use a default location
+                        });
+                    } else {
+                        console.error(""Geolocation is not supported by this browser."");
+                        // Handle error case, e.g., use a default location
+                    }
+                }
+
+                // Initialize the map with the user's current location when the page loads
+                window.onload = function() {
+                    getUserLocation();
+                };
          
             </script>
             <script src=""https://maps.googleapis.com/maps/api/js?key=AIzaSyCMPKV70vmSd-153eJsECz6gJD0AipZD-M&callback=initMap"" async defer></script>
@@ -230,19 +352,20 @@ namespace ParkEase.Controls
                 }
             }
         }
-
+        
+        // async indicates that the method contains asynchronous operations.
         private async void GMapMobile_Loaded(object? sender, EventArgs e)
         {
-            currentInstance = (GMapMobile)sender;
-            var location = await Geolocation.GetLocationAsync();
+            // assigned to the static variable
+            currentInstance = (GMapMobile)sender; //sender the object that raised the event
+            var location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
             if (location != null)
-            {   
-                //string jsCommand = $"initMap({location.Latitude}, {location.Longitude});";
-
-                //For test only!!!!
-                string jsCommand = $"initMap({51.06686555416899}, {-114.09486095583466});";
+            {
+                // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator
+                string jsCommand = $"initMapWithCircle({location.Latitude}, {location.Longitude});";
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
-                LoadedEvent?.Invoke(sender, e);
+                LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
+
             }
         }
 
@@ -281,6 +404,13 @@ namespace ParkEase.Controls
 
                 // Find the line that matches the selected line based on the points
                 SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
+
+                // Notify the view model about the line click
+                var viewModel = BindingContext as UserMapViewModel;
+                if (viewModel != null && SelectedLine != null)
+                {
+                    await viewModel.OnLineClicked(SelectedLine);
+                }
             }
         }
 

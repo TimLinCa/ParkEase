@@ -11,26 +11,36 @@ namespace ParkEase.Services
 {
     public class DialogService : IDialogService
     {
+        private MyBottomSheet currentBottomSheet;
 
         public Task ShowAlertAsync(string title, string message, string cancel = "OK")
         {
             return Application.Current.MainPage.DisplayAlert(title, message, cancel);
         }
 
-        public Task ShowPrivateMapBottomSheet(string address, decimal parkingFee, int limitHours)
+        public async Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour, string availability)
         {
-            BottomSheetViewModel bottomSheetViewModel = new BottomSheetViewModel();
-            bottomSheetViewModel.Address = address;
-            bottomSheetViewModel.ParkingFee = Convert.ToDecimal(parkingFee);
-            bottomSheetViewModel.LimitHour = Convert.ToInt32(limitHours);
-            MyBottomSheet sheet = new MyBottomSheet(bottomSheetViewModel)
+            
+            if (currentBottomSheet != null)
+            {
+                await currentBottomSheet.DismissAsync();
+            }
+
+            var bottomSheetViewModel = new BottomSheetViewModel
+            {
+                Address = address,
+                ParkingFee = parkingFee,
+                LimitHour = limitHour,
+                Availability = availability
+            };
+
+            currentBottomSheet = new MyBottomSheet(bottomSheetViewModel)
             {
                 HasHandle = true,
                 HandleColor = Colors.Black
             };
 
-            return sheet.ShowAsync();
-
+            await currentBottomSheet.ShowAsync();
         }
     }
 }
