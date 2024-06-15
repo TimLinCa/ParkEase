@@ -6,7 +6,16 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
-             x:DataType="vm:PrivateMapViewModel">
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit" 
+             x:DataType="vm:PrivateMapViewModel"
+             xmlns:converter="clr-namespace:ParkEase.Converters"
+             xmlns:barcode="zxing.ne">
+
+    <ContentPage.Resources>
+        <converter:BarcodeDetectionEventConverter x:Key="BarcodeConverter"></converter:BarcodeDetectionEventConverter>
+    </ContentPage.Resources>
+    
     <VerticalStackLayout>
         <!--<Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />-->
         <material:PickerField
@@ -17,7 +26,36 @@
             ItemsSource="{Binding FloorNames}"
             SelectedItem="{Binding SelectedFloorName}"
             AllowClear="True"/>
-     
+  
+        
+        <Grid
+            IsVisible="{Binding GridVisible}"
+            VerticalOptions="Start">
+
+            <zxing:CameraBarcodeReaderView
+                x:Name="barcodeReader"
+                VerticalOptions="Center"
+                IsDetecting="{Binding GridVisible}">
+                <zxing:CameraBarcodeReaderView.Behaviors>
+                    <toolkit:EventToCommandBehavior EventName="BarcodesDetected" Command="{Binding BarcodesDetectedCommand}" EventArgsConverter="{StaticResource BarcodeConverter}"></toolkit:EventToCommandBehavior>
+                </zxing:CameraBarcodeReaderView.Behaviors>
+            </zxing:CameraBarcodeReaderView>
+
+        </Grid>
+            <Label
+                Text="{Binding BarcodeResult}"
+                FontSize="32"
+                HorizontalOptions="Center" />
+        
+        
+        <Button
+            Text="{Binding ScannerText}"
+            HorizontalOptions="Center"
+            TextColor="White"
+            Command="{Binding ScannerButtonCommand}"/>
+        
+        
+
             <controls:RecGraphicsView
             x:Name="RectangleDrawableView"
             MinimumHeightRequest="650"
@@ -27,7 +65,9 @@
                     <controls:RectDrawableMobile />
                 </controls:RecGraphicsView.Drawable>
             </controls:RecGraphicsView>
-       
+
+
+
 
         <Button
             Text="Load Data"

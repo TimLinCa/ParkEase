@@ -153,16 +153,31 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                //var filter = Builders<PrivateParking>.Filter.Eq(data => data.CreatedBy, parkEaseModel.User.Email);
-                //userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
-                privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+
+                userData = (await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking)).Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
+
+
+
+                /*var filter = Builders<PrivateParking>.Filter.Eq(data => data.CreatedBy, parkEaseModel.User.Email);
+                //await dialogService.ShowAlertAsync("Error", $"{filter}", "OK");
+                userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);*/
+
+
+
+                //r userDB = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking, fieldValue);
+                //userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, fieldValue);
+
+
+
+
+                /*privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 if (privateData == null || privateData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No parking data found.");
                     return;
                 }
-                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
+                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();*/
 
                 _ = GetPropertyAddress();
             }
@@ -434,10 +449,17 @@ namespace ParkEase.ViewModel
                             },
 
                             FloorInfo = listFloorInfos
-
+                            
                         };
                         await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
-                        await dialogService.ShowAlertAsync("", "Your data is saved.", "OK");
+
+                        privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                        var parkingInfo = privateData.Where(data => data.Address == privateParkingInfo.Address).First();
+
+                        await dialogService.ShowAlertAsync("Success", "Your data is saved.\n" + 
+                                                            "Generate QR Code to use this parking lot\n" + 
+                                                            parkingInfo.Id, 
+                                                            "OK");
 
                         ResetAfterSubmit();
                         _ = GetUserDataFromDatabase();
@@ -484,7 +506,7 @@ namespace ParkEase.ViewModel
                 }
                 else
                 {
-                    await dialogService.ShowAlertAsync("Error", "There is nothing to deldete.\nPlease draw the map first!", "OK");
+                    await dialogService.ShowAlertAsync("Error", "There is nothing to deldete.\nPlease draw the map first! ", "OK");
                 }
             }
             catch (Exception ex)

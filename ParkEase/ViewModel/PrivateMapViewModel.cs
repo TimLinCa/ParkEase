@@ -16,6 +16,8 @@ using MongoDB.Driver;
 using ParkEase.Core.Services;
 using IImage = Microsoft.Maui.Graphics.IImage;
 using Microsoft.Maui.Graphics.Platform;
+using System.Reflection;
+using ZXing.Net.Maui;
 
 namespace ParkEase.ViewModel
 {
@@ -60,6 +62,22 @@ namespace ParkEase.ViewModel
 
         private ParkEaseModel parkEaseModel;
 
+        [ObservableProperty]
+        private string barcodeResult;
+
+        [ObservableProperty]
+        private bool enableScanner;
+
+        [ObservableProperty]
+        private bool gridVisible;
+
+        [ObservableProperty]
+        private string scannerText;
+
+        [ObservableProperty]
+        private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
+
+
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
             this.mongoDBService = mongoDBService;
@@ -69,6 +87,11 @@ namespace ParkEase.ViewModel
             FloorNames = new ObservableCollection<string>();
             ListRectangle = new ObservableCollection<Rectangle>();
             privateStatusData = new List<PrivateStatus>();
+
+            BarcodeResult = string.Empty;
+            EnableScanner = true;
+            GridVisible = false;
+            ScannerText = "Open Scanner";
         }
 
         public ICommand LoadDataCommand => new RelayCommand(async () =>
@@ -131,6 +154,32 @@ namespace ParkEase.ViewModel
         {
             _ = ShowSelectedMap();
         }
+
+
+        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(qrCode =>
+        {
+            //var result = qrCode;
+            BarcodeResult = qrCode;
+            GridVisible = false;
+        });
+
+        [RelayCommand]
+        public async Task ScannerButton()
+        {
+            try
+            {
+                GridVisible = !GridVisible;
+                if (!GridVisible)
+                    ScannerText = "Open Scanner";
+                else
+                    ScannerText = "Close Scanner";
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
 
         private async Task ShowSelectedMap()
         {
