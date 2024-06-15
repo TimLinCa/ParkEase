@@ -22,6 +22,7 @@ using System.Reflection;
 using ParkEase.Core.Model;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using ZXing.Net.Maui;
 
 namespace ParkEase.ViewModel
 {
@@ -152,23 +153,23 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                var filter = Builders<PrivateParking>.Filter.Eq(p => p.CreatedBy, parkEaseModel.User.Email);
+                /*var filter = Builders<PrivateParking>.Filter.Eq(p => p.CreatedBy, parkEaseModel.User.Email);
                 userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
 
                 if (userData == null || userData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No data found.");
                     return;
-                }
+                }*/
 
-                /*List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 if (privateData == null || privateData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No parking data found.");
                     return;
                 }
-                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();*/
+                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
 
                 _ = GetPropertyAddress();
             }
@@ -550,5 +551,8 @@ namespace ParkEase.ViewModel
             ListRectangle.Clear();
             addNewFloorClicked = false;
         }
+
+        
+
     }
 }

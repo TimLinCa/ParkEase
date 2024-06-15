@@ -42,21 +42,32 @@
             </zxing:CameraBarcodeReaderView>
 
         </Grid>
-            <Label
-                Text="{Binding BarcodeResult}"
-                FontSize="32"
-                HorizontalOptions="Center" />
-        
-        
-        <Button
-            Text="{Binding ScannerText}"
-            HorizontalOptions="Center"
-            TextColor="White"
-            Command="{Binding ScannerButtonCommand}"/>
-        
-        
 
-            <controls:RecGraphicsView
+
+            <HorizontalStackLayout
+                Margin="10, 0, 0, 0">
+                <Picker ItemsSource="{Binding AddressList}"
+                    Title="Select Address"
+                    VerticalOptions="StartAndExpand"
+                    WidthRequest="320"/>    
+
+            <!-- QR Code Button -->
+                <ImageButton Grid.Row="0"
+                     Source="{Binding ScannerImage}"
+                     HorizontalOptions="End"
+                     WidthRequest="40"
+                     HeightRequest="40"
+                     Margin="10"
+                     Command="{Binding ScannerButtonCommand}" />    
+
+        </HorizontalStackLayout>
+
+            <!-- Expander -->
+
+            
+
+
+        <controls:RecGraphicsView
             x:Name="RectangleDrawableView"
             MinimumHeightRequest="650"
             MinimumWidthRequest="100"
@@ -69,11 +80,11 @@
 
 
 
-        <Button
-            Text="Load Data"
-            SemanticProperties.Hint="Counts the number of times you click"
-            HorizontalOptions="Center"
-            Command="{Binding LoadDataCommand}"/>
+        <!--<button
+            text="load data"
+            semanticproperties.hint="counts the number of times you click"
+            horizontaloptions="center"
+            command="{binding loaddatacommand}"/>-->
 
     </VerticalStackLayout>
 </ContentPage>
