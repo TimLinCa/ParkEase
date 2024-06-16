@@ -75,6 +75,8 @@ namespace ParkEase.ViewModel
 
         private string selectedPropertyId;
 
+        private string selectedCompanyName;
+
         private List<PrivateParking> userData;
 
         //private List<Rectangle> listRectangles;
@@ -153,23 +155,23 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                /*var filter = Builders<PrivateParking>.Filter.Eq(p => p.CreatedBy, parkEaseModel.User.Email);
+                var filter = Builders<PrivateParking>.Filter.Eq(p => p.CreatedBy, parkEaseModel.User.Email);
                 userData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
 
                 if (userData == null || userData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No data found.");
                     return;
-                }*/
+                }
 
-                List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                /*List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 if (privateData == null || privateData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No parking data found.");
                     return;
                 }
-                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();
+                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();*/
 
                 _ = GetPropertyAddress();
             }
@@ -233,6 +235,7 @@ namespace ParkEase.ViewModel
                     if (selectedProperty != null)
                     {
                         selectedPropertyId = selectedProperty.Id;
+                        selectedCompanyName = selectedProperty.CompanyName;
                         CompanyName = selectedProperty.CompanyName;
                         Address = selectedProperty.Address;
                         City = selectedProperty.City;
@@ -390,6 +393,29 @@ namespace ParkEase.ViewModel
         }
         );
 
+        public async Task<bool> CheckIfDocumentExists(FilterDefinition<PrivateParking> filter)
+        {
+            var document = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
+            if (document != null)
+            {
+                var result = document[0];
+                Console.WriteLine("Document found:");
+                Console.WriteLine($"ID: {result.Id}");
+                Console.WriteLine($"CompanyName: {result.CompanyName}");
+                Console.WriteLine($"Address: {result.Address}");
+                System.Diagnostics.Debug.WriteLine("Document found:");
+                System.Diagnostics.Debug.WriteLine($"ID: {result.Id}");
+                System.Diagnostics.Debug.WriteLine($"CompanyName: {result.CompanyName}");
+                System.Diagnostics.Debug.WriteLine($"Address: {result.Address}");
+                // Log other properties as needed
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("No document matches the filter criteria.");
+                return false;
+            }
+        }
         // Submit Command
         public ICommand SubmitCommand => new RelayCommand(async () =>
         {
@@ -400,16 +426,18 @@ namespace ParkEase.ViewModel
                     // if UPDATING existing data
                     if (selectedPropertyId != null && (SelectedAddress != null || SelectedFloorName != null)) 
                     {
-                        var filter = Builders<PrivateParking>.Filter.Eq(p => p.Id, selectedPropertyId);
-                        //System.Diagnostics.Debug.WriteLine($"Id: {selectedPropertyId} - filter: {filter.ToJson()}");
-                        var update = Builders<PrivateParking>.Update
+                        var builder = Builders<PrivateParking>.Filter;
+                        var filter = builder.Eq(p => p.CompanyName, selectedCompanyName) & builder.Eq(p => p.Address, selectedAddress);
+
+                            var update = Builders<PrivateParking>.Update
                                         .Set(p => p.CompanyName, CompanyName)
                                         .Set(p => p.Address, Address)
                                         .Set(p => p.City, City)
                                         .Set(p => p.CreatedBy, parkEaseModel.User.Email)
                                         .Set(p => p.ParkingInfo, new ParkingInfo { Fee = Fee, LimitedHour = LimitHour })
                                         .Set(p => p.FloorInfo, listFloorInfos);
-                        await mongoDBService.UpdateData<PrivateParking>(CollectionName.PrivateParking, filter, update);
+
+                        await mongoDBService.UpdateData(CollectionName.PrivateParking, filter, update);
                         await dialogService.ShowAlertAsync("", "Your data is updated.", "OK");
 
                         ResetAfterSubmit();
@@ -436,7 +464,7 @@ namespace ParkEase.ViewModel
                         await mongoDBService.InsertData(CollectionName.PrivateParking, privateParkingInfo);
 
                         var privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                        var parkingInfo = privateData.Where(data => data.Address == privateParkingInfo.Address).First();
+                        var parkingInfo = privateData.Where(data => data.Address == Address).First();
 
                         await dialogService.ShowAlertAsync("Success", "Your data is saved.\n" + 
                                                             "Generate QR Code to use this parking lot\n" + 
