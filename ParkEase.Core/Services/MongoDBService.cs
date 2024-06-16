@@ -128,6 +128,51 @@ namespace ParkEase.Core.Services
             return deleteResult;
         }
 
+        /*public async Task UpdateData<T>(string collectionName, FilterDefinition<T> filter, UpdateDefinition<T> update)
+        {
+            await CheckAPIKey();
+            var serializerRegistry = BsonSerializer.SerializerRegistry;
+            var documentSerializer = serializerRegistry.GetSerializer<T>();
+            var renderedFilter = filter.Render(documentSerializer, serializerRegistry);
+            var filterString = renderedFilter.ToString();
+
+            var renderedUpdate = update.Render(documentSerializer, serializerRegistry);
+            var updateString = renderedUpdate.ToString();
+
+            var client = new RestClient($"{apiBase}/updateMany");
+            var request = new RestRequest();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Access-Control-Request-Headers", "*");
+            request.AddHeader("api-key", APIKey);
+            var body = @"{" +
+            $@" ""collection"":""{collectionName}""," +
+            $@" ""database"":""{databaseName}""," +
+            @" ""dataSource"":""ParkEase""," +
+            $@" ""filter"": {filterString}," +
+            $@" ""update"": {updateString}" +
+            @"}";
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.PostAsync(request);
+
+            UpdateDataResult updateResult = new UpdateDataResult();
+            updateResult.Success = response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                Dictionary<string, object> responseContent = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                updateResult.Message = responseContent["message"].ToString();
+                updateResult.MatchedCount = int.Parse(responseContent["matchedCount"].ToString());
+                updateResult.ModifiedCount = int.Parse(responseContent["modifiedCount"].ToString());
+                System.Diagnostics.Debug.WriteLine($"MongoDB message: {updateResult.Message}");
+                System.Diagnostics.Debug.WriteLine($"MongoDB matchCount: {updateResult.MatchedCount}");
+                System.Diagnostics.Debug.WriteLine($"MongoDB ModifiedCount: {updateResult.ModifiedCount}");
+            }
+            else
+            {
+                updateResult.Message = $"Update failed: {response.StatusDescription}";
+                System.Diagnostics.Debug.WriteLine($"MongoDB fail: {updateResult.Message}");
+            }
+        }*/
+
         public async Task UpdateData<T>(string collectionName, FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
             await CheckAPIKey();
@@ -153,6 +198,7 @@ namespace ParkEase.Core.Services
             @"}";
             request.AddStringBody(body, DataFormat.Json);
             RestResponse response = await client.PostAsync(request);
+
         }
 
         private async Task CheckAPIKey()
@@ -176,5 +222,12 @@ namespace ParkEase.Core.Services
         public static string PublicStatus = "PublicStatus";
     }
 
-  
+    public class UpdateDataResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public int MatchedCount { get; set; }
+        public int ModifiedCount { get; set; }
+    }
+
 }

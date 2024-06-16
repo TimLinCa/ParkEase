@@ -46,6 +46,9 @@ namespace ParkEase.ViewModel
 
         private List<PrivateParking> parkingLotData;
 
+        [ObservableProperty]
+        private List<string> addressList;
+
         private List<PrivateStatus> privateStatusData;
 
         private string address;
@@ -72,7 +75,13 @@ namespace ParkEase.ViewModel
         private bool gridVisible;
 
         [ObservableProperty]
+        private bool enableExpender;
+
+        [ObservableProperty]
         private string scannerText;
+
+        [ObservableProperty]
+        private string scannerImage;
 
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
@@ -91,20 +100,30 @@ namespace ParkEase.ViewModel
             BarcodeResult = string.Empty;
             EnableScanner = true;
             GridVisible = false;
-            ScannerText = "Open Scanner";
+            ScannerText = "";
+            scannerImage = "scanner_image.png";
+
+            _ = LoadAddress();
         }
 
-        public ICommand LoadDataCommand => new RelayCommand(async () =>
+        private async Task LoadAddress()
+        {
+            var parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+            AddressList = parkingLotData.Select(data => data.Address).ToList();
+        }
+
+        private async Task LoadDataCommand()
         {
             try
             {
-                /* var filter = Builders<PrivateParking>.Filter.Eq(data => data.Id, "666763d4d2c61b754e32a094");
-                 parkingLotData = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);*/
                 parkingLotData?.Clear();
                 FloorNames?.Clear();
-                ListRectangle?.Clear();
-                privateStatusData?.Clear();
                 listFloorInfos?.Clear();
+                privateStatusData?.Clear();
+
+
+
+                // Fetch PrivateParking data from MongoDB
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 if (parkingLotData == null || parkingLotData.Count == 0)
@@ -113,7 +132,13 @@ namespace ParkEase.ViewModel
                     return;
                 }
 
-                parkingLotData = parkingLotData.Where(p => p.Id == "666763d4d2c61b754e32a094").ToList();
+                // Filter parkingLotData based on BarcodeResult
+                parkingLotData = parkingLotData.Where(p => p.Id == BarcodeResult).ToList();
+                if (parkingLotData.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No matching parking data found.");
+                    return;
+                }
 
                 var selectedProperty = parkingLotData[0];
                 address = selectedProperty.Address;
@@ -121,6 +146,7 @@ namespace ParkEase.ViewModel
                 fee = selectedProperty.ParkingInfo.Fee;
                 limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
                 listFloorInfos = selectedProperty.FloorInfo;
+
                 foreach (var floor in listFloorInfos)
                 {
                     FloorNames.Add(floor.Floor);
@@ -135,18 +161,13 @@ namespace ParkEase.ViewModel
                 }
 
                 // Filter privateStatusData based on selectedPropertyId
-                privateStatusData = privateStatusData.Where(item => item.AreaId == "666763d4d2c61b754e32a094").ToList();
-
-
-                
-                await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", "");
-
+                privateStatusData = privateStatusData.Where(item => item.AreaId == BarcodeResult).ToList();
             }
             catch (Exception ex)
             {
-                await dialogService.ShowAlertAsync("Error in Load data", ex.Message, "OK");
+                System.Diagnostics.Debug.WriteLine($"An error occurred: {ex.Message}");
             }
-        });
+        }
 
         partial void OnSelectedFloorNameChanged(string? value)
         {
@@ -154,11 +175,12 @@ namespace ParkEase.ViewModel
         }
 
 
-        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(qrCode =>
+        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
             //var result = qrCode;
             BarcodeResult = qrCode;
             GridVisible = false;
+            await LoadDataCommand();
         });
 
         [RelayCommand]
@@ -167,10 +189,6 @@ namespace ParkEase.ViewModel
             try
             {
                 GridVisible = !GridVisible;
-                if (!GridVisible)
-                    ScannerText = "Open Scanner";
-                else
-                    ScannerText = "Close Scanner";
             }
             catch (Exception ex)
             {

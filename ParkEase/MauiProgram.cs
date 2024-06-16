@@ -18,6 +18,8 @@ using Amazon.SimpleSystemsManagement;
 using Amazon;
 using The49.Maui.BottomSheet;
 
+using ZXing.Net.Maui.Controls;
+
 namespace ParkEase
 {
     [AutoRoutes("Page")]
@@ -48,7 +50,8 @@ namespace ParkEase
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddMaterialIconFonts(); /* https://enisn-projects.io/docs/en/uranium/latest/theming/Icons#material-icons*/
-                });
+                })
+                .UseBarcodeReader();
 
             #region page
 
