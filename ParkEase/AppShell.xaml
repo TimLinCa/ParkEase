@@ -5,7 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ParkEase"
     xmlns:page="clr-namespace:ParkEase.Page"
+    xmlns:vm="clr-namespace:ParkEase.ViewModel"
     Title="ParkEase"
+    x:DataType="vm:AppShellViewModel"
     Shell.FlyoutBehavior="Flyout">
 
 
@@ -18,14 +20,14 @@
     <ShellContent
         Title="Public Map"
         ContentTemplate="{DataTemplate page:MapPage}"
+        IsVisible="{Binding MapVisible}"
         Route="MapPage" />
 
     <ShellContent
         Title="Private Map"
         ContentTemplate="{DataTemplate page:CreateMapPage}"
+        IsVisible="{Binding CreateMapVisible}"
         Route="CreateMap" />
-
-
 
     <Shell.FlyoutHeader>
         <Image
@@ -34,7 +36,4 @@
             Source="parkease_logo.png"
             WidthRequest="100" />
     </Shell.FlyoutHeader>
-
-
-
 </Shell>

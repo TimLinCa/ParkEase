@@ -10,5 +10,7 @@ namespace ParkEase.Core.Data
     {
         User,
         Administrator,
+        Engineer,
+        Developer
     }
 }

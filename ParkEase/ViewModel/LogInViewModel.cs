@@ -1,11 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Model;
 using ParkEase.Core.Services;
+using ParkEase.Messages;
 using ParkEase.Page;
 using ParkEase.Utilities;
 using System;
@@ -16,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using User = ParkEase.Core.Data.User;
 
 namespace ParkEase.ViewModel
 {
@@ -37,6 +40,7 @@ namespace ParkEase.ViewModel
 
         private ParkEaseModel parkEaseModel;
 
+
         public LogInViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
             this.dialogService = dialogService;
@@ -47,17 +51,17 @@ namespace ParkEase.ViewModel
             //ForgotPasswordCommand = new RelayCommand(async () => await ExecuteForgotPasswordCommand());
         }
 
-
-
-
         public async Task<bool> AccountExists(string email, string password)
         {
-           
             List<User> users = await mongoDBService.GetData<User>(CollectionName.Users);
             User user = users.FirstOrDefault(u => u.Email == email);
+ 
+            if (user != null && user.Email == email && PasswordHasher.VerifyPassword(password, user.Password))
+            {
+                parkEaseModel.User = user;
+                return true;
+            } 
 
-            if (user == null) return false;
-            if (user.Email == email && PasswordHasher.VerifyPassword(password, user.Password)) return true;
             return false;
         }
 
@@ -67,6 +71,7 @@ namespace ParkEase.ViewModel
             {
                 User user = new User();
                 user.Email = "Test123@gmail.com";
+                user.Role = Roles.Engineer;
                 parkEaseModel.User = user;
                 await DirectToMainPage();
             }
@@ -84,9 +89,6 @@ namespace ParkEase.ViewModel
 
                 if (accountExists)
                 {
-                    User user = new User();
-                    user.Email = Email;
-                    parkEaseModel.User = user;
                     await DirectToMainPage();
                 }
                 else
@@ -148,13 +150,38 @@ namespace ParkEase.ViewModel
 
         private async Task DirectToMainPage()
         {
+            WeakReferenceMessenger.Default.Send<UserChangedMessage>(new UserChangedMessage(parkEaseModel.User));
+
             if (DeviceInfo.Platform == DevicePlatform.Android)
             {
                 await Shell.Current.GoToAsync($"//{nameof(UserMapPage)}");
             }
             else if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {
-                await Shell.Current.GoToAsync($"//{nameof(MapPage)}");
+                if (parkEaseModel.User.Role == Roles.User)
+                {
+                    await dialogService.ShowAlertAsync("Error", "Sorry you don not have permission to use this application");
+                    return;
+                }
+
+                if(parkEaseModel.User.Role == Roles.Developer)
+                {
+                    await Shell.Current.GoToAsync($"//{nameof(MapPage)}");
+                    return;
+                }
+
+                if(parkEaseModel.User.Role == Roles.Engineer)
+                {
+                    await Shell.Current.GoToAsync($"//{nameof(MapPage)}");
+                    return;
+                }
+                
+                if(parkEaseModel.User.Role == Roles.Administrator)
+                {
+                    await Shell.Current.GoToAsync($"//{nameof(CreateMapPage)}");
+                    return;
+                }
+
             }
         }
 

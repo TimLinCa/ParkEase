@@ -1,4 +1,5 @@
 ﻿using ParkEase.Page;
+using ParkEase.ViewModel;
 
 namespace ParkEase
 {
@@ -16,7 +17,8 @@ namespace ParkEase
             }
             else if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {
-                MainPage = new AppShell();
+                AppShellViewModel appShellViewModel = new AppShellViewModel();
+                MainPage = new AppShell(appShellViewModel);
             }
 
         }
