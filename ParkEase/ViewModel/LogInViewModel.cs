@@ -71,7 +71,7 @@ namespace ParkEase.ViewModel
             {
                 User user = new User();
                 user.Email = "Test123@gmail.com";
-                user.Role = Roles.Engineer;
+                user.Role = Roles.Developer;
                 parkEaseModel.User = user;
                 await DirectToMainPage();
             }

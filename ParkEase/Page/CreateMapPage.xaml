@@ -35,14 +35,18 @@
                             HorizontalOptions="Center"
                             Text="Create Map Editor" />
 
-                        <Picker Title="Select a property address" ItemsSource="{Binding PropertyAddresses}" SelectedItem="{Binding SelectedAddress}" />
+                        <Picker
+                            Title="Select a property address"
+                            ItemsSource="{Binding PropertyAddresses}"
+                            SelectedItem="{Binding SelectedAddress}"
+                            Style="{StaticResource MAUIDefaultPicker}" />
                         <Button
-                        Margin="0,20,0,10"
-                        Command="{Binding LoadParkingInfoCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Text="Load"
-                        VerticalOptions="Center"
-                        WidthRequest="200" />
+                            Margin="0,20,0,10"
+                            Command="{Binding LoadParkingInfoCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Text="Load"
+                            VerticalOptions="Center"
+                            WidthRequest="200" />
 
                         <material:TextField
                             Title="Company Name"
@@ -105,16 +109,17 @@
                     <StackLayout Padding="20">
                         <!--  Create floor section  -->
 
-                        <HorizontalStackLayout 
-                            Margin="20, 0, 0, 20"
+                        <HorizontalStackLayout
+                            Margin="20,0,0,20"
                             HorizontalOptions="Start"
                             Spacing="20">
 
-                            <Picker 
-                                Title="Select floor" 
-                                ItemsSource="{Binding FloorNames}" 
-                                SelectedItem="{Binding SelectedFloorName}" 
-                                VerticalOptions="Center" 
+                            <Picker
+                                Title="Select floor"
+                                ItemsSource="{Binding FloorNames}"
+                                SelectedItem="{Binding SelectedFloorName}"
+                                Style="{StaticResource MAUIDefaultPicker}"
+                                VerticalOptions="Center"
                                 WidthRequest="200" />
 
                             <Button
@@ -143,17 +148,17 @@
                             <validation:RequiredValidation />
                         </material:TextField>
 
-                        <HorizontalStackLayout 
-                            Margin="0, 10, 0, 0" 
+                        <HorizontalStackLayout
+                            Margin="0,10,0,0"
                             HorizontalOptions="Center"
                             Spacing="20">
 
-                            <Button 
+                            <Button
                                 Command="{Binding AddNewFloorCommand}"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Text="Add"
-                                WidthRequest="130" 
-                                VerticalOptions="Center" />
+                                VerticalOptions="Center"
+                                WidthRequest="130" />
                             <Button
                                 x:Name="UploadBtn"
                                 Command="{Binding UploadImageClick}"
@@ -163,10 +168,11 @@
                                 WidthRequest="130" />
                         </HorizontalStackLayout>
 
-                        <!-- save button -->
+                        <!--  save button  -->
                         <Button
                             Margin="50,50,50,30"
                             Command="{Binding SaveFloorInfoCommand}"
+                            Style="{StaticResource MAUIDefaultButton}"
                             Text="Save"
                             VerticalOptions="Center"
                             WidthRequest="200" />
@@ -174,20 +180,19 @@
                 </ScrollView>
             </sfTabView:SfTabItem>
         </sfTabView:SfTabView>
-        
-        <!-- Middle Row -->
-            <StackLayout
-                Grid.Row="1"
-                Grid.Column="0">
-                <Button
-                 x:Name="SubmitBtn"
-                 Command="{Binding SubmitCommand}"
-                 FontAttributes="Bold"
-                 FontSize="Medium"
-                 HorizontalOptions="Center"
-                 Text="Submit"
-                 WidthRequest="400"/>
-            </StackLayout>
+
+        <!--  Middle Row  -->
+        <StackLayout Grid.Row="1" Grid.Column="0">
+            <Button
+                x:Name="SubmitBtn"
+                Command="{Binding SubmitCommand}"
+                FontAttributes="Bold"
+                FontSize="Medium"
+                HorizontalOptions="Center"
+                Style="{StaticResource MAUIDefaultButton}"
+                Text="Submit"
+                WidthRequest="200" />
+        </StackLayout>
 
         <!--  Bottom Row  -->
         <Border
@@ -255,9 +260,9 @@
             <controls:RecGraphicsView
                 x:Name="RectangleDrawableView"
                 ImageSource="{Binding ImgSourceData}"
+                ListRectangle="{Binding ListRectangle}"
                 MinimumHeightRequest="700"
-                MinimumWidthRequest="700"
-                ListRectangle="{Binding ListRectangle}">
+                MinimumWidthRequest="700">
                 <controls:RecGraphicsView.Drawable>
                     <controls:RectDrawable />
                 </controls:RecGraphicsView.Drawable>

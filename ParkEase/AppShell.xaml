@@ -16,6 +16,7 @@
         FlyoutItemIsVisible="False"
         NavigationPage.HasNavigationBar="False"
         Shell.FlyoutBehavior="Disabled" />
+    
 
     <ShellContent
         Title="Public Map"

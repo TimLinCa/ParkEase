@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ParkEase.Core.Converters;
 
 namespace ParkEase.Core.Data
 {
@@ -16,6 +17,7 @@ namespace ParkEase.Core.Data
 
         public string Color {  get; set; }
 
+        [JsonConverter(typeof(RectFConverter))]
         public RectF Rect {  get; set; }
 
         //red #E11919
@@ -26,8 +28,6 @@ namespace ParkEase.Core.Data
             Color = "#009D00"; // Default color green
         }
 
-        // Constructor with default color
-        [JsonConstructor]
         public Rectangle(int index, RectF rect)
         {
             Index = index;

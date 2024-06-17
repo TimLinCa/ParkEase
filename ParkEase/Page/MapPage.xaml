@@ -37,7 +37,9 @@
                     x:Name="btn_Draw"
                     Margin="50,50,50,0"
                     Command="{Binding DrawCommand}"
+                    Style="{StaticResource MAUIDefaultButton}"
                     VerticalOptions="Center">
+
                     <Button.Triggers>
                         <DataTrigger
                             Binding="{Binding DrawingLine}"
@@ -82,7 +84,7 @@
                     FontAttributes="Bold"
                     Text="Parking Fee:" />
                 <Label Margin="10,3" Text="{Binding SelectedParkingData.ParkingFee}" />
-              
+
                 <material:TextField
                     Title="Parking Spot"
                     Margin="10,3"
@@ -118,6 +120,7 @@
                     CornerRadius="10"
                     HorizontalOptions="Center"
                     MinimumWidthRequest="150"
+                    Style="{StaticResource MAUIDefaultButton}"
                     Text="Submit"
                     VerticalOptions="Center" />
 

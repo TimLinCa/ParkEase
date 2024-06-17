@@ -23,6 +23,7 @@ using ParkEase.Core.Model;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using ZXing.Net.Maui;
+using System.Runtime.InteropServices;
 
 namespace ParkEase.ViewModel
 {
@@ -429,7 +430,7 @@ namespace ParkEase.ViewModel
                         var builder = Builders<PrivateParking>.Filter;
                         var filter = builder.Eq(p => p.CompanyName, selectedCompanyName) & builder.Eq(p => p.Address, selectedAddress);
 
-                            var update = Builders<PrivateParking>.Update
+                        var update = Builders<PrivateParking>.Update
                                         .Set(p => p.CompanyName, CompanyName)
                                         .Set(p => p.Address, Address)
                                         .Set(p => p.City, City)

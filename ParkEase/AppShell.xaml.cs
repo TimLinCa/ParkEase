@@ -10,6 +10,9 @@ namespace ParkEase
         {
             InitializeComponent();
             BindingContext = viewModel;
+
+            Routing.RegisterRoute(Routes.SignUpPage, typeof(SignUpPage));
+            Routing.RegisterRoute(Routes.ForgotPasswordPage, typeof(ForgotPasswordPage));
         }
     }
 }

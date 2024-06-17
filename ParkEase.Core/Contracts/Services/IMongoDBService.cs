@@ -10,7 +10,7 @@ namespace ParkEase.Core.Contracts.Services
 {
     public interface IMongoDBService
     {
-        Task<RestResponse> InsertData<T>(string collectionName, T data) where T : class;
+        Task<T> InsertData<T>(string collectionName, T data) where T : class;
 
         Task<List<T>> GetData<T>(string collectionName) where T : class;
 

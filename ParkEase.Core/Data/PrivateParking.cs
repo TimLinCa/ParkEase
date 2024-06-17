@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
+using ParkEase.Core.Converters;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -27,7 +28,7 @@ namespace ParkEase.Core.Data
 
         public ParkingInfo ParkingInfo { get; set; }
 
-        public List<FloorInfo> FloorInfo { get; set; }
+        public List<FloorInfo> FloorInfo { get; set; } = new List<FloorInfo>();
 
         public bool ShouldSerializeId()
         {
@@ -45,7 +46,8 @@ namespace ParkEase.Core.Data
     {
         public string Floor { get; set; }
         public List<Rectangle> Rectangles { get; set; }
-
+        
+        [JsonConverter(typeof(ImageDataConverter))]
         public byte[] ImageData { get; set; }
 
         public FloorInfo(string floor, List<Rectangle> rectangles, byte[] imageData)
