@@ -247,23 +247,13 @@ namespace ParkEase.ViewModel
         {
         }
 
-        //public ICommand NavigatePrivateMapPage => new RelayCommand(async () =>
-        //{
-        //    // Implement the logic to navigate to the Forgot Password Page
-        //    //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
-        //    await Shell.Current.GoToAsync(nameof(PrivateMapPage));
-        //});
-
-
-
-
-        // Navigate PrivateMapPage function
-        /*public ICommand NavigatePrivateMapPage => new RelayCommand(async () =>
+        public ICommand NavigatePrivateMapPage => new RelayCommand(async () =>
         {
-            await Shell.Current.GoToAsync("///PrivateMapPage");
-            // or use a full route if necessary
-            // await Shell.Current.GoToAsync("//PrivateMapPage");
-        });*/
+            // Implement the logic to navigate to the Forgot Password Page
+            //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
+            await Shell.Current.GoToAsync(nameof(PrivateMapPage));
+        });
+
 
     }
 }
