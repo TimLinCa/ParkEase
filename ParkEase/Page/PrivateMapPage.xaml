@@ -71,6 +71,7 @@
             x:Name="RectangleDrawableView"
             MinimumHeightRequest="650"
             MinimumWidthRequest="100"
+            ImageSource="{Binding ImgSourceData}"
             ListRectangle="{Binding ListRectangle}">
                 <controls:RecGraphicsView.Drawable>
                     <controls:RectDrawableMobile />
