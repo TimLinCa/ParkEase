@@ -3,15 +3,75 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkEase.Page.PrivateSearchPage"
              xmlns:vm="clr-namespace:ParkEase.ViewModel"
-             x:DataType="vm:PrivateSearchViewModel">
+             x:DataType="vm:PrivateSearchViewModel"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:converter="clr-namespace:ParkEase.Converters">
+
+    <ContentPage.Resources>
+        <converter:BarcodeDetectionEventConverter x:Key="BarcodeConverter"></converter:BarcodeDetectionEventConverter>
+    </ContentPage.Resources>
+
+    
+    
     <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-        <Button
+        <!--<StackLayout Padding="10">
+            <SearchBar Placeholder="Search Address"
+                   Text="{Binding SearchText}" />
+
+            <ListView ItemsSource="{Binding Addresses}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>-->
+        <StackLayout Padding="10">
+            <SearchBar Placeholder="Search Address" Text="{Binding SearchText}" />
+            <ListView ItemsSource="{Binding Addresses}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Label Text="{Binding EmailExistsMessage}" TextColor="Red" />
+        </StackLayout>
+
+
+
+        <!-- QR CODE-->
+        <!--<Grid
+            IsVisible="{Binding GridVisible}"
+            VerticalOptions="Start">
+        <zxing:CameraBarcodeReaderView
+            x:Name="barcodeReader"
+            VerticalOptions="Center"
+            IsDetecting="{Binding GridVisible}">
+            <zxing:CameraBarcodeReaderView.Behaviors>
+                <toolkit:EventToCommandBehavior EventName="BarcodesDetected" Command="{Binding BarcodesDetectedCommand}" EventArgsConverter="{StaticResource BarcodeConverter}"></toolkit:EventToCommandBehavior>
+            </zxing:CameraBarcodeReaderView.Behaviors>
+        </zxing:CameraBarcodeReaderView>
+        </Grid>
+        
+        <ImageButton Grid.Row="0"
+             IsVisible="{Binding BarcodeButtonVisible}"
+             Source="{Binding ScannerImage}"
+             HorizontalOptions="Center"
+             WidthRequest="100"
+             HeightRequest="100"
+             Margin="10"
+             Command="{Binding ScannerButtonCommand}" />
+        <Label
+            Text="{Binding BarcodeResult}"/>-->
+        
+        
+        
+        <!--<Button
             Text="button"
             Command="{Binding NavigatePrivateMapPage}"
-            />
+            />-->
     </VerticalStackLayout>
 </ContentPage>
