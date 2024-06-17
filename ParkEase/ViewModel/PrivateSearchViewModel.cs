@@ -29,7 +29,7 @@ namespace ParkEase.ViewModel
         {
             // Implement the logic to navigate to the Forgot Password Page
             //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
-            await Shell.Current.GoToAsync($"//{nameof(PrivateMapPage)}");
+            await Shell.Current.GoToAsync(nameof(PrivateMapPage));
         });
 
     }
