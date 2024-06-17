@@ -83,12 +83,12 @@
             <Button
                 Command="{Binding GetDirectionsCommand}"
                 CornerRadius="8"
-                Text="Get Directions" />
+                Text="Get Direction" />
             <Button
                 BackgroundColor="#FF5722"
                 Command="{Binding OpenInGoogleMapsCommand}"
                 CornerRadius="8"
-                Text="Redirect to external map" />
+                Text="Start Navigation" />
 
         </VerticalStackLayout>
 
