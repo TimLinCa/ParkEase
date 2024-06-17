@@ -18,9 +18,9 @@ namespace ParkEase.Services
             return Application.Current.MainPage.DisplayAlert(title, message, cancel);
         }
 
-        public async Task ShowPrivateMapBottomSheet(string address, string parkingFee, string limitHour, string availability)
+        public async Task ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng)
         {
-            
+
             if (currentBottomSheet != null)
             {
                 await currentBottomSheet.DismissAsync();
@@ -31,8 +31,14 @@ namespace ParkEase.Services
                 Address = address,
                 ParkingFee = parkingFee,
                 LimitHour = limitHour,
-                Availability = availability
+                Availability = availability,
+                ShowButton = ShowButton,
+                Lat = lat,
+                Lng = lng
             };
+
+            //bottomSheetViewModel.Lat = lat;
+            //bottomSheetViewModel.Lng = lng;
 
             currentBottomSheet = new MyBottomSheet(bottomSheetViewModel)
             {
@@ -42,5 +48,6 @@ namespace ParkEase.Services
 
             await currentBottomSheet.ShowAsync();
         }
+
     }
 }

@@ -1,9 +1,20 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Devices.Sensors;
+using MongoDB.Driver;
+using ParkEase.Contracts.Services;
+using ParkEase.Controls;
+using ParkEase.Core.Contracts.Services;
+using ParkEase.Core.Data;
+using ParkEase.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+
 
 namespace ParkEase.ViewModel
 {
@@ -20,13 +31,64 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private string availability;
+
+        [ObservableProperty]
+        private bool showButton;
+
+        [ObservableProperty]
+        private string lat;
+
+        [ObservableProperty]
+        private string lng;
+
+        public ICommand GetDirectionsCommand { get; }
+        public ICommand OpenInGoogleMapsCommand { get; }
+
+        private IMongoDBService mongoDBService;
+        private IDialogService dialogService;
+        public BottomSheetViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
+        {
+            this.mongoDBService = mongoDBService;
+            this.dialogService = dialogService;
+            GetDirectionsCommand = new AsyncRelayCommand(OnGetDirections);
+            OpenInGoogleMapsCommand = new AsyncRelayCommand(OnOpenInGoogleMaps);
+        }
+
         public BottomSheetViewModel()
         {
             address = "";
             parkingFee = "";
             limitHour = "";
-            Availability = "";
-            
+            availability = "";
+            showButton = false;
+            lat = "";
+            lng = "";
+
+            GetDirectionsCommand = new AsyncRelayCommand(OnGetDirections);
+            OpenInGoogleMapsCommand = new AsyncRelayCommand(OnOpenInGoogleMaps);
         }
+
+
+        private async Task OnGetDirections()
+        {
+            // Send a message to trigger the JavaScript function
+            MessagingCenter.Send(this, "GetDirections");
+        }
+
+        private async Task OnOpenInGoogleMaps()
+        {
+            //string Lat = "51.02323583729865";
+            //string Lng = "-114.28669176519081";
+
+
+            // Construct the URI for Google Maps
+            string uri = $"https://www.google.com/maps/dir/?api=1&destination={Lat},{Lng}&travelmode=driving";
+
+            // Open the URI
+            await Launcher.OpenAsync(new Uri(uri));
+
+        }
+
     }
 }
+

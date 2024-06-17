@@ -98,6 +98,13 @@ namespace ParkEase
                 BindingContext = provider.GetRequiredService<PrivateMapViewModel>()
             });
 
+            builder.Services.AddSingleton<PrivateSearchViewModel>();
+            builder.Services.AddSingleton(provider => new PrivateSearchPage
+            {
+                BindingContext = provider.GetRequiredService<PrivateSearchViewModel>()
+            });
+
+
             builder.Services.AddTransient<MyBottomSheet>(provider => new MyBottomSheet(provider.GetRequiredService<BottomSheetViewModel>()));
             #endregion
 

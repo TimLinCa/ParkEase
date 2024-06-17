@@ -1,5 +1,6 @@
 ﻿using Microsoft.Maui.Controls;
 using Newtonsoft.Json;
+using ParkEase.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.ViewModel;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace ParkEase.Controls
 {
@@ -18,7 +20,6 @@ namespace ParkEase.Controls
         public event EventArgsHandler LoadedEvent;
         private static GMapMobile currentInstance;
         private static bool selfUpdatingLines = false;
-
         public ObservableCollection<MapLine> Lines
         {
             get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
@@ -28,7 +29,6 @@ namespace ParkEase.Controls
         {
             get => (MapLine)GetValue(SelectedLineProperty); set { SetValue(SelectedLineProperty, value); }
         }
-
 
         public static readonly BindableProperty LinesProperty = BindableProperty.Create(nameof(Lines), typeof(ObservableCollection<MapLine>), typeof(GMapMobile), propertyChanged: LinesPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
@@ -41,61 +41,51 @@ namespace ParkEase.Controls
             var htmlSource = new HtmlWebViewSource
             {
                 Html = @"
-        <!DOCTYPE html>
-        <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml""> 
-        
-
-        <head>
-            <meta charset=""utf-8"" />
-            <title></title>
-            <style>
-                #controls {
-                    height: 8%;
-                    padding: 10px;
-                    background: #f9f9f9;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 10px;
-                }
-
-                #controls select {
-                    padding: 5px; /* Increase padding */
-                    font-size: 15px; /* Increase font size */
-                    border-radius: 5px; /* Add rounded corners */
-                }
-
-                #controls button {
-                    background-color: #007BFF; /* Blue background */
-                    color: white; /* White text */
-                    border: none; /* Remove border */
-                    padding: 10px 20px; 
-                    cursor: pointer; 
-                    border-radius: 5px; 
-                    font-size: 15px; 
-                }
-
-                #controls button:hover {
-                    background-color: #0056b3; 
-                }
-
-                #map {
-                    height: 92%;
-                }
-
-                html, body {
-                    height: 100%;
-                    margin: 0;
-                    padding: 0;
-                }
-
-                
-
-            </style>
-        </head>
+            <!DOCTYPE html>
+            <html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml""> 
+            <head>
+                <meta charset=""utf-8"" />
+                <title></title>
+                <style>
+                    #controls {
+                        height: 8%;
+                        padding: 10px;
+                        background: #f9f9f9;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    #controls select {
+                        padding: 5px;
+                        font-size: 15px;
+                        border-radius: 5px;
+                    }
+                    #controls button {
+                        background-color: #007BFF;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        cursor: pointer;
+                        border-radius: 5px;
+                        font-size: 15px;
+                    }
+                    #controls button:hover {
+                        background-color: #0056b3;
+                    }
+                    #map {
+                        height: 92%;
+                    }
+                    html, body {
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+                </style>
+            </head>
         <body>
             <div id=""map""></div>
-
+            
             <div id=""controls"">
                 <label for=""rangeSelect"">Select Range: </label>
                 <select id=""rangeSelect"" >
@@ -104,11 +94,11 @@ namespace ParkEase.Controls
                     <option value=""1"">1000 meters</option>
                 </select>
                 <button onclick=""updateRange()"">Update Range</button>
-
             </div>
-
             <script>
                 let map;
+                let directionsService;
+                let directionsRenderer;
                 let start = false;
                 let selectedPoints = [];
                 let lines = [];
@@ -132,6 +122,10 @@ namespace ParkEase.Controls
                     // GPS marker for the user 
                     addUserMarker(lat, lng);
                     drawCircle(lat, lng, 0.2);
+
+                    directionsService = new google.maps.DirectionsService();
+                     directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true });
+                    directionsRenderer.setMap(map);                    
                 }
 
                 // GPS marker for the user
@@ -178,10 +172,10 @@ namespace ParkEase.Controls
 
                         let lineInfo = getLineInfo(line);
                         window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
+                        setSelectedLine(lineCoordinates);
                     });
 
                     line.setMap(map);
-                    
                     lines.push(line);
                 }
 
@@ -196,12 +190,11 @@ namespace ParkEase.Controls
                         let point = path.getAt(i);
                         pathStr += point.lat() + "","" + point.lng() + "";"";
                     }
-                
                     // Remove the trailing semicolon
                     pathStr = pathStr.slice(0, -1);
-                
                     return pathStr;
                 }
+
                 // Deletes the selected line
                 function deleteLine() {
                     if (selectedLine != null) {
@@ -283,10 +276,45 @@ namespace ParkEase.Controls
                     }
                 }
 
-                // Initialize the map with the user's current location when the page loads
-                window.onload = function() {
-                    getUserLocation();
-                };
+                let selectedLineCoordinates = null;
+
+                function setSelectedLine(lineCoordinates) {
+                    selectedLineCoordinates = lineCoordinates;
+                }
+
+                function navigateToLine() {
+                    if (!selectedLineCoordinates) return;
+
+                    const midPointIndex = Math.floor(selectedLineCoordinates.length / 2);
+                    const midPoint = selectedLineCoordinates[midPointIndex];
+                    const request = {
+                        origin: { lat: currentLat, lng: currentLng },
+                        destination: { lat: midPoint.lat, lng: midPoint.lng },
+                        travelMode: google.maps.TravelMode.DRIVING
+                    };
+                    directionsService.route(request, function (result, status) {
+                        if (status == 'OK') {
+                            directionsRenderer.setDirections(result);
+                            displayRouteSteps(result);
+                        } else {
+                            alert('Directions request failed: ' + status);
+                        }
+                    });
+                }
+
+               
+                function receiveMessage(event) {
+                    if (event.data === 'GetDirections') {
+                        navigateToLine();
+                    }
+                }
+
+                window.addEventListener('message', receiveMessage, false);
+
+                 // Initialize the map with the user's current location when the page loads
+                 window.onload = function() {
+                       getUserLocation();
+                   };
          
             </script>
             <script src=""https://maps.googleapis.com/maps/api/js?key=AIzaSyCMPKV70vmSd-153eJsECz6gJD0AipZD-M&callback=initMap"" async defer></script>
@@ -297,6 +325,14 @@ namespace ParkEase.Controls
             Navigating += GMapMobile_Navigating;
             Loaded += GMapMobile_Loaded;
             Reload();
+
+            MessagingCenter.Subscribe<BottomSheetViewModel>(this, "GetDirections", async (sender) =>
+            {
+                await Device.InvokeOnMainThreadAsync(async () =>
+                {
+                    await EvaluateJavaScriptAsync("window.postMessage('GetDirections');");
+                });
+            });
         }
 
         private async void GMapMobile_Navigating(object? sender, WebNavigatingEventArgs e)
@@ -352,7 +388,7 @@ namespace ParkEase.Controls
                 }
             }
         }
-        
+
         // async indicates that the method contains asynchronous operations.
         private async void GMapMobile_Loaded(object? sender, EventArgs e)
         {
@@ -396,11 +432,14 @@ namespace ParkEase.Controls
 
             // Evaluate the JavaScript function "getLines()" to get the JSON string of all lines from the WebView
             var result = await this.EvaluateJavaScriptAsync("getLines()");
+
+
             if (result != null)
             {
                 result = result.Replace("\\\"", "\"");
                 // Deserialize the JSON string into a list of Line objects
                 List<MapLine> lines = JsonConvert.DeserializeObject<List<MapLine>>(result);
+
 
                 // Find the line that matches the selected line based on the points
                 SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
@@ -409,10 +448,9 @@ namespace ParkEase.Controls
                 var viewModel = BindingContext as UserMapViewModel;
                 if (viewModel != null && SelectedLine != null)
                 {
-                    await viewModel.OnLineClicked(SelectedLine);
+                    await viewModel.OnLineClickedAsync(SelectedLine);
                 }
             }
         }
-
     }
 }
