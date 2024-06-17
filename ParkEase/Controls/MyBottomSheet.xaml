@@ -1,72 +1,96 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<the49:BottomSheet xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
-             x:Class="ParkEase.Controls.MyBottomSheet"
-             xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
-             xmlns:vm="clr-namespace:ParkEase.ViewModel"
-             x:DataType="vm:BottomSheetViewModel"
-                   Padding="16,32"
-                   BackgroundColor="WhiteSmoke">
+<the49:BottomSheet
+    x:Class="ParkEase.Controls.MyBottomSheet"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
+    xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
+    xmlns:vm="clr-namespace:ParkEase.ViewModel"
+    Padding="16,32"
+    x:DataType="vm:BottomSheetViewModel"
+    BackgroundColor="WhiteSmoke">
+
     <the49:BottomSheet.Detents>
-        <the49:ContentDetent IsDefault="True"/>
-        <the49:HeightDetent Height="30"/>
+        <the49:ContentDetent IsDefault="True" />
+        <the49:HeightDetent Height="30" />
         <!--<the49:RatioDetent Ratio="0.8" />-->
     </the49:BottomSheet.Detents>
     <VerticalStackLayout>
 
         <HorizontalStackLayout Spacing="10">
-            <Image Source="parkease_logo.png"
-                   WidthRequest="50"
-                   HeightRequest="50"
-                   Aspect="AspectFit"/>
-            <Label Text="Nearby Parking Spot"
-                   TextColor="#512BD4"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   VerticalOptions="Center"/>
+            <Image
+                Aspect="AspectFit"
+                HeightRequest="50"
+                Source="parkease_logo.png"
+                WidthRequest="50" />
+            <Label
+                FontAttributes="Bold"
+                FontSize="20"
+                Text="Nearby Parking Spot"
+                TextColor="#512BD4"
+                VerticalOptions="Center" />
         </HorizontalStackLayout>
 
-        <Frame BackgroundColor="White"
-               CornerRadius="8"
-               Padding="12"
-               Margin="0,10"
-               HasShadow="True">
+        <Frame
+            Margin="0,10"
+            Padding="12"
+            BackgroundColor="White"
+            CornerRadius="8"
+            HasShadow="True">
             <VerticalStackLayout>
-                <Label Text="{Binding Address}"
-                           FontSize="20"
-                           FontAttributes="Bold"/>
-                <!-- Light line separator -->
-                <BoxView HeightRequest="1"
-                         WidthRequest="1000"
-                         BackgroundColor="LightGray"
-                         HorizontalOptions="FillAndExpand"
-                         Margin="0,10"/>
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    Text="{Binding Address}" />
 
-                <HorizontalStackLayout Spacing="10"  Margin="0,3">
-                    <Image Source="dollar_icon.png"
-                                       WidthRequest="20"
-                                       HeightRequest="20"
-                                       Aspect="AspectFit"/>
-                    <Label Text="{Binding ParkingFee}"/>
+                <BoxView
+                    Margin="0,10"
+                    BackgroundColor="LightGray"
+                    HeightRequest="1"
+                    HorizontalOptions="FillAndExpand"
+                    WidthRequest="1000" />
+
+                <HorizontalStackLayout Margin="0,3" Spacing="10">
+                    <Image
+                        Aspect="AspectFit"
+                        HeightRequest="20"
+                        Source="dollar_icon.png"
+                        WidthRequest="20" />
+                    <Label Text="{Binding ParkingFee}" />
                 </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10"  Margin="0,3">
-                    <Image Source="clock_icon.png"
-                                       WidthRequest="20"
-                                       HeightRequest="20"
-                                       Aspect="AspectFit"/>
-                    <Label Text="{Binding LimitHour}"/>
+                <HorizontalStackLayout Margin="0,3" Spacing="10">
+                    <Image
+                        Aspect="AspectFit"
+                        HeightRequest="20"
+                        Source="clock_icon.png"
+                        WidthRequest="20" />
+                    <Label Text="{Binding LimitHour}" />
                 </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10"  Margin="0,3">
-                    <Image Source="parking_icon.png"
-                           WidthRequest="20"
-                           HeightRequest="20"
-                           Aspect="AspectFit"/>
-                    <Label Text="{Binding Availability}"/>
+                <HorizontalStackLayout Margin="0,3" Spacing="10">
+                    <Image
+                        Aspect="AspectFit"
+                        HeightRequest="20"
+                        Source="parking_icon.png"
+                        WidthRequest="20" />
+                    <Label Text="{Binding Availability}" />
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Frame>
+
+        <VerticalStackLayout IsVisible="{Binding ShowButton}" Spacing="10">
+            <Button
+                Command="{Binding GetDirectionsCommand}"
+                CornerRadius="8"
+                Text="Get Directions" />
+            <Button
+                BackgroundColor="#FF5722"
+                Command="{Binding OpenInGoogleMapsCommand}"
+                CornerRadius="8"
+                Text="Redirect to external map" />
+
+        </VerticalStackLayout>
+
     </VerticalStackLayout>
 </the49:BottomSheet>

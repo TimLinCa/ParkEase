@@ -21,7 +21,7 @@ namespace ParkEase.ViewModel
     public partial class UserMapViewModel : ObservableObject
     {
         [ObservableProperty]
-        private ObservableCollection<MapLine> mapLines;  //list on map
+        private ObservableCollection<MapLine> mapLines;
 
         [ObservableProperty]
         private MapLine selectedMapLine;
@@ -29,25 +29,23 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string availableSpots;
 
-        private IMongoDBService mongoDBService;
-        private IDialogService dialogService;
+        private readonly IMongoDBService mongoDBService;
+        private readonly IDialogService dialogService;
         public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
         }
-
-        //partial void OnSelectedMapLineChanged(MapLine? value)
-        //{
-
-        //}
-
         public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
+        {
+            await LoadMapDataAsync();
+        });
+
+        private async Task LoadMapDataAsync()
         {
             try
             {
-                List<ParkingData> parkingDatas = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
-
+                var parkingDatas = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
                 if (parkingDatas == null || !parkingDatas.Any())
                 {
                     System.Diagnostics.Debug.WriteLine("No parking data found.");
@@ -60,58 +58,36 @@ namespace ParkEase.ViewModel
                 {
                     if (pd.Points.Count > 1)
                     {
-                        var color = await GetLineColor(pd.Id); // Get the color based on parking availability
+                        var color = await GetLineColorAsync(pd.Id);
                         lines.Add(new MapLine(pd.Points, color));
                     }
                 }
 
                 MapLines = lines;
-
-                // Load and calculate available parking spots
-                await LoadAvailableSpots(null); // Load with no specific parkingDataId initially
-
+                await LoadAvailableSpotsAsync(null);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in draw_lines: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error loading map data: {ex.Message}");
             }
-        });
-
-        private async Task<string> GetLineColor(string parkingDataId)
+        }
+        private async Task<string> GetLineColorAsync(string parkingDataId)
         {
             var statuses = await mongoDBService.GetData<PublicStatus>(CollectionName.PublicStatus);
-            var matchingStatuses = statuses.Where(status => status.AreaId == parkingDataId);
-            var availableSpots = matchingStatuses.Count(status => !status.Status);
-
-            return availableSpots > 0 ? "green" : "red";  // Return the color based on availability
+            var availableSpots = statuses.Count(status => status.AreaId == parkingDataId && !status.Status);
+            return availableSpots > 0 ? "green" : "red";
         }
 
-        private async Task LoadAvailableSpots(string parkingDataId)
+        private async Task LoadAvailableSpotsAsync(string parkingDataId)
         {
             try
             {
                 var statuses = await mongoDBService.GetData<PublicStatus>(CollectionName.PublicStatus);
+                var count = string.IsNullOrEmpty(parkingDataId)
+                    ? statuses.Count(status => !status.Status)
+                    : statuses.Count(status => status.AreaId == parkingDataId && !status.Status);
 
-                if (string.IsNullOrEmpty(parkingDataId))
-                {
-                    // If no specific parkingDataId, do a general count
-                    var count = statuses.Count(status => !status.Status); // Count where status is false
-                    availableSpots = count.ToString();
-                }
-                else
-                {
-                    var matchingStatuses = statuses.Where(status => status.AreaId == parkingDataId);
-
-                    if (matchingStatuses.Any())
-                    {
-                        var count = matchingStatuses.Count(status => !status.Status); // Count where status is false
-                        availableSpots = count.ToString();
-                    }
-                    else
-                    {
-                        AvailableSpots = "No"; // No matching areaId
-                    }
-                }
+                AvailableSpots = count.ToString();
             }
             catch (Exception ex)
             {
@@ -119,47 +95,36 @@ namespace ParkEase.ViewModel
             }
         }
 
-        public async Task OnLineClicked(MapLine selectedLine)
+        public async Task OnLineClickedAsync(MapLine selectedLine)
         {
-            if (selectedLine != null)
+            if (selectedLine == null) return;
+
+            try
             {
-                try
+                var filter = Builders<ParkingData>.Filter.Eq(pd => pd.Points, selectedLine.Points);
+                var parkingDataList = await mongoDBService.GetDataFilter<ParkingData>(CollectionName.ParkingData, filter);
+
+                if (parkingDataList == null || !parkingDataList.Any())
                 {
-                    // Create a filter to match the selected line's points
-                    var filter = Builders<ParkingData>.Filter.Eq(pd => pd.Points, selectedLine.Points);
-
-                    // Fetch the parking data that matches the filter from MongoDB database
-                    List<ParkingData> parkingDataList = await mongoDBService.GetDataFilter<ParkingData>(CollectionName.ParkingData, filter);
-
-                    // Check if the parking data is not null and has at least one item
-                    if (parkingDataList != null && parkingDataList.Count > 0)
-                    {
-                        // Get the first parking data from the list
-                        var parkingData = parkingDataList.First();
-
-                        // Extract necessary information from the parking data
-                        var address = parkingData.ParkingSpot;
-                        var parkingFee = parkingData.ParkingFee;
-                        var limitedHour = parkingData.ParkingTime;
-                        var parkingDataId = parkingData.Id; // Assuming `Id` is the property name for the parking data ID
-
-                        // Load and calculate available parking spots
-                        await LoadAvailableSpots(parkingDataId);
-
-                        // Show the bottom sheet with the line's information
-                        await dialogService.ShowPrivateMapBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots");
-                    }
-                    else
-                    {
-                        await dialogService.ShowAlertAsync("No Data Found", "No parking data found for the selected line.");
-                    }
+                    await dialogService.ShowAlertAsync("No Data Found", "No parking data found for the selected line.");
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error retrieving parking data: {ex.Message}");
-                }
+
+                var parkingData = parkingDataList.First();
+                var address = parkingData.ParkingSpot;
+                var parkingFee = parkingData.ParkingFee;
+                var limitedHour = parkingData.ParkingTime;
+                var parkingDataId = parkingData.Id;
+                var lat = parkingData.Points[1].Lat;
+                var lng = parkingData.Points[1].Lng;
+
+                await LoadAvailableSpotsAsync(parkingDataId);
+                await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{AvailableSpots} Available Spots", true, lat, lng);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error retrieving parking data: {ex.Message}");
             }
         }
-
     }
 }

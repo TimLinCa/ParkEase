@@ -239,7 +239,7 @@ namespace ParkEase.ViewModel
                 }
                 ListRectangle.Add(rectangle);
             }
-            await dialogService.ShowPrivateMapBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots");
+            await dialogService.ShowBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
         }
     }
 }
