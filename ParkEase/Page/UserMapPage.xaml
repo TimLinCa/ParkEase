@@ -4,14 +4,59 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:ParkEase.Controls"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:UserMapViewModel">
     <Grid>
-        <controls:GMapMobile Lines="{Binding MapLines}" SelectedLine="{Binding SelectedMapLine}">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="0.1*" />
+        </Grid.RowDefinitions>
+        <controls:GMapMobile
+            Grid.Row="0"
+            Lines="{Binding MapLines}"
+            Radius="{Binding Radius}"
+            SelectedLine="{Binding SelectedMapLine}">
             <controls:GMapMobile.Behaviors>
                 <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
             </controls:GMapMobile.Behaviors>
         </controls:GMapMobile>
+
+        <Grid
+            Grid.Row="1"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+            <StackLayout
+                HorizontalOptions="CenterAndExpand"
+                Orientation="Horizontal"
+                Spacing="10"
+                VerticalOptions="CenterAndExpand">
+                <Label
+                    Text="Select Range:"
+                    TextColor="Black"
+                    VerticalOptions="Center" />
+                <Picker
+                    x:Name="RangePicker"
+                    Title="Please select"
+                    BackgroundColor="White"
+                    SelectedItem="{Binding SelectedRadius}"
+                    Style="{StaticResource MAUIDefaultPicker}"
+                    TextColor="Black"
+                    VerticalOptions="Center"
+                    WidthRequest="150">
+                    <Picker.Items>
+                        <x:String>200 meters</x:String>
+                        <x:String>500 meters</x:String>
+                        <x:String>1000 meters</x:String>
+                    </Picker.Items>
+                </Picker>
+                <Button
+                    Command="{Binding UpdateRangeCommand}"
+                    Text="Update Range"
+                    VerticalOptions="Center" />
+            </StackLayout>
+        </Grid>
     </Grid>
 </ContentPage>
+
