@@ -292,6 +292,11 @@ namespace ParkEase.ViewModel
             {
                 try
                 {
+                    if (!addNewFloorClicked)
+                    {
+                        await dialogService.ShowAlertAsync("", "Please make sure that you entered floor name and clicked Add button before uploading image.", "OK");
+                        return;
+                    }
                     if (MediaPicker.Default.IsCaptureSupported)
                     {
                         FileResult myPhoto = await MediaPicker.PickPhotoAsync();
@@ -391,32 +396,8 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        }
-        );
+        });
 
-        public async Task<bool> CheckIfDocumentExists(FilterDefinition<PrivateParking> filter)
-        {
-            var document = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
-            if (document != null)
-            {
-                var result = document[0];
-                Console.WriteLine("Document found:");
-                Console.WriteLine($"ID: {result.Id}");
-                Console.WriteLine($"CompanyName: {result.CompanyName}");
-                Console.WriteLine($"Address: {result.Address}");
-                System.Diagnostics.Debug.WriteLine("Document found:");
-                System.Diagnostics.Debug.WriteLine($"ID: {result.Id}");
-                System.Diagnostics.Debug.WriteLine($"CompanyName: {result.CompanyName}");
-                System.Diagnostics.Debug.WriteLine($"Address: {result.Address}");
-                // Log other properties as needed
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("No document matches the filter criteria.");
-                return false;
-            }
-        }
         // Submit Command
         public ICommand SubmitCommand => new RelayCommand(async () =>
         {
@@ -428,7 +409,8 @@ namespace ParkEase.ViewModel
                     if (selectedPropertyId != null && (SelectedAddress != null || SelectedFloorName != null)) 
                     {
                         var builder = Builders<PrivateParking>.Filter;
-                        var filter = builder.Eq(p => p.CompanyName, selectedCompanyName) & builder.Eq(p => p.Address, selectedAddress);
+                        //var filter = builder.Eq(p => p.CompanyName, selectedCompanyName) & builder.Eq(p => p.Address, selectedAddress);
+                        var filter = builder.Eq(p => p.Id, selectedPropertyId);
 
                         var update = Builders<PrivateParking>.Update
                                         .Set(p => p.CompanyName, CompanyName)
@@ -478,7 +460,7 @@ namespace ParkEase.ViewModel
                 }
                 else
                 {
-                    await dialogService.ShowAlertAsync("Warning", "Please check if all fields is filled up or if you click Add button to add a new floor.", "OK");
+                    await dialogService.ShowAlertAsync("Warning", "Please check if all fields is filled up.", "OK");
                 }
             }
             catch (Exception ex)
@@ -580,8 +562,5 @@ namespace ParkEase.ViewModel
             ListRectangle.Clear();
             addNewFloorClicked = false;
         }
-
-        
-
     }
 }

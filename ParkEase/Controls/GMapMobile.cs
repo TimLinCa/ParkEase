@@ -97,9 +97,10 @@ namespace ParkEase.Controls
                     addUserMarker(lat, lng);
                     drawCircle(lat, lng, 0.2);
 
-                    directionsService = new google.maps.DirectionsService();
-                    directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true });
-                    directionsRenderer.setMap(map);                    
+                    //https://developers.google.com/maps/documentation/javascript/reference/directions
+                    directionsService = new google.maps.DirectionsService(); // communicate with the Google Maps Directions API
+                    directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true }); // taking the directions computed by DirectionsService and displaying them on the map
+                    directionsRenderer.setMap(map);  // render the computed directions on the specified map                  
                 }
 
                 function clearLines() {
@@ -272,18 +273,24 @@ namespace ParkEase.Controls
 
                 let selectedLineCoordinates = null;
 
+                // Set the selected line coordinates when a line is clicked
                 function setSelectedLine(lineCoordinates) {
                     selectedLineCoordinates = lineCoordinates;
                 }
 
+                // Display the route steps in the bottom sheet
                 function navigateToLine() {
-                    if (!selectedLineCoordinates) return;
+                    if (!selectedLineCoordinates) return;  // If no line is selected, it exits the function
 
-                    const midPointIndex = Math.floor(selectedLineCoordinates.length / 2);
-                    const midPoint = selectedLineCoordinates[midPointIndex];
+                    
+                    //const midPointIndex = Math.floor(selectedLineCoordinates.length / 2);
+                    //const midPoint = selectedLineCoordinates[midPointIndex];
+
+                    const endPoint = selectedLineCoordinates[selectedLineCoordinates.length - 1];
+
                     const request = {
-                        origin: { lat: currentLat, lng: currentLng },
-                        destination: { lat: midPoint.lat, lng: midPoint.lng },
+                        origin: { lat: currentLat, lng: currentLng }, // Start point
+                        destination: { lat: endPoint.lat, lng: endPoint.lng }, // End point
                         travelMode: google.maps.TravelMode.DRIVING
                     };
                     directionsService.route(request, function (result, status) {
@@ -302,7 +309,8 @@ namespace ParkEase.Controls
                         navigateToLine();
                     }
                 }
-
+                
+                // listen for the message event
                 window.addEventListener('message', receiveMessage, false);
 
                  // Initialize the map with the user's current location when the page loads
@@ -320,11 +328,15 @@ namespace ParkEase.Controls
             Loaded += GMapMobile_Loaded;
             Reload();
 
+            //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/messagingcenter?view=net-maui-8.0
+            // Listen for the GetDirections message from the BottomSheetViewModel
             MessagingCenter.Subscribe<BottomSheetViewModel>(this, "GetDirections", async (sender) =>
             {
+                // Ensure the following code runs on the main thread - update the UI
                 await Device.InvokeOnMainThreadAsync(async () =>
                 {
-                    await EvaluateJavaScriptAsync("window.postMessage('GetDirections');");
+                    // Evaluate the JavaScript function in the web view context
+                    await EvaluateJavaScriptAsync("window.postMessage('GetDirections');"); // send a message to the JavaScript function
                 });
             });
         }

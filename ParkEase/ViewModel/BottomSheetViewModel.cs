@@ -77,15 +77,12 @@ namespace ParkEase.ViewModel
 
         private async Task OnOpenInGoogleMaps()
         {
-            //string Lat = "51.02323583729865";
-            //string Lng = "-114.28669176519081";
-
 
             // Construct the URI for Google Maps
-            string uri = $"https://www.google.com/maps/dir/?api=1&destination={Lat},{Lng}&travelmode=driving";
+            string uri = $"https://www.google.com/maps/dir/?api=1&destination={Lat},{Lng}&travelmode=driving"; /*https://developers.google.com/maps/documentation/urls/get-started#directions-action*/
 
             // Open the URI
-            await Launcher.OpenAsync(new Uri(uri));
+            await Launcher.OpenAsync(new Uri(uri)); /*https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.applicationmodel.launcher.openasync?view=net-maui-8.0#microsoft-maui-applicationmodel-launcher-openasync(system-uri)*/
 
         }
 

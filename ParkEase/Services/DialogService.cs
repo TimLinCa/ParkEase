@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace ParkEase.Services
 {
+
     public class DialogService : IDialogService
     {
         private MyBottomSheet currentBottomSheet;
@@ -23,7 +24,7 @@ namespace ParkEase.Services
 
             if (currentBottomSheet != null)
             {
-                await currentBottomSheet.DismissAsync();
+                await currentBottomSheet.DismissAsync(); /*https://stackoverflow.com/questions/76626365/how-do-i-dismiss-the-bottom-sheet-from-a-button-click-event-inside-the-bottom-sh*/
             }
 
             var bottomSheetViewModel = new BottomSheetViewModel
@@ -36,9 +37,6 @@ namespace ParkEase.Services
                 Lat = lat,
                 Lng = lng
             };
-
-            //bottomSheetViewModel.Lat = lat;
-            //bottomSheetViewModel.Lng = lng;
 
             currentBottomSheet = new MyBottomSheet(bottomSheetViewModel)
             {
