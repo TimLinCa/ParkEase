@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls.PlatformConfiguration;
+using MongoDB.Bson;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
@@ -40,12 +41,14 @@ namespace ParkEase.ViewModel
 
         private ParkEaseModel parkEaseModel;
 
+        private IAWSService awsService;
 
-        public LogInViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
+        public LogInViewModel(IMongoDBService mongoDBService, IDialogService dialogService, IAWSService awsService, ParkEaseModel model)
         {
             this.dialogService = dialogService;
             this.mongoDBService = mongoDBService;
             this.parkEaseModel = model;
+            this.awsService = awsService;
             Email = "";
             Password = "";
             //ForgotPasswordCommand = new RelayCommand(async () => await ExecuteForgotPasswordCommand());
@@ -67,6 +70,7 @@ namespace ParkEase.ViewModel
 
         public ICommand InitCommand => new RelayCommand(async () =>
         {
+            await RegisterEnvironmentVariable();
             if (parkEaseModel.developerMode)
             {
                 User user = new User();
@@ -103,6 +107,11 @@ namespace ParkEase.ViewModel
             }
 
         });
+
+        private async Task RegisterEnvironmentVariable()
+        {
+            Environment.SetEnvironmentVariable("GoogleAKYKey", await awsService.GetParamenter("/ParkEase/APIKeys/google"));
+        }
 
         public ICommand SignUpCommand => new RelayCommand(async () =>
         {

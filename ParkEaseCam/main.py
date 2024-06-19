@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
         self.cmb_floor.currentIndexChanged.connect(self.floorChanged)
         self.bnt_loadArea.setEnabled(False)
         self.cmb_lotId.setEnabled(False)
-       
+
         # Resource Usage
         self.resource_usage = boardInfoClass()
         self.resource_usage.start()
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         # Graphics View
         self.m_scene = AnnotationScene(self)
         self.m_scene.selection_index_changed.connect(self.update_selected_index)
-        
+
         QtWidgets.QShortcut(QtCore.Qt.Key_Escape, self, activated=partial(self.m_scene.setCurrentInstruction, Instructions.No_Instruction))
         self.graphicsview = AnnotationView(self.m_scene)
         lay = QtWidgets.QVBoxLayout(self.disp_main)

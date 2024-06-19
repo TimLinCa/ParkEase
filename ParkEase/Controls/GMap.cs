@@ -46,6 +46,7 @@ namespace ParkEase.Controls
 
         public GMap()
         {
+            var apiKey = Environment.GetEnvironmentVariable("GoogleAKYKey");
             // HTML content to be loaded in the WebView for displaying Google Maps. https://www.google.com/search?sca_esv=00e485a4403845c8&sca_upv=1&rlz=1C1UEAD_enCA1040CA1040&sxsrf=ADLYWIIu_-3h0kGt3_IxavzDEMmyG-bAfg:1716486128385&q=HTML+content+to+be+loaded+in+the+WebView+for+displaying+Google+Maps.&tbm=vid&source=lnms&prmd=sivbnmtz&sa=X&ved=2ahUKEwi-zMaPqaSGAxWqJzQIHecgDQEQ0pQJegQIChAB&biw=1920&bih=911&dpr=1#fpstate=ive&vld=cid:7c1c270e,vid:s3g04pbAJBA,st:0
             var htmlSource = new HtmlWebViewSource
             {
@@ -229,9 +230,9 @@ namespace ParkEase.Controls
                         function setInitial(newValue) {
                             initial = newValue;
                         }
-                    </script>
-                    <script src=""https://maps.googleapis.com/maps/api/js?key=AIzaSyCMPKV70vmSd-153eJsECz6gJD0AipZD-M&callback=initMap"" async defer></script>
-                </body>
+                    </script>" + 
+                    @$"<script src=""https://maps.googleapis.com/maps/api/js?key={apiKey}&callback=initMap"" async defer></script>" +
+                @"</body>
                 </html>"
             };
 

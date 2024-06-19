@@ -157,7 +157,7 @@ def parkingLot_detect_video(video_filePath,config_file_path):
     cap.release()
     cv2.destroyAllWindows()
 
-def start_detect_cam(configName):
+def start_detect_cam(camIndex,configName):
     CamConfig = localDb.CamConfig
     ConfigGridFs = gridfs.GridFS(localDb)
     area_config = CamConfig.find_one({"name":configName})
@@ -169,17 +169,16 @@ def start_detect_cam(configName):
     areaType = area_config.get('areaType')
     if(areaType == 'Public'):
         publicStatus = onlineDb.PublicStatus
-        start_detect_cam_public(area_config,cam_config,publicStatus)
+        start_detect_cam_public(camIndex,area_config,cam_config,publicStatus)
     else:
         # get the floor from spliting the configName by '_' in the last element
         floor = configName.split('_')[-1]
         privateStatus = onlineDb.PrivateStatus
-        start_detect_cam_private(area_config,cam_config,privateStatus,floor)
+        start_detect_cam_private(camIndex,area_config,cam_config,privateStatus,floor)
 
-def start_detect_cam_public(area_config,cam_config,logDC):
+def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
     global stopSignal
     areaId = area_config.get("areaId")
-    cam_index = area_config.get('cam_index')
     cam_name = area_config.get("displayName")
     statusDC = onlineDb.PublicStatus
     status = statusDC.find()
@@ -253,13 +252,12 @@ def start_detect_cam_public(area_config,cam_config,logDC):
             break
     cap.release()
 
-def start_detect_cam_private(area_config,cam_config,floor,logDC):
+def start_detect_cam_private(cam_index,area_config,cam_config,floor,logDC):
     lotIds = area_config.get('lotIds')
     statusDC = onlineDb.PrivateStatus
     status = statusDC.find()
     local_status = {s['index']: s['status'] for s in status}
     areaId = area_config.get("areaId")
-    cam_index = area_config.get('cam_index')
     cam_name = area_config.get("displayName")
     polylines = cam_config['polylines']
     with open("coco.txt", "r") as my_file:

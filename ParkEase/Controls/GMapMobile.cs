@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace ParkEase.Controls
 {
     public class GMapMobile : WebView
@@ -36,6 +35,7 @@ namespace ParkEase.Controls
 
         public GMapMobile()
         {
+            var apiKey = Environment.GetEnvironmentVariable("GoogleAKYKey");
             HorizontalOptions = LayoutOptions.FillAndExpand;
             VerticalOptions = LayoutOptions.FillAndExpand;
             var htmlSource = new HtmlWebViewSource
@@ -316,10 +316,10 @@ namespace ParkEase.Controls
                        getUserLocation();
                    };
          
-            </script>
-            <script src=""https://maps.googleapis.com/maps/api/js?key=AIzaSyCMPKV70vmSd-153eJsECz6gJD0AipZD-M&callback=initMap"" async defer></script>
-        </body>
-        </html>"
+            </script>" +
+                    @$"<script src=""https://maps.googleapis.com/maps/api/js?key={apiKey}&callback=initMap"" async defer></script>" +
+                @"</body>
+                </html>"
             };
             Source = htmlSource;
             Navigating += GMapMobile_Navigating;
