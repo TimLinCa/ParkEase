@@ -1,4 +1,5 @@
 ﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Shapes;
 using Newtonsoft.Json;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Data;
@@ -19,9 +20,15 @@ namespace ParkEase.Controls
         public event EventArgsHandler LoadedEvent;
         private static GMapMobile currentInstance;
         private static bool selfUpdatingLines = false;
+        private static Location location;
         public ObservableCollection<MapLine> Lines
         {
             get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
+        }
+
+        public double Radius
+        {
+            get => (double)GetValue(RadiusProperty); set { SetValue(RadiusProperty, value); }
         }
 
         public MapLine SelectedLine
@@ -32,6 +39,8 @@ namespace ParkEase.Controls
         public static readonly BindableProperty LinesProperty = BindableProperty.Create(nameof(Lines), typeof(ObservableCollection<MapLine>), typeof(GMapMobile), propertyChanged: LinesPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly BindableProperty SelectedLineProperty = BindableProperty.Create(nameof(SelectedLine), typeof(MapLine), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
+
+        public static readonly BindableProperty RadiusProperty = BindableProperty.Create(nameof(Radius), typeof(double), typeof(GMapMobile), propertyChanged: RadiusPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
         public GMapMobile()
         {
@@ -47,34 +56,9 @@ namespace ParkEase.Controls
                 <meta charset=""utf-8"" />
                 <title></title>
                 <style>
-                    #controls {
-                        height: 8%;
-                        padding: 10px;
-                        background: #f9f9f9;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        gap: 10px;
-                    }
-                    #controls select {
-                        padding: 5px;
-                        font-size: 15px;
-                        border-radius: 5px;
-                    }
-                    #controls button {
-                        background-color: #007BFF;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        cursor: pointer;
-                        border-radius: 5px;
-                        font-size: 15px;
-                    }
-                    #controls button:hover {
-                        background-color: #0056b3;
-                    }
+                    
                     #map {
-                        height: 92%;
+                        height: 100%;
                     }
                     html, body {
                         height: 100%;
@@ -85,16 +69,6 @@ namespace ParkEase.Controls
             </head>
         <body>
             <div id=""map""></div>
-            
-            <div id=""controls"">
-                <label for=""rangeSelect"">Select Range: </label>
-                <select id=""rangeSelect"" >
-                    <option value=""0.2"">200 meters</option>
-                    <option value=""0.5"">500 meters</option>
-                    <option value=""1"">1000 meters</option>
-                </select>
-                <button onclick=""updateRange()"">Update Range</button>
-            </div>
             <script>
                 let map;
                 let directionsService;
@@ -123,9 +97,15 @@ namespace ParkEase.Controls
                     addUserMarker(lat, lng);
                     drawCircle(lat, lng, 0.2);
 
-                    directionsService = new google.maps.DirectionsService();
-                     directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true });
-                    directionsRenderer.setMap(map);                    
+                    //https://developers.google.com/maps/documentation/javascript/reference/directions
+                    directionsService = new google.maps.DirectionsService(); // communicate with the Google Maps Directions API
+                    directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true }); // taking the directions computed by DirectionsService and displaying them on the map
+                    directionsRenderer.setMap(map);  // render the computed directions on the specified map                  
+                }
+
+                function clearLines() {
+                    lines.forEach(line => line.setMap(null));
+                    lines = [];
                 }
 
                 // GPS marker for the user
@@ -145,38 +125,41 @@ namespace ParkEase.Controls
                     });
                 }
 
-                function drawLine(latitude1, longitude1, latitude2, longitude2,color) {
-                    // Draw a line on the map
-                    let lineCoordinates = [
-                        { lat: parseFloat(latitude1), lng: parseFloat(longitude1) },
-                        { lat: parseFloat(latitude2), lng: parseFloat(longitude2) }
-                    ];
+                function drawLine(latitude1, longitude1, latitude2, longitude2, color) {
+                
+                    // Check if both points of the line are within the circle
+                        // Draw a line on the map
+                        let lineCoordinates = [
+                            { lat: parseFloat(latitude1), lng: parseFloat(longitude1) },
+                            { lat: parseFloat(latitude2), lng: parseFloat(longitude2) }
+                        ];
 
-                    let line = new google.maps.Polyline({
-                        path: lineCoordinates,
-                        geodesic: true,
-                        strokeColor: color,
-                        strokeOpacity: 1.0,
-                        strokeWeight: 4
-                    });
+                        let line = new google.maps.Polyline({
+                            path: lineCoordinates,
+                            geodesic: true,
+                            strokeColor: color,
+                            strokeOpacity: 1.0,
+                            strokeWeight: 4
+                        });
 
-                    line.originalColor = color; // Store the original color
+                        line.originalColor = color; // Store the original color
 
-                    line.addListener('click', function() {
-                         // If there is a previously selected line, reset its color.
-                        if (selectedLine != null) {
-                            selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
-                        }
-                        selectedLine = line; // Set the clicked line as the selected line
-                        selectedLine.setOptions({ strokeColor: ""yellow"" });
+                        line.addListener('click', function() {
+                             // If there is a previously selected line, reset its color.
+                            if (selectedLine != null) {
+                                selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
+                            }
+                            selectedLine = line; // Set the clicked line as the selected line
+                            selectedLine.setOptions({ strokeColor: ""yellow"" });
 
-                        let lineInfo = getLineInfo(line);
-                        window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
-                        setSelectedLine(lineCoordinates);
-                    });
+                            let lineInfo = getLineInfo(line);
+                            window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
+                            setSelectedLine(lineCoordinates);
+                        });
 
-                    line.setMap(map);
-                    lines.push(line);
+                        line.setMap(map);
+                        lines.push(line);
+                    
                 }
 
                 // Returns the path of the line as a string
@@ -250,6 +233,7 @@ namespace ParkEase.Controls
                 // Call this function to initialize the map with a circle
                 function initMapWithCircle(lat, lng) {
                      initMap(lat, lng); // Initialize the map
+                     updateRange(); // Draw the circle and lines within the range
                      
                 }
 
@@ -257,6 +241,17 @@ namespace ParkEase.Controls
                     const rangeSelect = document.getElementById('rangeSelect');
                     const selectedRange = parseFloat(rangeSelect.value);
                     drawCircle(currentLat, currentLng, selectedRange);
+
+                    // Clear existing lines
+                    lines.forEach(line => line.setMap(null));
+                    lines = [];
+
+                    // Redraw lines within the new range
+                    for (let line of allLines) { // allLines should be a separate array storing all original lines
+                        const start = line.path[0];
+                        const end = line.path[1];
+                        drawLine(start.lat, start.lng, end.lat, end.lng, line.strokeColor, currentLat, currentLng, selectedRange);
+                    }
                 } 
 
                 // Get user's current location
@@ -278,18 +273,24 @@ namespace ParkEase.Controls
 
                 let selectedLineCoordinates = null;
 
+                // Set the selected line coordinates when a line is clicked
                 function setSelectedLine(lineCoordinates) {
                     selectedLineCoordinates = lineCoordinates;
                 }
 
+                // Display the route steps in the bottom sheet
                 function navigateToLine() {
-                    if (!selectedLineCoordinates) return;
+                    if (!selectedLineCoordinates) return;  // If no line is selected, it exits the function
 
-                    const midPointIndex = Math.floor(selectedLineCoordinates.length / 2);
-                    const midPoint = selectedLineCoordinates[midPointIndex];
+                    
+                    //const midPointIndex = Math.floor(selectedLineCoordinates.length / 2);
+                    //const midPoint = selectedLineCoordinates[midPointIndex];
+
+                    const endPoint = selectedLineCoordinates[selectedLineCoordinates.length - 1];
+
                     const request = {
-                        origin: { lat: currentLat, lng: currentLng },
-                        destination: { lat: midPoint.lat, lng: midPoint.lng },
+                        origin: { lat: currentLat, lng: currentLng }, // Start point
+                        destination: { lat: endPoint.lat, lng: endPoint.lng }, // End point
                         travelMode: google.maps.TravelMode.DRIVING
                     };
                     directionsService.route(request, function (result, status) {
@@ -308,7 +309,8 @@ namespace ParkEase.Controls
                         navigateToLine();
                     }
                 }
-
+                
+                // listen for the message event
                 window.addEventListener('message', receiveMessage, false);
 
                  // Initialize the map with the user's current location when the page loads
@@ -326,11 +328,15 @@ namespace ParkEase.Controls
             Loaded += GMapMobile_Loaded;
             Reload();
 
+            //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/messagingcenter?view=net-maui-8.0
+            // Listen for the GetDirections message from the BottomSheetViewModel
             MessagingCenter.Subscribe<BottomSheetViewModel>(this, "GetDirections", async (sender) =>
             {
+                // Ensure the following code runs on the main thread - update the UI
                 await Device.InvokeOnMainThreadAsync(async () =>
                 {
-                    await EvaluateJavaScriptAsync("window.postMessage('GetDirections');");
+                    // Evaluate the JavaScript function in the web view context
+                    await EvaluateJavaScriptAsync("window.postMessage('GetDirections');"); // send a message to the JavaScript function
                 });
             });
         }
@@ -347,13 +353,26 @@ namespace ParkEase.Controls
                 HandleLineClicked(info); // Call your C# function to handle the line click
             }
         }
-
+        private static void RadiusPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is not GMapMobile view)
+            {
+                return;
+            }
+            double newRadius = (double)newValue;
+            string jsCommand = $"drawCircle({location.Latitude},{location.Longitude},{newRadius});";
+            view.EvaluateJavaScriptAsync(jsCommand);
+        }
         private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not GMapMobile view)
             {
                 return;
             }
+
+            string jsClearCommand = $"clearLines();";
+            view.EvaluateJavaScriptAsync(jsClearCommand);
+
             ObservableCollection<MapLine> lines = (ObservableCollection<MapLine>)newValue;
             lines.CollectionChanged += Lines_CollectionChanged;
 
@@ -394,7 +413,7 @@ namespace ParkEase.Controls
         {
             // assigned to the static variable
             currentInstance = (GMapMobile)sender; //sender the object that raised the event
-            var location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
+            location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
             if (location != null)
             {
                 // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator

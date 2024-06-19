@@ -4,9 +4,8 @@ using ZXing.Net.Maui;
 
 public partial class PrivateMapPage : ContentPage
 {
-	public PrivateMapPage()
+    public PrivateMapPage()
 	{
 		InitializeComponent();
-		
 	}
 }

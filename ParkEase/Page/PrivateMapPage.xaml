@@ -19,6 +19,11 @@
     </ContentPage.Resources>
 
     <VerticalStackLayout>
+        <Button
+            Text="Test Load Data"
+            Command="{Binding TestLoadData}"
+            HorizontalOptions="Center"/>
+        
         <!--<Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />-->
         <material:PickerField
             Title="Pick a floor"
@@ -28,7 +33,6 @@
                                    Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
             ItemsSource="{Binding FloorNames}"
             SelectedItem="{Binding SelectedFloorName}" />
-
 
         <Grid IsVisible="{Binding GridVisible}" VerticalOptions="Start">
 
@@ -45,7 +49,6 @@
             </zxing:CameraBarcodeReaderView>
 
         </Grid>
-
 
         <HorizontalStackLayout Margin="10,0,0,0">
             <Picker
@@ -66,30 +69,40 @@
 
         </HorizontalStackLayout>
 
-        <!--  Expander  -->
 
 
-
-
-        <controls:RecGraphicsView
-            x:Name="RectangleDrawableView"
+        <!--<controls:RecGraphicsView
+            x:Name="RectangleDrawableViewMobile"
             ImageSource="{Binding ImgSourceData}"
             ListRectangle="{Binding ListRectangle}"
             MinimumHeightRequest="650"
             MinimumWidthRequest="100">
             <controls:RecGraphicsView.Drawable>
-                <controls:RectDrawableMobile />
+                <controls:RectDrawable />
             </controls:RecGraphicsView.Drawable>
-        </controls:RecGraphicsView>
+        </controls:RecGraphicsView>-->
 
 
 
+        <!--<Grid>
+            <controls:RecGraphicsView
+            x:Name="RectangleDrawableView"
+            MinimumHeightRequest="650"
+            MinimumWidthRequest="100"
+            ImageSource="{Binding ImgSourceData}"
+            ListRectangle="{Binding ListRectangle}">
+                <controls:RecGraphicsView.GestureRecognizers>
+                    <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+                    <PanGestureRecognizer PanUpdated="OnPanUpdated" />
+                </controls:RecGraphicsView.GestureRecognizers>
+                <controls:RecGraphicsView.Drawable>
+                    <controls:RectDrawable />
+                </controls:RecGraphicsView.Drawable>
+            </controls:RecGraphicsView>
+        </Grid>-->
 
-        <!--<button
-            text="load data"
-            semanticproperties.hint="counts the number of times you click"
-            horizontaloptions="center"
-            command="{binding loaddatacommand}"/>-->
+
+        
 
     </VerticalStackLayout>
 </ContentPage>

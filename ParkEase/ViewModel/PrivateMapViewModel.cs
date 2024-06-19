@@ -121,8 +121,6 @@ namespace ParkEase.ViewModel
                 listFloorInfos?.Clear();
                 privateStatusData?.Clear();
 
-
-
                 // Fetch PrivateParking data from MongoDB
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
@@ -132,7 +130,7 @@ namespace ParkEase.ViewModel
                     return;
                 }
 
-                // Filter parkingLotData based on BarcodeResult
+                // Filter parkingLotData based on selected Address or BarcodeResult *****////*******////******************
                 parkingLotData = parkingLotData.Where(p => p.Id == BarcodeResult).ToList();
                 if (parkingLotData.Count == 0)
                 {
@@ -241,5 +239,62 @@ namespace ParkEase.ViewModel
             }
             await dialogService.ShowBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
         }
+
+
+        // Just a test function -> will be removed later
+        public ICommand TestLoadData => new RelayCommand(async () =>
+        {
+            try
+            {
+                parkingLotData?.Clear();
+                FloorNames?.Clear();
+                listFloorInfos?.Clear();
+                privateStatusData?.Clear();
+
+                // Fetch PrivateParking data from MongoDB
+                var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+
+                if (data == null || data.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No parking data found.");
+                    return;
+                }
+
+                // Filter parkingLotData based on BarcodeResult
+                parkingLotData = data.Where(p => p.Id == "666fc659959b052b84b5ba0e").ToList();
+                if (parkingLotData.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No matching parking data found.");
+                    return;
+                }
+
+                var selectedProperty = parkingLotData[0];
+                address = selectedProperty.Address;
+                city = selectedProperty.City;
+                fee = selectedProperty.ParkingInfo.Fee;
+                limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
+                listFloorInfos = selectedProperty.FloorInfo;
+
+                foreach (var floor in listFloorInfos)
+                {
+                    FloorNames.Add(floor.Floor);
+                }
+
+                // Fetch PrivateStatus data from MongoDB
+                var status = await mongoDBService.GetData<PrivateStatus>(CollectionName.PrivateStatus);
+                if (status == null || status.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No private status data found.");
+                    return;
+                }
+
+                // Filter privateStatusData based on selectedPropertyId
+                privateStatusData = status.Where(item => item.AreaId == "666fc659959b052b84b5ba0e").ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"An error occurred: {ex.Message}");
+            }
+        });
     }
 }
