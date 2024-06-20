@@ -8,6 +8,8 @@ import gridfs
 from pymongo import MongoClient
 from AWSService import AwsParameterManager
 from datetime import datetime
+import threading
+
 stopSignal = False
 parameterManager = AwsParameterManager()
 onlineClient = MongoClient(parameterManager.get_parameters('/ParkEase/Configs/ConnectionString'))
@@ -161,7 +163,8 @@ def start_detect_cam(camIndex,configName):
     CamConfig = localDb.CamConfig
     ConfigGridFs = gridfs.GridFS(localDb)
     area_config = CamConfig.find_one({"name":configName})
-    cam_config = ConfigGridFs.find_one({"filename": configName})
+    data = ConfigGridFs.find_one({"filename": configName})
+    cam_config = pickle.loads(data.read())
     if(area_config is None or cam_config is None):
         print("Config not found")
         return 
@@ -173,15 +176,17 @@ def start_detect_cam(camIndex,configName):
     else:
         # get the floor from spliting the configName by '_' in the last element
         floor = configName.split('_')[-1]
-        privateStatus = onlineDb.PrivateStatus
-        start_detect_cam_private(camIndex,area_config,cam_config,privateStatus,floor)
+        start_detect_cam_private(camIndex,area_config,cam_config,floor)
 
 def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
-    global stopSignal
+    logDC = localDb.PublicLog
+    statusDC = localDb.PublicStatus
+
     areaId = area_config.get("areaId")
     cam_name = area_config.get("displayName")
-    statusDC = onlineDb.PublicStatus
-    status = statusDC.find()
+    query = {"areaId": areaId,"camName": cam_name}
+    status = statusDC.find(query)
+
     local_status = {s['index']: s['status'] for s in status}
     polylines = cam_config['polylines']
     with open("coco.txt", "r") as my_file:
@@ -193,7 +198,7 @@ def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
     cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-
+    print(f"Camera {cam_name}, Running on {threading.current_thread().name}")
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -205,7 +210,7 @@ def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
         px=pd.DataFrame(a).astype("float")
         carPosition =[]
         #detecting cars
-        for row in px.iterrows():
+        for index,row in px.iterrows():
             x1=int(row[0])
             y1=int(row[1])
             x2=int(row[2])
@@ -239,10 +244,10 @@ def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
             #if car is inside the polyLine, update the status
             if i in local_status:
                 if local_status[i] != carInside:
-                    statusDC.update_one({"index": i,"camName":cam_name}, {"$set": dir}, upsert=True)
+                    statusDC.update_one(dir, upsert=True)
                     logDC.insert_one(dir)
             else:
-                statusDC.insert_one({"index": i, "status": carInside})
+                statusDC.insert_one(dir)
                 logDC.insert_one(dir)
             
             local_status[i] = carInside
@@ -252,14 +257,18 @@ def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
             break
     cap.release()
 
-def start_detect_cam_private(cam_index,area_config,cam_config,floor,logDC):
+def start_detect_cam_private(cam_index,area_config,cam_config,floor):
+    logDC = localDb.PrivateLog
+    statusDC = localDb.PrivateStatus
+
     lotIds = area_config.get('lotIds')
-    statusDC = onlineDb.PrivateStatus
-    status = statusDC.find()
-    local_status = {s['index']: s['status'] for s in status}
     areaId = area_config.get("areaId")
     cam_name = area_config.get("displayName")
+    query = {"areaId": areaId, "floor": floor,"camName": cam_name}
+    status = statusDC.find(query)
+    local_status = {s['index']: s['status'] for s in status}
     polylines = cam_config['polylines']
+
     with open("coco.txt", "r") as my_file:
         data = my_file.read()
         class_list = data.split("\n")
@@ -269,7 +278,7 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor,logDC):
     cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-
+    print(f"Camera {cam_name}, Running on {threading.current_thread().name}")
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -281,7 +290,7 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor,logDC):
         px=pd.DataFrame(a).astype("float")
         carPosition =[]
         #detecting cars
-        for row in px.iterrows():
+        for index,row in px.iterrows():
             x1=int(row[0])
             y1=int(row[1])
             x2=int(row[2])
@@ -309,7 +318,7 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor,logDC):
                     "areaId":areaId,
                     "index" : i,
                     "camName": cam_name,
-                    "lotId" : lotIds[i],
+                    "lotId" : lotIds[str(i+1)],
                     "status" : carInside,
                     "floor" : floor,
                     "timestamp": datetime.now()

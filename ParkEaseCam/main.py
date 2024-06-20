@@ -246,15 +246,17 @@ class MainWindow(QMainWindow):
         self.label_seletedIndex.setText(str(index))
         if self.label_configPath.text() == '':
             return
-        fileName = self.getConfigFileName()
-        config = CamConfig.find_one({'name':fileName})
-        if config:
-            lotIds = config.get("lotIds")
-            selectedIndex = self.label_seletedIndex.text()
-            if selectedIndex in lotIds:
-                self.label_lotId.setText(lotIds[selectedIndex])
-            else:
-                self.label_lotId.setText('')
+        if self.cmb_areaType.currentText() == 'Private':
+            fileName = self.getConfigFileName()
+            config = CamConfig.find_one({'name':fileName})
+            if config:
+                lotIds = config.get("lotIds")
+                selectedIndex = self.label_seletedIndex.text()
+                if selectedIndex in lotIds:
+                    self.label_lotId.setText(lotIds[selectedIndex])
+                else:
+                    self.label_lotId.setText('')
+        
 
 
     def saveConfig(self):
@@ -274,6 +276,8 @@ class MainWindow(QMainWindow):
             areaType = self.cmb_areaType.currentText()
             floor = self.cmb_floor.currentText()
             fileName = self.getConfigFileName()
+            if fileName == None:
+                return
             file = configGridFs.find_one({"filename": fileName})
             if file:
                 configGridFs.delete(file._id)
@@ -281,6 +285,24 @@ class MainWindow(QMainWindow):
             self.label_configPath.setText(fileName)
             if areaType == 'Private':
                 self.label_floor.setText(floor)
+                self.showMessageDialog("Config file saved successfully","Success")
+            else:
+                cameraName = self.txt_cameraName.text()
+                areaName = self.cmb_areaName.currentText()
+                camDeviceName = self.online_cam[self.camlist.currentIndex()].deviceName()
+                config = CamConfig.find_one({'name':fileName})
+                area = publicArea.find_one({'ParkingSpot':areaName})
+                myDict = {"name": fileName,
+                          "displayName": cameraName,
+                          "areaType": areaType,
+                          "areaId": area.get('_id'),
+                          "camDeviceName": camDeviceName}
+                if config:
+                    CamConfig.find_one_and_update({'name':fileName},{'$set':myDict})
+                    self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
+                else:
+                    CamConfig.insert_one(myDict)
+                    self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
         else:
             name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
             if name[0] == '':
@@ -288,8 +310,8 @@ class MainWindow(QMainWindow):
             with open(name[0],"wb") as f:
                 pickle.dump(data,f)
             self.label_configPath.setText(name[0])
-        self.showMessageDialog("Config file saved successfully","Success")    
-
+            self.showMessageDialog("Config file saved successfully","Success")
+            
     def loadConfig(self):
         data = None
         if self.rab_cam.isChecked():
@@ -402,46 +424,34 @@ class MainWindow(QMainWindow):
             floor = self.cmb_floor.currentText()
             fileName = fileName + "_" + floor
         config = CamConfig.find_one({'name':fileName})
-        if(areaType == "Public"):
-            area = publicArea.find_one({'ParkingSpot':areaName})
-            mydict = {"name": fileName,
-                      "displayName": cameraName,
-                      "type": areaType,
-                      "areaId": area._id,
-                      "camDeviceName": camDeviceName}
-            if config:
-                CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
-                self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
-            else:
-                CamConfig.insert_one(mydict)
-                self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
-        else:
-            area = privateArea.find_one({'CompanyName':areaName})
-            lotId = self.cmb_lotId.currentText()
-            selectedIndex = self.label_seletedIndex.text()
+       
+        
+        area = privateArea.find_one({'CompanyName':areaName})
+        lotId = self.cmb_lotId.currentText()
+        selectedIndex = self.label_seletedIndex.text()
 
-            if config:
-                lotIds = config.get("lotIds")
-                lotIds[selectedIndex] = lotId
-                mydict = {"name": fileName,
-                      "displayName": cameraName,
-                      "type": areaType,
-                      "areaId": area.get('_id'),
-                      "camDeviceName": camDeviceName,
-                      "lotIds": lotIds}
-                CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
-                self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
-            else:
-                lotIds = {selectedIndex: lotId}
-                mydict = {"name": fileName, 
-                 "displayName": cameraName,
-                 "type": areaType,
-                 "areaId": area.get('_id'),
-                 "camDeviceName": camDeviceName,
-                 "lotIds": lotIds}
-                CamConfig.insert_one(mydict)
-                self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
-            self.label_lotId.setText(lotId)
+        if config:
+            lotIds = config.get("lotIds")
+            lotIds[selectedIndex] = lotId
+            mydict = {"name": fileName,
+                  "displayName": cameraName,
+                  "areaType": areaType,
+                  "areaId": area.get('_id'),
+                  "camDeviceName": camDeviceName,
+                  "lotIds": lotIds}
+            CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
+            self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
+        else:
+            lotIds = {selectedIndex: lotId}
+            mydict = {"name": fileName, 
+             "displayName": cameraName,
+             "areaType": areaType,
+             "areaId": area.get('_id'),
+             "camDeviceName": camDeviceName,
+             "lotIds": lotIds}
+            CamConfig.insert_one(mydict)
+            self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
+        self.label_lotId.setText(lotId)
     
     def DbTest(self):
         if hasattr(self, 'Worker_Test') and self.Worker_Test.isRunning():

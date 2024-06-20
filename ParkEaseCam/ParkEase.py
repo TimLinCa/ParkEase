@@ -20,6 +20,7 @@ if __name__ == '__main__':
         futures = []
         for camConfig in camConfigList:
             camName = camConfig.get("name")
-            camDeviceName = camConfig.get("deviceName")
+            camDeviceName = camConfig.get("camDeviceName")
             camIndex = deviceNames.index(camDeviceName)
+            #start_detect_cam(camIndex, camName)
             futures.append(executor.submit(start_detect_cam, camIndex, camName))
