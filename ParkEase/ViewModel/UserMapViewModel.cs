@@ -169,8 +169,9 @@ namespace ParkEase.ViewModel
 
             // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, location.Latitude, location.Longitude, radius_out)).ToList();
-            MapLines = new ObservableCollection<MapLine>(linesInRange);
             Radius = radius_out;
+            MapLines = new ObservableCollection<MapLine>(linesInRange);
+            
         });
 
         //From chatGPT 
@@ -183,7 +184,7 @@ namespace ParkEase.ViewModel
 
                 // Pythagorean theorem
                 var distance = Math.Sqrt(Math.Pow(pointLat - centerLat, 2) + Math.Pow(pointLng - centerLng, 2));
-                if (distance <= radius ) 
+                if (distance <= radius /111  ) 
                 {
                     return true;
                 }
