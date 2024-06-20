@@ -41,7 +41,7 @@ namespace ParkEase.Controls
                         //Calculate image width and height to show
                         //https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview
 
-                        float viewRatio = dirtyRect.Width / dirtyRect.Height;
+                        /*float viewRatio = dirtyRect.Width / dirtyRect.Height;
                         float imageRatio = image.Width / image.Height;
                         float offsetX, offsetY, drawWidth, drawHeight;
 
@@ -60,7 +60,29 @@ namespace ParkEase.Controls
 
                             offsetX = 0;
                             offsetY = (dirtyRect.Height - drawHeight) / 2;
+                        }*/
+
+                        float viewRatio = 1134 / 830;
+                        float imageRatio = image.Width / image.Height;
+                        float offsetX, offsetY, drawWidth, drawHeight;
+
+                        if (imageRatio <= viewRatio)
+                        {
+                            drawHeight = 830;
+                            drawWidth = drawHeight / imageRatio;
+
+                            offsetY = 0;
+                            offsetX = (1134 - drawWidth) / 2;
                         }
+                        else
+                        {
+                            drawWidth = 1134;
+                            drawHeight = drawWidth / imageRatio;
+
+                            offsetX = 0;
+                            offsetY = (830 - drawHeight) / 2;
+                        }
+
                         canvas.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
                         if (ListRectangle?.Count > 0)

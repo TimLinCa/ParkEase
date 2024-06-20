@@ -116,7 +116,6 @@ namespace ParkEase.ViewModel
             addNewFloorClicked = false;
 
             _ = GetUserDataFromDatabase();
-            
         }
 
         public float RectWidth
