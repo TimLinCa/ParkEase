@@ -26,7 +26,7 @@ namespace ParkEase.Core.Data
 
         public double Longitude { get; set; }
 
-        public string CreatedBy {  get; set; }
+        public string CreatedBy { get; set; }
 
         public ParkingInfo ParkingInfo { get; set; }
 
@@ -48,7 +48,7 @@ namespace ParkEase.Core.Data
     {
         public string Floor { get; set; }
         public List<Rectangle> Rectangles { get; set; }
-        
+
         [JsonConverter(typeof(ImageDataConverter))]
         public byte[] ImageData { get; set; }
 
