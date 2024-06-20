@@ -146,10 +146,11 @@ namespace ParkEase.ViewModel
                 System.Diagnostics.Debug.WriteLine($"Error retrieving parking data: {ex.Message}");
             }
         }
-
+        // Represents the command interface, used to implement the command pattern.
+        //A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
         public ICommand UpdateRangeCommand => new RelayCommand(async() =>
         {
-            // parse selectedRadius to int 200 meters > 0.2
+            
             if (string.IsNullOrEmpty(SelectedRadius))
             {
                 Debug.WriteLine("SelectedRadius is null or empty");
@@ -166,12 +167,13 @@ namespace ParkEase.ViewModel
             radius_out /= 1000.0;
             var location = await Geolocation.GetLocationAsync();
 
+            // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, location.Latitude, location.Longitude, radius_out)).ToList();
             MapLines = new ObservableCollection<MapLine>(linesInRange);
             Radius = radius_out;
         });
 
-
+        //From chatGPT 
         private bool isPointInCircle(List<MapPoint> points, double centerLat, double centerLng, double radius)
         {
             foreach(MapPoint point in points)
@@ -179,8 +181,9 @@ namespace ParkEase.ViewModel
                 double pointLat = double.Parse(point.Lat);
                 double pointLng = double.Parse(point.Lng);
 
+                // Pythagorean theorem
                 var distance = Math.Sqrt(Math.Pow(pointLat - centerLat, 2) + Math.Pow(pointLng - centerLng, 2));
-                if(distance <= (radius / 111))
+                if (distance <= radius ) 
                 {
                     return true;
                 }
