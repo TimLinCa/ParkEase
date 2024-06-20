@@ -184,7 +184,7 @@ namespace ParkEase.ViewModel
         //https://www.mongodb.com/docs/drivers/csharp/current/usage-examples/updateOne/
 
 
-        // List of User's parking property address
+        // List of User's parking property 
         private async Task GetPropertyAddress()
         {
             try
@@ -221,6 +221,62 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
+        }
+
+        // verify address and save latitude, longitude
+        public ICommand AddressCommand => new RelayCommand(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(Address))
+            {
+                // Handle empty address case
+                return;
+            }
+
+            try
+            {
+                // https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device/geocoding?view=net-maui-8.0&tabs=android
+                IEnumerable<Location> locations = await Geocoding.Default.GetLocationsAsync(Address);
+                Location location = locations?.FirstOrDefault();
+
+                if (location != null)
+                {
+                    // Perform reverse geocoding to verify the address
+                    IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(location.Latitude, location.Longitude);
+                    Placemark placemark = placemarks?.FirstOrDefault();
+                    bool test = NormalizeAddress(placemark.FeatureName).Contains(NormalizeAddress(Address));
+
+                    if (test)
+                    {
+                        // Compare the input address with the reverse geocoded address
+
+                        latitude = location.Latitude;
+                        longitude = location.Longitude;
+                    }
+                    else
+                    {
+                        await dialogService.ShowAlertAsync("error", "Invalid Address", "OK");
+
+                    }
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("error", "Invalid Address", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("error", ex.Message, "OK");
+            }
+        });
+
+        // AddressCommand helper
+        private string NormalizeAddress(string address)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                return string.Empty;
+            }
+            return new string(address.ToLower().Where(char.IsLetterOrDigit).ToArray());
         }
 
         // Load Parking Information base on Address

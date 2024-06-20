@@ -166,6 +166,7 @@ namespace ParkEase.ViewModel
             //var result = qrCode;
             IdResult = qrCode;
             GridVisible = !GridVisible;
+
         });
 
         [RelayCommand]
