@@ -35,8 +35,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string address;
 
-        [ObservableProperty]
-        private string city;
+        private double latitude;
+
+        private double longitude;
 
         [ObservableProperty]
         private double fee;
@@ -103,7 +104,6 @@ namespace ParkEase.ViewModel
             this.parkEaseModel = model;
             companyName = string.Empty;
             address = string.Empty;
-            city = string.Empty;
             fee = 0;
             limitHour = 0;
             rectWidth = 100;
@@ -239,7 +239,6 @@ namespace ParkEase.ViewModel
                         selectedCompanyName = selectedProperty.CompanyName;
                         CompanyName = selectedProperty.CompanyName;
                         Address = selectedProperty.Address;
-                        City = selectedProperty.City;
                         Fee = selectedProperty.ParkingInfo.Fee;
                         LimitHour = selectedProperty.ParkingInfo.LimitedHour;
                         listFloorInfos = selectedProperty.FloorInfo;
@@ -415,7 +414,8 @@ namespace ParkEase.ViewModel
                         var update = Builders<PrivateParking>.Update
                                         .Set(p => p.CompanyName, CompanyName)
                                         .Set(p => p.Address, Address)
-                                        .Set(p => p.City, City)
+                                        .Set(p => p.Latitude, latitude)
+                                        .Set(p => p.Longitude, longitude)
                                         .Set(p => p.CreatedBy, parkEaseModel.User.Email)
                                         .Set(p => p.ParkingInfo, new ParkingInfo { Fee = Fee, LimitedHour = LimitHour })
                                         .Set(p => p.FloorInfo, listFloorInfos);
@@ -433,7 +433,8 @@ namespace ParkEase.ViewModel
                         {
                             CompanyName = CompanyName,
                             Address = Address,
-                            City = City,
+                            Latitude = latitude,
+                            Longitude = longitude,
                             CreatedBy = parkEaseModel.User.Email,
                             ParkingInfo = new ParkingInfo
                             {
@@ -534,7 +535,6 @@ namespace ParkEase.ViewModel
         {
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
-                    !string.IsNullOrEmpty(City) &&
                     listFloorInfos.Count() > 0;
         }
 
@@ -542,7 +542,6 @@ namespace ParkEase.ViewModel
         {
             CompanyName = "";
             Address = "";
-            City = "";
             Fee = 0;
             LimitHour = 0;
             listFloorInfos.Clear();

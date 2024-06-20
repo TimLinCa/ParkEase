@@ -51,7 +51,7 @@ namespace ParkEase.ViewModel
         private ParkEaseModel parkEaseModel;
 
         [ObservableProperty]
-        private string barcodeResult;
+        private string idResult;
 
         [ObservableProperty]
         private bool enableScanner;
@@ -72,16 +72,18 @@ namespace ParkEase.ViewModel
         private string scannerImage;
 
         [ObservableProperty]
-        private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
-
-        private string searchAddress;
-        private ObservableCollection<string> addresses;
-        private string emailExistsMessage;
+        private string searchText;
 
         [ObservableProperty]
+        private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
+        [ObservableProperty]
         private string selectedAddress;
-        
 
+        [ObservableProperty]
+        private ObservableCollection<string> addresses;
+
+        [ObservableProperty]
+        private string emailExistsMessage;
 
 
         public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
@@ -91,7 +93,7 @@ namespace ParkEase.ViewModel
             this.parkEaseModel = model;
             privateStatusData = new List<PrivateStatus>();
 
-            BarcodeResult = string.Empty;
+            IdResult = "";
             EnableScanner = true;
             GridVisible = false;
             BarcodeButtonVisible = true;
@@ -99,43 +101,12 @@ namespace ParkEase.ViewModel
             scannerImage = "scanner_image.png";
 
             Addresses = new ObservableCollection<string>();
-            _ = LoadAddress();
+            _ = LoadAddresses();
         }
-
-        public string SearchText
+        partial void OnSearchTextChanged(string? value)
         {
-            get => searchAddress;
-            set
-            {
-                if (searchAddress != value)
-                {
-                    searchAddress = value;
-                    OnPropertyChanged();
-                    _ = MatchedAddress();
-                }
-            }
+            MatchedAddress();
         }
-
-        public ObservableCollection<string> Addresses
-        {
-            get => addresses;
-            set
-            {
-                addresses = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string EmailExistsMessage
-        {
-            get => emailExistsMessage;
-            set
-            {
-                emailExistsMessage = value;
-                OnPropertyChanged();
-            }
-        }
-
 
         private async Task MatchedAddress()
         {
@@ -147,34 +118,21 @@ namespace ParkEase.ViewModel
                         .Where(a => a.ToLower().Contains(SearchText.ToLower()))
                         .ToList();
 
+                    Addresses = new ObservableCollection<string>(matchedAddresses);
 
-
-                    Addresses.Clear();
-
-                    foreach (var address in matchedAddresses)
-                    {
-                        Addresses.Add(address);
-                    }
-
-                    if (matchedAddresses.Any())
-                    {
-                        EmailExistsMessage = "Matching addresses found";
-                    }
-                    else
+                    if (Addresses.Count()==0)
                     {
                         EmailExistsMessage = "No matching addresses found";
                     }
+                    else
+                    {
+                        EmailExistsMessage = string.Empty;
+                    }
+
                 }
                 else
                 {
-                    Addresses.Clear();
-
-                    foreach (var address in addressList)
-                    {
-                        Addresses.Add(address);
-                    }
-
-                    EmailExistsMessage = string.Empty;
+                    Addresses = new ObservableCollection<string>(addressList);
                 }
             }
             catch (Exception ex)
@@ -183,32 +141,31 @@ namespace ParkEase.ViewModel
             }
         }
 
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        partial void OnSelectedAddressChanged(string? value)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            AddressSelectedCommand();
         }
 
-
-
-
-
-
-
-
-
-
+        private async Task AddressSelectedCommand()
+        {
+            try
+            {
+                IdResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress)?.Id;
+                await dialogService.ShowAlertAsync("Error", $"{IdResult}", "OK");
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
 
 
 
         public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
             //var result = qrCode;
-            BarcodeResult = qrCode;
-            GridVisible = false;
-            BarcodeButtonVisible = !BarcodeButtonVisible;
+            IdResult = qrCode;
+            GridVisible = !GridVisible;
         });
 
         [RelayCommand]
@@ -225,17 +182,23 @@ namespace ParkEase.ViewModel
             }
         }
 
-        private async Task LoadAddress()
+        private async Task LoadAddresses()
         {
             try
             {
-                var parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                addressList = parkingLotData.Select(data => data.Address).ToList();
 
-                foreach (var address in addressList)
+                parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+                addressList = parkingLotData.Select(data => data.Address).ToList();
+                /*addressList = new List<string>()
                 {
-                    Addresses.Add(address);
-                }
+                    "1628 17Ave NW",
+                    "530 10Ave NW",
+                    "666 park SE",
+                    "17st SW",
+                };*/
+
+
+                Addresses = new ObservableCollection<string>(addressList);
             }
             catch (Exception ex)
             {
@@ -243,9 +206,6 @@ namespace ParkEase.ViewModel
             }
         }
 
-        private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
-        {
-        }
 
         public ICommand NavigatePrivateMapPage => new RelayCommand(async () =>
         {

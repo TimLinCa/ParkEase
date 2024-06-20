@@ -140,7 +140,6 @@ namespace ParkEase.ViewModel
 
                 var selectedProperty = parkingLotData[0];
                 address = selectedProperty.Address;
-                city = selectedProperty.City;
                 fee = selectedProperty.ParkingInfo.Fee;
                 limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
                 listFloorInfos = selectedProperty.FloorInfo;
@@ -177,6 +176,7 @@ namespace ParkEase.ViewModel
         {
             //var result = qrCode;
             BarcodeResult = qrCode;
+            await dialogService.ShowAlertAsync("Error", $"{BarcodeResult}", "OK");
             GridVisible = false;
             await LoadDataCommand();
         });

@@ -16,21 +16,12 @@
     
     
     <VerticalStackLayout>
-        <!--<StackLayout Padding="10">
+        
+        <StackLayout Padding="10">
             <SearchBar Placeholder="Search Address"
                    Text="{Binding SearchText}" />
 
-            <ListView ItemsSource="{Binding Addresses}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextCell Text="{Binding .}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </StackLayout>-->
-        <StackLayout Padding="10">
-            <SearchBar Placeholder="Search Address" Text="{Binding SearchText}" />
-            <ListView ItemsSource="{Binding Addresses}">
+            <ListView ItemsSource="{Binding Addresses,Mode=TwoWay}" SelectedItem="{Binding SelectedAddress}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <TextCell Text="{Binding .}" />
@@ -39,39 +30,57 @@
             </ListView>
             <Label Text="{Binding EmailExistsMessage}" TextColor="Red" />
         </StackLayout>
+        <!--<HorizontalStackLayout Padding="10">
+            <SearchBar Placeholder="Search Address" Text="{Binding SearchText}" WidthRequest="330"/>
+           
+            <ListView ItemsSource="{Binding Addresses,Mode=TwoWay}" SelectedItem="{Binding SelectedAddress}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Label Text="{Binding EmailExistsMessage}" TextColor="Red" />
 
+            
 
+        </HorizontalStackLayout>-->
+        <Grid IsVisible="{Binding GridVisible}" VerticalOptions="Start">
 
-        <!-- QR CODE-->
-        <!--<Grid
-            IsVisible="{Binding GridVisible}"
-            VerticalOptions="Start">
-        <zxing:CameraBarcodeReaderView
-            x:Name="barcodeReader"
-            VerticalOptions="Center"
-            IsDetecting="{Binding GridVisible}">
-            <zxing:CameraBarcodeReaderView.Behaviors>
-                <toolkit:EventToCommandBehavior EventName="BarcodesDetected" Command="{Binding BarcodesDetectedCommand}" EventArgsConverter="{StaticResource BarcodeConverter}"></toolkit:EventToCommandBehavior>
-            </zxing:CameraBarcodeReaderView.Behaviors>
-        </zxing:CameraBarcodeReaderView>
+            <zxing:CameraBarcodeReaderView
+                IsDetecting="{Binding GridVisible}"
+                VerticalOptions="Center">
+                <zxing:CameraBarcodeReaderView.Behaviors>
+                    <toolkit:EventToCommandBehavior
+                Command="{Binding BarcodesDetectedCommand}"
+                EventArgsConverter="{StaticResource BarcodeConverter}"
+                EventName="BarcodesDetected" />
+                </zxing:CameraBarcodeReaderView.Behaviors>
+            </zxing:CameraBarcodeReaderView>
+
         </Grid>
-        
-        <ImageButton Grid.Row="0"
-             IsVisible="{Binding BarcodeButtonVisible}"
-             Source="{Binding ScannerImage}"
-             HorizontalOptions="Center"
-             WidthRequest="100"
-             HeightRequest="100"
-             Margin="10"
-             Command="{Binding ScannerButtonCommand}" />
-        <Label
-            Text="{Binding BarcodeResult}"/>-->
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
         <Button
             Text="button"
             Command="{Binding NavigatePrivateMapPage}"
             />
+
+        <!-- QR CODE-->
+        <ImageButton Grid.Row="0"
+            IsVisible="{Binding BarcodeButtonVisible}"
+            Source="{Binding ScannerImage}"
+            HorizontalOptions="Center"
+            WidthRequest="200"
+            HeightRequest="200"
+            Command="{Binding ScannerButtonCommand}" />
     </VerticalStackLayout>
 </ContentPage>
