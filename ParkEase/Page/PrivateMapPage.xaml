@@ -55,7 +55,7 @@
             Grid.Row="2"
             HorizontalOptions="FillAndExpand"
             ImageSource="{Binding ImgSourceData}"
-            ListRectangle="{Binding ListRectangle}"
+            ListRectangleFill="{Binding ListRectangleFill}"
             VerticalOptions="FillAndExpand"
             ZIndex="0">
             <controls:RecGraphicsView.Drawable>

@@ -33,14 +33,6 @@ namespace ParkEase.Controls
             get => (IImage)GetValue(ImageSourceProperty); set { SetValue(ImageSourceProperty, value); }
         }
 
-        /*public ObservableCollection<RectF> Rectangles
-        {
-            get => (ObservableCollection<RectF>)GetValue(RectanglesProperty);
-            set
-            {
-                SetValue(RectanglesProperty, value);
-            }
-        }*/
 
         public ObservableCollection<Rectangle> ListRectangle
         {
@@ -51,11 +43,21 @@ namespace ParkEase.Controls
             }
         }
 
-        //public static readonly BindableProperty RectanglesProperty = BindableProperty.Create(nameof(Rectangles), typeof(ObservableCollection<RectF>), typeof(RecGraphicsView), propertyChanged: RectanglesPropertyChanged);
+        public ObservableCollection<Rectangle> ListRectangleFill
+        {
+            get => (ObservableCollection<Rectangle>)GetValue(ListRectangleFillProperty);
+            set
+            {
+                SetValue(ListRectangleFillProperty, value);
+            }
+        }
+
 
         public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create(nameof(ImageSource), typeof(IImage), typeof(RecGraphicsView), propertyChanged: ImageSourcePropertyChanged);
 
         public static readonly BindableProperty ListRectangleProperty = BindableProperty.Create(nameof(ListRectangle), typeof(ObservableCollection<Rectangle>), typeof(RecGraphicsView), propertyChanged: ListRectanglePropertyChanged);
+
+        public static readonly BindableProperty ListRectangleFillProperty = BindableProperty.Create(nameof(ListRectangleFill), typeof(ObservableCollection<Rectangle>), typeof(RecGraphicsView), propertyChanged: ListRectangleFillPropertyChanged);
 
 
         public RecGraphicsView()
@@ -68,7 +70,6 @@ namespace ParkEase.Controls
             GestureRecognizers.Add(pinchGesture);
 
         }
-
         private async void OnPanUpdated(object sender, PanUpdatedEventArgs e)
         {
             switch (e.StatusType)
@@ -88,6 +89,7 @@ namespace ParkEase.Controls
                     break;
             }
         }
+        //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/pan?view=net-maui-8.0
 
         void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
         {
@@ -112,29 +114,7 @@ namespace ParkEase.Controls
                     break;
             }
         }
-        //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/pan?view=net-maui-8.0S
-
-        /*private static void Rectangles_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            //Triger reRender
-            if (sender is ObservableCollection<RectF> rectangles && rectangles.Count >= 0)
-            {
-                reRender(_currentInstance);
-            }
-        }
-
-        private static void RectanglesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            if (bindable is not RecGraphicsView { Drawable: RectDrawable drawable } view)
-            {
-                return;
-            }
-            ObservableCollection<RectF> rectFs = (ObservableCollection<RectF>)newValue;
-            rectFs.CollectionChanged += Rectangles_CollectionChanged;
-            drawable.Rectangles = rectFs;
-            _currentInstance = view;
-            reRender(view);
-        }*/
+        //https://learn.microsoft.com/en-us/answers/questions/1163990/in-net-maui-how-can-i-implement-zooming-and-scroll
 
         private static void ImageSourcePropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
@@ -169,21 +149,41 @@ namespace ParkEase.Controls
             reRender(view);
         }
 
+        // Mobile Rectangle list
+        private static void ListRectangleFill_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //Triger reRender
+            if (sender is ObservableCollection<Rectangle> listRectangleFill && listRectangleFill.Count >= 0)
+            {
+                reRender(_currentInstance);
+            }
+        }
+
+        private static void ListRectangleFillPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is not RecGraphicsView { Drawable: RectDrawable drawable } view)
+            {
+                return;
+            }
+            ObservableCollection<Rectangle> listRectangleFill = (ObservableCollection<Rectangle>)newValue;
+            listRectangleFill.CollectionChanged += ListRectangle_CollectionChanged;
+            drawable.ListRectangleFill = listRectangleFill;
+            _currentInstance = view;
+            reRender(view);
+        }
+
         private static void reRender(RecGraphicsView view)
         {
             lock (drawlock)
             {
                 try
                 {
-                    
                     view.Invalidate();
-  
                 }
                 catch (Exception)
                 {
 
                 }
-
             }
         }
     }

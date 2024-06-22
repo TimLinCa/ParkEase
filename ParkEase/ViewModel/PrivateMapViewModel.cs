@@ -33,7 +33,7 @@ namespace ParkEase.ViewModel
         private ObservableCollection<RectF> rectangles;
 
         [ObservableProperty]
-        private ObservableCollection<Rectangle> listRectangle;
+        private ObservableCollection<Rectangle> listRectangleFill;
 
         [ObservableProperty]
         private IImage imgSourceData;
@@ -99,7 +99,7 @@ namespace ParkEase.ViewModel
             this.parkEaseModel = model;
             selectedFloorName = string.Empty;
             FloorNames = new ObservableCollection<string>();
-            ListRectangle = new ObservableCollection<Rectangle>();
+            ListRectangleFill = new ObservableCollection<Rectangle>();
             privateStatusData = new List<PrivateStatus>();
 
             BarcodeResult = string.Empty;
@@ -128,6 +128,7 @@ namespace ParkEase.ViewModel
                 FloorNames?.Clear();
                 listFloorInfos?.Clear();
                 privateStatusData?.Clear();
+                ListRectangleFill?.Clear();
 
                 // Fetch PrivateParking data from MongoDB
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
@@ -235,15 +236,15 @@ namespace ParkEase.ViewModel
                 {
                     if (!isAvailable)
                     {
-                        rectangle.Color = "#009D00";
+                        rectangle.Color = "green";
                         availabilityCount++;
                     }
                     else
                     {
-                        rectangle.Color = "#E11919";
+                        rectangle.Color = "red";
                     }
                 }
-                ListRectangle.Add(rectangle);
+                ListRectangleFill.Add(rectangle);
             }
             await dialogService.ShowBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
         }
@@ -258,6 +259,7 @@ namespace ParkEase.ViewModel
                 FloorNames?.Clear();
                 listFloorInfos?.Clear();
                 privateStatusData?.Clear();
+                ListRectangleFill?.Clear();
 
                 // Fetch PrivateParking data from MongoDB
                 var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
@@ -297,7 +299,6 @@ namespace ParkEase.ViewModel
 
                 // Filter privateStatusData based on selectedPropertyId
                 privateStatusData = status.Where(item => item.AreaId == "667480e5b36704987ba78ffa").ToList();
-                await dialogService.ShowAlertAsync("Success", "Data loaded successfully", "OK");
             }
             catch (Exception ex)
             {

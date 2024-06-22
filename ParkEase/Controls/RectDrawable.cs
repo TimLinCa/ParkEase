@@ -1,4 +1,4 @@
-﻿//using AVFoundation;
+﻿using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Graphics.Platform;
 using ParkEase.Core.Data;
 using System;
@@ -17,14 +17,17 @@ namespace ParkEase.Controls
     {
         /* https://learn.microsoft.com/en-us/dotnet/maui/user-interface/graphics/draw?view=net-maui-8.0#draw-a-rectangle */
         private object drawLock = new object();
+
         public IImage? ImageSource { get; set; }
 
         public int RectCount { get; set; }
 
         public ObservableCollection<Rectangle>? ListRectangle { get; set; }
-        //public ObservableCollection<RectF>? Rectangles { get; set; }
+
+        public ObservableCollection<Rectangle>? ListRectangleFill { get; set; }
 
         public float RectWidth { get; set; } = 100;
+
         public float RectHeight { get; set; } = 50;
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
@@ -101,6 +104,56 @@ namespace ParkEase.Controls
 
                                 canvas.DrawRectangle(rect);
 
+                                var number = rectangle.Index.ToString();
+                                var x = rect.X + 10;
+                                var y = rect.Y + 20;
+                                canvas.DrawString(number, x, y, HorizontalAlignment.Left);
+                            }
+                        }
+
+                        // Mobile
+                        if (ListRectangleFill?.Count > 0)
+                        {
+                            canvas.StrokeSize = 2;
+                            canvas.FontColor = Colors.Black;
+                            canvas.FontSize = 18;
+                            canvas.Font = Font.DefaultBold;
+
+                            foreach (Rectangle rectangle in ListRectangleFill)
+                            {
+                                LinearGradientPaint linearGradientPaint = new LinearGradientPaint();
+                                if (rectangle.Color == "green")
+                                {
+                                    linearGradientPaint.StartColor = Color.FromRgba("#008343");
+                                    linearGradientPaint.EndColor = Color.FromRgba("#D6F3E5");
+                                }
+                                else
+                                {
+                                    linearGradientPaint.StartColor = Color.FromRgba("#C31728");
+                                    linearGradientPaint.EndColor = Color.FromRgba("#DFA7AD");
+                                }
+                                /*SolidPaint linearGradientPaint = new SolidPaint();
+                                if (rectangle.Color == "green")
+                                {
+                                    linearGradientPaint.Color = Color.FromRgba("#538c50");
+                                    //99BC85
+                                    //linearGradientPaint.Color = Color.FromRgba("#99BC85");
+                                }
+                                else
+                                {
+                                    linearGradientPaint.Color = Color.FromRgba("#C23B22");
+                                    //linearGradientPaint.Color = Color.FromRgba("194, 59, 34, 127");
+                                }*/
+
+
+                                float pointX = rectangle.Rect.X;
+                                float pointY = rectangle.Rect.Y;
+                                var rect = new RectF(pointX, pointY, rectangle.Rect.Width, rectangle.Rect.Height);
+
+                                canvas.SetFillPaint(linearGradientPaint, rect);
+                                canvas.FillRoundedRectangle(rect, 0);
+
+                                // Draw lot number
                                 var number = rectangle.Index.ToString();
                                 var x = rect.X + 10;
                                 var y = rect.Y + 20;

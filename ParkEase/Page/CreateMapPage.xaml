@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:sfTabView="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
@@ -11,11 +12,11 @@
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:CreateMapViewModel">
 
-    <Grid>
+    <Grid BackgroundColor="#EFEFEF">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="45" />
-            <RowDefinition Height="220" />
+            <RowDefinition Height="255" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -27,30 +28,39 @@
         <sfTabView:SfTabView Grid.Row="0" Grid.Column="0">
             <sfTabView:SfTabItem Header="Details">
                 <ScrollView>
-                    <StackLayout Padding="10" BackgroundColor="#EFEFEF">
-                        <!--  General information  -->
+                    <StackLayout Padding="10">
                         <Label
                             Margin="10"
                             FontSize="20"
                             HorizontalOptions="Center"
                             Text="Create Map Editor" />
 
-                        <Picker
+                        <!--  Load Parking Data  -->
+                        <material:PickerField
                             Title="Select a property address"
+                            Margin="20,8"
+                            Icon="{FontImageSource FontFamily=MaterialOutlined,
+                                                   Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                             ItemsSource="{Binding PropertyAddresses}"
-                            SelectedItem="{Binding SelectedAddress}"
-                            Style="{StaticResource MAUIDefaultPicker}" />
+                            SelectedItem="{Binding SelectedAddress}" />
                         <Button
-                            Margin="0,20,0,10"
+                            Margin="0,0,0,20"
                             Command="{Binding LoadParkingInfoCommand}"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Text="Load"
                             VerticalOptions="Center"
-                            WidthRequest="200" />
+                            WidthRequest="130" />
+                        <BoxView
+                            Margin="0,0"
+                            BackgroundColor="LightGray"
+                            HeightRequest="1"
+                            HorizontalOptions="FillAndExpand"
+                            WidthRequest="1000" />
 
+                        <!--  Parking data form  -->
                         <material:TextField
                             Title="Company Name"
-                            Margin="20,8"
+                            Margin="20,25,20,8"
                             AllowClear="True"
                             IsReadOnly="False"
                             Text="{Binding CompanyName}"
@@ -58,79 +68,78 @@
                             <validation:RequiredValidation />
                         </material:TextField>
 
-                        <material:TextField
-                            Title="Address"
-                            Margin="0,8"
-                            AllowClear="True"
-                            IsReadOnly="False"
-                            Text="{Binding Address}"
-                            WidthRequest="350">
-                            <validation:RequiredValidation />
-                        </material:TextField>
+                        <HorizontalStackLayout Margin="0,8">
+                            <material:TextField
+                                Title="Address"
+                                Margin="15,0,19,0"
+                                AllowClear="True"
+                                IsReadOnly="False"
+                                Text="{Binding Address}"
+                                WidthRequest="200">
+                                <validation:RequiredValidation />
+                            </material:TextField>
 
-                        <Button
-                            Text="Verify Address"
-                            Command="{Binding AddressCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            WidthRequest="150"
-                            HeightRequest="30"
-                            Margin="0,0,0,8"/>
+                            <Button
+                                Margin="0,5,0,0"
+                                Command="{Binding AddressCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Text="Verify Address"
+                                WidthRequest="130" />
+                        </HorizontalStackLayout>
 
-                        <material:TextField
-                            Title="Parking Fee"
-                            Margin="0,8"
-                            AllowClear="True"
-                            IsReadOnly="False"
-                            Text="{Binding Fee}"
-                            WidthRequest="350">
-                            <validation:RequiredValidation />
-                        </material:TextField>
+                        <HorizontalStackLayout Margin="0,8">
+                            <material:TextField
+                                Title="Parking Fee"
+                                Margin="15,0,10,0"
+                                AllowClear="True"
+                                IsReadOnly="False"
+                                Text="{Binding Fee}"
+                                WidthRequest="170">
+                                <validation:RequiredValidation />
+                            </material:TextField>
 
-                        <material:TextField
-                            Title="Limit Hour"
-                            Margin="0,20"
-                            AllowClear="True"
-                            IsReadOnly="False"
-                            Text="{Binding LimitHour}"
-                            WidthRequest="350">
-                            <validation:RequiredValidation />
-                        </material:TextField>
-
-
-
+                            <material:TextField
+                                Title="Limit Hour"
+                                Margin="0,0,20,0"
+                                AllowClear="True"
+                                IsReadOnly="False"
+                                Text="{Binding LimitHour}"
+                                WidthRequest="170">
+                                <validation:RequiredValidation />
+                            </material:TextField>
+                        </HorizontalStackLayout>
                     </StackLayout>
                 </ScrollView>
             </sfTabView:SfTabItem>
 
+            <!--  Create floor section  -->
             <sfTabView:SfTabItem Header="Floor Info">
                 <ScrollView>
-                    <StackLayout Padding="20">
-                        <!--  Create floor section  -->
+                    <StackLayout Padding="10">
+                        <!--  Load floor data  -->
+                        <material:PickerField
+                            Title="Select a floor"
+                            Margin="12,15,12,8"
+                            Icon="{FontImageSource FontFamily=MaterialOutlined,
+                                                   Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
+                            ItemsSource="{Binding FloorNames}"
+                            SelectedItem="{Binding SelectedFloorName}" />
+                        <Button
+                            Margin="0,0,0,20"
+                            Command="{Binding LoadFloorInfoCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Text="Load Floor"
+                            WidthRequest="130" />
+                        <BoxView
+                            Margin="0,0"
+                            BackgroundColor="LightGray"
+                            HeightRequest="1"
+                            HorizontalOptions="FillAndExpand"
+                            WidthRequest="1000" />
 
-                        <HorizontalStackLayout
-                            Margin="20,0,0,20"
-                            HorizontalOptions="Start"
-                            Spacing="20">
-
-                            <Picker
-                                Title="Select floor"
-                                ItemsSource="{Binding FloorNames}"
-                                SelectedItem="{Binding SelectedFloorName}"
-                                Style="{StaticResource MAUIDefaultPicker}"
-                                VerticalOptions="Center"
-                                WidthRequest="200" />
-
-                            <Button
-                                Margin="0,15,0,0"
-                                Command="{Binding LoadFloorInfoCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Text="Load Floor"
-                                VerticalOptions="Center"
-                                WidthRequest="100" />
-                        </HorizontalStackLayout>
-
+                        <!--  Add new floor  -->
                         <Label
-                            Margin="20,20,20,4"
+                            Margin="20,25,20,4"
                             FontSize="14"
                             HorizontalOptions="Start"
                             Style="{StaticResource SecondaryDarkText}"
@@ -138,11 +147,11 @@
 
                         <material:TextField
                             Title="Level"
-                            Margin="20,4,20,10"
+                            Margin="15,0"
                             AllowClear="True"
                             IsReadOnly="False"
                             Text="{Binding Floor}"
-                            WidthRequest="200">
+                            WidthRequest="350">
                             <validation:RequiredValidation />
                         </material:TextField>
 
@@ -150,7 +159,6 @@
                             Margin="0,10,0,0"
                             HorizontalOptions="Center"
                             Spacing="20">
-
                             <Button
                                 Command="{Binding AddNewFloorCommand}"
                                 Style="{StaticResource SecondaryButtonStyle}"
@@ -166,89 +174,104 @@
                                 WidthRequest="130" />
                         </HorizontalStackLayout>
 
-                        <!--  save button  -->
+                        <!--  Save button  -->
                         <Button
                             Margin="50,50,50,30"
                             Command="{Binding SaveFloorInfoCommand}"
-                            Style="{StaticResource MAUIDefaultButton}"
+                            Style="{StaticResource SecondaryButtonStyle}"
                             Text="Save"
                             VerticalOptions="Center"
-                            WidthRequest="200" />
+                            WidthRequest="130" />
 
-                        
-                           
                     </StackLayout>
                 </ScrollView>
             </sfTabView:SfTabItem>
         </sfTabView:SfTabView>
 
-        <!--  Middle Row  -->
-        <StackLayout Grid.Row="1" Grid.Column="0">
+        <!--  Middle Row - Submit button  -->
+        <StackLayout
+            Grid.Row="1"
+            Grid.Column="0"
+            VerticalOptions="Center">
             <Button
                 x:Name="SubmitBtn"
                 Command="{Binding SubmitCommand}"
                 FontAttributes="Bold"
-                FontSize="Medium"
                 HorizontalOptions="Center"
                 Style="{StaticResource MAUIDefaultButton}"
                 Text="Submit"
-                WidthRequest="200" />
+                WidthRequest="150">
+                <Button.Shadow>
+                    <Shadow
+                        Brush="Gray"
+                        Opacity="0.8"
+                        Offset="5,5" />
+                </Button.Shadow>
+            </Button>
         </StackLayout>
 
         <!--  Bottom Row  -->
-        <Border
+        <StackLayout
             Grid.Row="2"
             Grid.Column="0"
-            Stroke="#512BD4">
-            <StackLayout Margin="40,10,40,0">
-                <!--  Rectangle Width Slider  -->
-                <Label
-                    x:Name="widthLabel"
+            Margin="25,5,25,25"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+            <BoxView
+                Margin="0,10"
+                BackgroundColor="LightGray"
+                HeightRequest="1"
+                HorizontalOptions="FillAndExpand"
+                WidthRequest="1000" />
+
+            <!--  Rectangle Width Slider  -->
+            <Label
+                x:Name="widthLabel"
+                Margin="0,10,0,5"
+                HorizontalOptions="Start"
+                Text="{Binding Source={x:Reference RectWidth}, Path=Value, StringFormat='Width value: {0:F0}', Mode=TwoWay}"
+                VerticalOptions="Center" />
+            <Slider
+                x:Name="RectWidth"
+                Margin="0,0,0,15"
+                Maximum="250"
+                Minimum="10"
+                Value="{Binding RectWidth}" />
+
+            <!--  Rectangle Height Slider  -->
+            <Label
+                x:Name="heightLabel"
+                Margin="0,0,0,5"
+                HorizontalOptions="Start"
+                Text="{Binding Source={x:Reference RectHeight}, Path=Value, StringFormat='Height value: {0:F0}', Mode=TwoWay}"
+                VerticalOptions="Center" />
+            <Slider
+                x:Name="RectHeight"
+                Maximum="250"
+                Minimum="10"
+                Value="{Binding RectHeight}" />
+
+            <HorizontalStackLayout HorizontalOptions="Center">
+                <Button
+                    x:Name="DeleteBtn"
+                    Margin="10,25,10,0"
+                    Command="{Binding RemoveRectangleClick}"
                     HorizontalOptions="Center"
-                    Text="{Binding Source={x:Reference RectWidth}, Path=Value, StringFormat='Width value: {0:F0}', Mode=TwoWay}"
-                    VerticalOptions="Center" />
-                <Slider
-                    x:Name="RectWidth"
-                    Margin="0,0,0,20"
-                    Maximum="250"
-                    Minimum="10"
-                    Value="{Binding RectWidth}" />
-
-                <!--  Rectangle Height Slider  -->
-                <Label
-                    x:Name="heightLabel"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Text="Delete"
+                    WidthRequest="130" />
+                <Button
+                    x:Name="ClearBtn"
+                    Margin="10,25,10,0"
+                    Command="{Binding ClearAllRectangleClick}"
                     HorizontalOptions="Center"
-                    Text="{Binding Source={x:Reference RectHeight}, Path=Value, StringFormat='Height value: {0:F0}', Mode=TwoWay}"
-                    VerticalOptions="Center" />
-                <Slider
-                    x:Name="RectHeight"
-                    Maximum="250"
-                    Minimum="10"
-                    Value="{Binding RectHeight}" />
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Text="Clear"
+                    WidthRequest="130" />
 
-                <HorizontalStackLayout HorizontalOptions="Center">
-                    <Button
-                        x:Name="DeleteBtn"
-                        Margin="10,20,0,0"
-                        Command="{Binding RemoveRectangleClick}"
-                        HeightRequest="20"
-                        HorizontalOptions="Center"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Text="Delete"
-                        WidthRequest="80" />
-                    <Button
-                        x:Name="ClearBtn"
-                        Margin="10,20,10,0"
-                        Command="{Binding ClearAllRectangleClick}"
-                        HeightRequest="20"
-                        HorizontalOptions="Center"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Text="Clear"
-                        WidthRequest="80" />
+            </HorizontalStackLayout>
+        </StackLayout>
 
-                </HorizontalStackLayout>
-            </StackLayout>
-        </Border>
 
         <!--  GraphicsView  -->
         <Border
@@ -272,6 +295,5 @@
                 </GraphicsView.GestureRecognizers>
             </controls:RecGraphicsView>
         </Border>
-
     </Grid>
 </ContentPage>
