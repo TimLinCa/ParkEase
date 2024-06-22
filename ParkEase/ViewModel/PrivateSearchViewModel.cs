@@ -22,6 +22,8 @@ using ParkEase.Page;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.Maui.Controls;
+using CommunityToolkit.Mvvm.Messaging;
+using ParkEase.Messages;
 
 
 namespace ParkEase.ViewModel
@@ -50,8 +52,9 @@ namespace ParkEase.ViewModel
 
         private ParkEaseModel parkEaseModel;
 
-        [ObservableProperty]
         private string idResult;
+
+
 
         [ObservableProperty]
         private bool enableScanner;
@@ -85,15 +88,18 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string emailExistsMessage;
 
+        private Location location;
+
 
         public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
+
+            location = DataService.GetLocation();
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.parkEaseModel = model;
             privateStatusData = new List<PrivateStatus>();
 
-            IdResult = "";
             EnableScanner = true;
             GridVisible = false;
             BarcodeButtonVisible = true;
@@ -103,6 +109,7 @@ namespace ParkEase.ViewModel
             Addresses = new ObservableCollection<string>();
             _ = LoadAddresses();
         }
+
         partial void OnSearchTextChanged(string? value)
         {
             MatchedAddress();
@@ -150,8 +157,10 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                IdResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress)?.Id;
-                await dialogService.ShowAlertAsync("Error", $"{IdResult}", "OK");
+
+                idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress)?.Id;
+                DataService.SetId(idResult);
+                await Shell.Current.GoToAsync(nameof(PrivateMapPage));
             }
             catch (Exception ex)
             {
@@ -164,8 +173,10 @@ namespace ParkEase.ViewModel
         public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
             //var result = qrCode;
-            IdResult = qrCode;
+            idResult = qrCode;
             GridVisible = !GridVisible;
+            DataService.SetId(idResult);
+            await Shell.Current.GoToAsync(nameof(PrivateMapPage));
 
         });
 

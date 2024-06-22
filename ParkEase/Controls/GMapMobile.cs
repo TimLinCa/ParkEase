@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ParkEase.Messages;
 
 namespace ParkEase.Controls
 {
@@ -414,6 +415,7 @@ namespace ParkEase.Controls
             // assigned to the static variable
             currentInstance = (GMapMobile)sender; //sender the object that raised the event
             location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
+            DataService.SetLocation(location);
             if (location != null)
             {
                 // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator

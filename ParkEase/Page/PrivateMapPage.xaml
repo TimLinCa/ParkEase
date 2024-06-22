@@ -27,13 +27,13 @@
         </Grid.RowDefinitions>
 
 
-        <Grid Background="White" ZIndex="99">
+        <!--<Grid Background="White" ZIndex="99">
             <Button
                 Grid.Row="0"
                 Command="{Binding TestLoadData}"
                 HorizontalOptions="Center"
                 Text="Test Load Data" />
-        </Grid>
+        </Grid>-->
 
 
         <!--<Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />-->

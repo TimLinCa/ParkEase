@@ -18,9 +18,13 @@ using IImage = Microsoft.Maui.Graphics.IImage;
 using Microsoft.Maui.Graphics.Platform;
 using System.Reflection;
 using ZXing.Net.Maui;
+using CommunityToolkit.Mvvm.Messaging;
+using ParkEase.Messages;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ParkEase.ViewModel
-{
+{ 
     public partial class PrivateMapViewModel : ObservableObject
     {
         [ObservableProperty]
@@ -83,6 +87,8 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string scannerImage;
 
+        private string privateParkingId;
+
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
 
@@ -94,6 +100,9 @@ namespace ParkEase.ViewModel
 
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
+
+            privateParkingId = DataService.GetId();
+
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.parkEaseModel = model;
@@ -101,7 +110,7 @@ namespace ParkEase.ViewModel
             FloorNames = new ObservableCollection<string>();
             ListRectangleFill = new ObservableCollection<Rectangle>();
             privateStatusData = new List<PrivateStatus>();
-
+           
             BarcodeResult = string.Empty;
             EnableScanner = true;
             GridVisible = false;
@@ -111,6 +120,7 @@ namespace ParkEase.ViewModel
             //PinchCommand = new Command<PinchGestureUpdatedEventArgs>(OnPinchUpdated);
             //PanCommand = new Command<PanUpdatedEventArgs>(OnPanUpdated);
 
+            TestLoadData();
             _ = LoadAddress();
         }
 
@@ -251,7 +261,7 @@ namespace ParkEase.ViewModel
 
 
         // Just a test function -> will be removed later
-        public ICommand TestLoadData => new RelayCommand(async () =>
+        private async Task TestLoadData()
         {
             try
             {
@@ -271,7 +281,7 @@ namespace ParkEase.ViewModel
                 }
 
                 // Filter parkingLotData based on BarcodeResult
-                parkingLotData = data.Where(p => p.Id == "667480e5b36704987ba78ffa").ToList();
+                parkingLotData = data.Where(p => p.Id == privateParkingId).ToList();
                 if (parkingLotData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No matching parking data found.");
@@ -304,7 +314,7 @@ namespace ParkEase.ViewModel
             {
                 System.Diagnostics.Debug.WriteLine($"An error occurred: {ex.Message}");
             }
-        });
+        }
 
         
     }

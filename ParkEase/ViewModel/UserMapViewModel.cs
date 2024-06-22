@@ -166,6 +166,7 @@ namespace ParkEase.ViewModel
 
             radius_out /= 1000.0;
             var location = await Geolocation.GetLocationAsync();
+            System.Diagnostics.Debug.WriteLine($"Location: {location.Latitude}, {location.Longitude}");
 
             // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, location.Latitude, location.Longitude, radius_out)).ToList();
