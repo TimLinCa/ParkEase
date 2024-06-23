@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ParkEase"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
     xmlns:page="clr-namespace:ParkEase.Page"
     Title="ParkEase">
 
@@ -16,9 +17,15 @@
     </ShellItem>
     <TabBar>
         <Tab Title="Map">
+            <Tab.Icon>
+                <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Map}" />
+            </Tab.Icon>
             <ShellContent ContentTemplate="{DataTemplate page:UserMapPage}" Route="UserMapPage" />
         </Tab>
-        <Tab Title="PrivateMap">
+        <Tab Title="Parking Info">
+            <Tab.Icon>
+                <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Location_on}" />
+            </Tab.Icon>
             <ShellContent ContentTemplate="{DataTemplate page:PrivateSearchPage}" Route="PrivateSearchPage" />
         </Tab>
     </TabBar>
