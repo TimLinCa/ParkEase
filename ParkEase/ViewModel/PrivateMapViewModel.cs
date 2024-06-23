@@ -18,9 +18,13 @@ using IImage = Microsoft.Maui.Graphics.IImage;
 using Microsoft.Maui.Graphics.Platform;
 using System.Reflection;
 using ZXing.Net.Maui;
+using CommunityToolkit.Mvvm.Messaging;
+using ParkEase.Messages;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ParkEase.ViewModel
-{
+{ 
     public partial class PrivateMapViewModel : ObservableObject
     {
         [ObservableProperty]
@@ -33,7 +37,7 @@ namespace ParkEase.ViewModel
         private ObservableCollection<RectF> rectangles;
 
         [ObservableProperty]
-        private ObservableCollection<Rectangle> listRectangle;
+        private ObservableCollection<Rectangle> listRectangleFill;
 
         [ObservableProperty]
         private IImage imgSourceData;
@@ -83,26 +87,40 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string scannerImage;
 
+        private string privateParkingId;
+
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
+
+        private double currentScale = 1;
+        private double startScale = 1;
+        private double xOffset = 0;
+        private double yOffset = 0;
 
 
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
+
+            privateParkingId = DataService.GetId();
+
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.parkEaseModel = model;
             selectedFloorName = string.Empty;
             FloorNames = new ObservableCollection<string>();
-            ListRectangle = new ObservableCollection<Rectangle>();
+            ListRectangleFill = new ObservableCollection<Rectangle>();
             privateStatusData = new List<PrivateStatus>();
-
+           
             BarcodeResult = string.Empty;
             EnableScanner = true;
             GridVisible = false;
             ScannerText = "";
             scannerImage = "scanner_image.png";
 
+            //PinchCommand = new Command<PinchGestureUpdatedEventArgs>(OnPinchUpdated);
+            //PanCommand = new Command<PanUpdatedEventArgs>(OnPanUpdated);
+
+            TestLoadData();
             _ = LoadAddress();
         }
 
@@ -120,6 +138,7 @@ namespace ParkEase.ViewModel
                 FloorNames?.Clear();
                 listFloorInfos?.Clear();
                 privateStatusData?.Clear();
+                ListRectangleFill?.Clear();
 
                 // Fetch PrivateParking data from MongoDB
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
@@ -140,7 +159,6 @@ namespace ParkEase.ViewModel
 
                 var selectedProperty = parkingLotData[0];
                 address = selectedProperty.Address;
-                city = selectedProperty.City;
                 fee = selectedProperty.ParkingInfo.Fee;
                 limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
                 listFloorInfos = selectedProperty.FloorInfo;
@@ -173,15 +191,16 @@ namespace ParkEase.ViewModel
         }
 
 
-        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
+/*        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
             //var result = qrCode;
             BarcodeResult = qrCode;
+            await dialogService.ShowAlertAsync("Error", $"{BarcodeResult}", "OK");
             GridVisible = false;
             await LoadDataCommand();
-        });
+        });*/
 
-        [RelayCommand]
+/*        [RelayCommand]
         public async Task ScannerButton()
         {
             try
@@ -192,7 +211,7 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        }
+        }*/
 
 
         private async Task ShowSelectedMap()
@@ -227,22 +246,22 @@ namespace ParkEase.ViewModel
                 {
                     if (!isAvailable)
                     {
-                        rectangle.Color = "#009D00";
+                        rectangle.Color = "green";
                         availabilityCount++;
                     }
                     else
                     {
-                        rectangle.Color = "#E11919";
+                        rectangle.Color = "red";
                     }
                 }
-                ListRectangle.Add(rectangle);
+                ListRectangleFill.Add(rectangle);
             }
             await dialogService.ShowBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
         }
 
 
         // Just a test function -> will be removed later
-        public ICommand TestLoadData => new RelayCommand(async () =>
+        private async Task TestLoadData()
         {
             try
             {
@@ -250,6 +269,7 @@ namespace ParkEase.ViewModel
                 FloorNames?.Clear();
                 listFloorInfos?.Clear();
                 privateStatusData?.Clear();
+                ListRectangleFill?.Clear();
 
                 // Fetch PrivateParking data from MongoDB
                 var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
@@ -261,7 +281,7 @@ namespace ParkEase.ViewModel
                 }
 
                 // Filter parkingLotData based on BarcodeResult
-                parkingLotData = data.Where(p => p.Id == "666fc659959b052b84b5ba0e").ToList();
+                parkingLotData = data.Where(p => p.Id == privateParkingId).ToList();
                 if (parkingLotData.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No matching parking data found.");
@@ -270,7 +290,6 @@ namespace ParkEase.ViewModel
 
                 var selectedProperty = parkingLotData[0];
                 address = selectedProperty.Address;
-                city = selectedProperty.City;
                 fee = selectedProperty.ParkingInfo.Fee;
                 limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
                 listFloorInfos = selectedProperty.FloorInfo;
@@ -289,12 +308,14 @@ namespace ParkEase.ViewModel
                 }
 
                 // Filter privateStatusData based on selectedPropertyId
-                privateStatusData = status.Where(item => item.AreaId == "666fc659959b052b84b5ba0e").ToList();
+                privateStatusData = status.Where(item => item.AreaId == privateParkingId).ToList();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"An error occurred: {ex.Message}");
             }
-        });
+        }
+
+        
     }
 }

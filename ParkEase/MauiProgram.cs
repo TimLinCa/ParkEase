@@ -51,6 +51,10 @@ namespace ParkEase
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddMaterialIconFonts(); /* https://enisn-projects.io/docs/en/uranium/latest/theming/Icons#material-icons*/
                 })
+                .ConfigureEssentials(essentials =>
+                {
+                    essentials.UseMapServiceToken(config["BingAPIKey"].ToString());
+                })
                 .UseBarcodeReader();
 
             #region page

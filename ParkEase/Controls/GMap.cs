@@ -155,7 +155,7 @@ namespace ParkEase.Controls
 
                             // Add mouseover and mouseout event listeners to the polyline
                             line.addListener('mouseover', function() {
-                                line.setOptions({ strokeColor: ""yellow"" }); // Change color to yellow on mouseover
+                                line.setOptions({ strokeColor: ""red"" }); // Change color to red on mouseover
                             });
 
                             line.addListener('mouseout', function() {
@@ -163,7 +163,7 @@ namespace ParkEase.Controls
                                     line.setOptions({ strokeColor: ""#097969"" }); // Change color back to original on mouseout
                                 }
                                 if(selectedLine != null){
-                                    selectedLine.setOptions({ strokeColor: ""yellow"" }); // Change color of selectedLine to yellow
+                                    selectedLine.setOptions({ strokeColor: ""red"" }); // Change color of selectedLine to red
                                 }
                             });
 
@@ -173,7 +173,7 @@ namespace ParkEase.Controls
                                     selectedLine.setOptions({ strokeColor: ""#097969"" });
                                 }
                                 selectedLine = line; // Set the clicked line as the selected line
-                                selectedLine.setOptions({ strokeColor: ""yellow"" });
+                                selectedLine.setOptions({ strokeColor: ""red"" });
 
                                 let lineInfo = getLineInfo(line);
                                 window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);

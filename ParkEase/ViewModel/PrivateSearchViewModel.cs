@@ -22,36 +22,40 @@ using ParkEase.Page;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.Maui.Controls;
+using CommunityToolkit.Mvvm.Messaging;
+using ParkEase.Messages;
+using Microsoft.Maui.Devices.Sensors;
 
 
 namespace ParkEase.ViewModel
 {
     public partial class PrivateSearchViewModel : ObservableObject
     {
-        
-
         private List<PrivateParking> parkingLotData;
 
-        private List<string> addressList;
+        private List<AddressDistance> addressDistanceFullList;
 
-        private List<PrivateStatus> privateStatusData;
-
-        private string address;
-        private string city;
-        private double fee;
-        private string limitHour;
-        private List<FloorInfo> listFloorInfos;
-
-        //private List<FloorInfo> listFloorInfos;
+        private readonly Location userLocation;
 
         private readonly IMongoDBService mongoDBService;
 
         private readonly IDialogService dialogService;
 
-        private ParkEaseModel parkEaseModel;
+        private readonly ParkEaseModel parkEaseModel;
+
+        private string idResult;
 
         [ObservableProperty]
-        private string barcodeResult;
+        private string selectedAddress;
+
+        [ObservableProperty]
+        private ObservableCollection<AddressDistance> addressDistanceList;
+
+        [ObservableProperty]
+        private string addressMessage;
+
+        [ObservableProperty]
+        private string searchText;
 
         [ObservableProperty]
         private bool enableScanner;
@@ -74,68 +78,47 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
 
-        private string searchAddress;
-        private ObservableCollection<string> addresses;
-        private string emailExistsMessage;
-
-        [ObservableProperty]
-        private string selectedAddress;
-        
-
-
-
         public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
+
+            userLocation = DataService.GetLocation();
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.parkEaseModel = model;
-            privateStatusData = new List<PrivateStatus>();
-
-            BarcodeResult = string.Empty;
             EnableScanner = true;
             GridVisible = false;
             BarcodeButtonVisible = true;
             ScannerText = "";
-            scannerImage = "scanner_image.png";
-
-            Addresses = new ObservableCollection<string>();
-            _ = LoadAddress();
+            scannerImage = "qr_code.png";
+            addressDistanceList = new ObservableCollection<AddressDistance>();
+            _ = LoadAddresses();
         }
 
-        public string SearchText
+        // Load address from database and sort by distance
+        private async Task LoadAddresses()
         {
-            get => searchAddress;
-            set
+            try
             {
-                if (searchAddress != value)
+                parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
+
+                addressDistanceFullList = parkingLotData.Select(parkingLot => new AddressDistance
                 {
-                    searchAddress = value;
-                    OnPropertyChanged();
-                    _ = MatchedAddress();
-                }
-            }
-        }
+                    Address = parkingLot.Address,
+                    Distance = CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude)
+                }).OrderBy(a => a.Distance).ToList();
 
-        public ObservableCollection<string> Addresses
-        {
-            get => addresses;
-            set
+                AddressDistanceList = new ObservableCollection<AddressDistance>(addressDistanceFullList);
+            }
+            catch (Exception ex)
             {
-                addresses = value;
-                OnPropertyChanged();
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         }
 
-        public string EmailExistsMessage
+        partial void OnSearchTextChanged(string? value)
         {
-            get => emailExistsMessage;
-            set
-            {
-                emailExistsMessage = value;
-                OnPropertyChanged();
-            }
+            MatchedAddress();
         }
-
 
         private async Task MatchedAddress()
         {
@@ -143,72 +126,67 @@ namespace ParkEase.ViewModel
             {
                 if (!string.IsNullOrEmpty(SearchText))
                 {
-                    var matchedAddresses = addressList
-                        .Where(a => a.ToLower().Contains(SearchText.ToLower()))
+                    var matchedAddresses = AddressDistanceList
+                        .Where(a => a.Address.ToLower().Contains(SearchText.ToLower()))
                         .ToList();
 
+                    AddressDistanceList = new ObservableCollection<AddressDistance>(matchedAddresses);
 
-
-                    Addresses.Clear();
-
-                    foreach (var address in matchedAddresses)
+                    if (AddressDistanceList?.Count == 0)
                     {
-                        Addresses.Add(address);
-                    }
-
-                    if (matchedAddresses.Any())
-                    {
-                        EmailExistsMessage = "Matching addresses found";
+                        AddressMessage = "No matching addresses found";
                     }
                     else
                     {
-                        EmailExistsMessage = "No matching addresses found";
+                        AddressMessage = string.Empty;
                     }
                 }
                 else
                 {
-                    Addresses.Clear();
-
-                    foreach (var address in addressList)
-                    {
-                        Addresses.Add(address);
-                    }
-
-                    EmailExistsMessage = string.Empty;
+                    AddressMessage = string.Empty;
+                    AddressDistanceList = new ObservableCollection<AddressDistance>(addressDistanceFullList);
                 }
             }
             catch (Exception ex)
             {
-                EmailExistsMessage = $"Error: {ex.Message}";
+                AddressMessage = $"Error: {ex.Message}";
             }
         }
 
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        // Calculate distance between 2 locations
+        private double CoordinateDistance(double latitude, double longtitude)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            Location newLocation = new Location(latitude, longtitude);
+            double distance = Location.CalculateDistance(userLocation, newLocation, DistanceUnits.Kilometers);
+            return distance;
         }
 
+        partial void OnSelectedAddressChanged(string? value)
+        {
+            AddressSelectedCommand();
+        }
 
-
-
-
-
-
-
-
-
-
-
+        private async Task AddressSelectedCommand()
+        {
+            try
+            {
+                idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress)?.Id;
+                DataService.SetId(idResult);
+                await Shell.Current.GoToAsync(nameof(PrivateMapPage));
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
 
         public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
             //var result = qrCode;
-            BarcodeResult = qrCode;
-            GridVisible = false;
-            BarcodeButtonVisible = !BarcodeButtonVisible;
+            idResult = qrCode;
+            GridVisible = !GridVisible;
+            DataService.SetId(idResult);
+            await Shell.Current.GoToAsync(nameof(PrivateMapPage));
         });
 
         [RelayCommand]
@@ -225,27 +203,6 @@ namespace ParkEase.ViewModel
             }
         }
 
-        private async Task LoadAddress()
-        {
-            try
-            {
-                var parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-                addressList = parkingLotData.Select(data => data.Address).ToList();
-
-                foreach (var address in addressList)
-                {
-                    Addresses.Add(address);
-                }
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-        }
-
-        private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
-        {
-        }
 
         public ICommand NavigatePrivateMapPage => new RelayCommand(async () =>
         {
@@ -253,7 +210,11 @@ namespace ParkEase.ViewModel
             //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
             await Shell.Current.GoToAsync(nameof(PrivateMapPage));
         });
+    }
 
-
+    public class AddressDistance
+    {
+        public string Address { get; set; }
+        public double Distance { get; set; }
     }
 }

@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:barcode="zxing.ne"
+    xmlns:behaviors="clr-namespace:ParkEase.Behaviors"
     xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
     xmlns:converter="clr-namespace:ParkEase.Converters"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
@@ -18,75 +19,66 @@
         <converter:BarcodeDetectionEventConverter x:Key="BarcodeConverter" />
     </ContentPage.Resources>
 
-    <VerticalStackLayout>
-        <Button
-            Text="Test Load Data"
-            Command="{Binding TestLoadData}"
-            HorizontalOptions="Center"/>
-        
-        <!--<Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />-->
-        <material:PickerField
-            Title="Pick a floor"
-            Margin="10,5,10,0"
-            AllowClear="True"
-            Icon="{FontImageSource FontFamily=MaterialOutlined,
-                                   Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
-            ItemsSource="{Binding FloorNames}"
-            SelectedItem="{Binding SelectedFloorName}" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <!--<RowDefinition Height="0.1*" />-->
+            <RowDefinition Height="0.1*" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
 
-        <Grid IsVisible="{Binding GridVisible}" VerticalOptions="Start">
 
-            <zxing:CameraBarcodeReaderView
-                x:Name="barcodeReader"
-                IsDetecting="{Binding GridVisible}"
-                VerticalOptions="Center">
-                <zxing:CameraBarcodeReaderView.Behaviors>
-                    <toolkit:EventToCommandBehavior
-                        Command="{Binding BarcodesDetectedCommand}"
-                        EventArgsConverter="{StaticResource BarcodeConverter}"
-                        EventName="BarcodesDetected" />
-                </zxing:CameraBarcodeReaderView.Behaviors>
-            </zxing:CameraBarcodeReaderView>
+        <!--<Grid Background="White" ZIndex="99">
+            <Button
+                Grid.Row="0"
+                Command="{Binding TestLoadData}"
+                HorizontalOptions="Center"
+                Text="Test Load Data" />
+        </Grid>-->
 
+        <Grid Grid.Row="0" BackgroundColor="White">
+            <material:PickerField
+                Title="Pick a floor"
+                Margin="20,10"
+                AllowClear="True"
+                Icon="{FontImageSource FontFamily=MaterialOutlined,
+                                       Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
+                ItemsSource="{Binding FloorNames}"
+                SelectedItem="{Binding SelectedFloorName}"
+                ZIndex="0" />
         </Grid>
 
-        <HorizontalStackLayout Margin="10,0,0,0">
-            <Picker
-                Title="Select Address"
-                ItemsSource="{Binding AddressList}"
-                VerticalOptions="StartAndExpand"
-                WidthRequest="320" />
-
-            <!--  QR Code Button  -->
-            <ImageButton
-                Grid.Row="0"
-                Margin="10"
-                Command="{Binding ScannerButtonCommand}"
-                HeightRequest="40"
-                HorizontalOptions="End"
-                Source="{Binding ScannerImage}"
-                WidthRequest="40" />
-
-        </HorizontalStackLayout>
-
-
-
-        <!--<controls:RecGraphicsView
-            x:Name="RectangleDrawableViewMobile"
+        <!--  GraphicsView  -->
+        <controls:RecGraphicsView
+            x:Name="RectangleDrawableView"
+            Grid.Row="1"
+            HorizontalOptions="FillAndExpand"
             ImageSource="{Binding ImgSourceData}"
-            ListRectangle="{Binding ListRectangle}"
-            MinimumHeightRequest="650"
-            MinimumWidthRequest="100">
+            ListRectangleFill="{Binding ListRectangleFill}"
+            VerticalOptions="FillAndExpand"
+            ZIndex="99">
             <controls:RecGraphicsView.Drawable>
                 <controls:RectDrawable />
             </controls:RecGraphicsView.Drawable>
-        </controls:RecGraphicsView>-->
+        </controls:RecGraphicsView>
+
+        <!--<Grid Grid.Row="2">
+        <behaviors:PinchGestureBehavior>
+        <BoxView
+            HeightRequest="300"
+            WidthRequest="200"
+            Color="Blue" />
+    </behaviors:PinchGestureBehavior>
+</Grid>-->
+
+    </Grid>
 
 
 
-        <!--<Grid>
+
+
+    <!--<Grid>
             <controls:RecGraphicsView
-            x:Name="RectangleDrawableView"
+            x:Name="RectangleDrawableViewMobile"
             MinimumHeightRequest="650"
             MinimumWidthRequest="100"
             ImageSource="{Binding ImgSourceData}"
@@ -96,13 +88,61 @@
                     <PanGestureRecognizer PanUpdated="OnPanUpdated" />
                 </controls:RecGraphicsView.GestureRecognizers>
                 <controls:RecGraphicsView.Drawable>
-                    <controls:RectDrawable />
+                    <controls:RectDrawable/>
                 </controls:RecGraphicsView.Drawable>
             </controls:RecGraphicsView>
         </Grid>-->
 
 
-        
 
-    </VerticalStackLayout>
+    <!--<Grid>
+            <controls:RecGraphicsView
+            x:Name="RectangleDrawableViewMobile"
+            MinimumHeightRequest="650"
+            MinimumWidthRequest="100"
+            ImageSource="{Binding ImgSourceData}"
+            ListRectangle="{Binding ListRectangle}">
+
+                <controls:RecGraphicsView.Behaviors>
+                    <behaviors:PinchGestureBehavior Command="{Binding OnPinchUpdated}" />
+                    <behaviors:PanGestureBehavior Command="{Binding OnPanUpdated}" />
+                </controls:RecGraphicsView.Behaviors>
+
+                <controls:RecGraphicsView.Drawable>
+                    <controls:RectDrawable />
+                </controls:RecGraphicsView.Drawable>
+            </controls:RecGraphicsView>
+        </Grid>-->
+
+    <!--<Grid>
+            <BoxView Color="Blue" WidthRequest="100" HeightRequest="300">
+                <BoxView.Behaviors>
+                    <behaviors:PinchGestureBehavior Command="{Binding OnPinchUpdated}" />
+                    <behaviors:PanGestureBehavior Command="{Binding OnPanUpdated}" />
+                </BoxView.Behaviors>
+            </BoxView>
+        </Grid>-->
+
+    <!--<Grid>
+            <controls:PanContainer>
+                <controls:RecGraphicsView
+                    x:Name="RectangleDrawableViewMobile"
+                    ImageSource="{Binding ImgSourceData}"
+                    ListRectangle="{Binding ListRectangle}"
+                    MinimumHeightRequest="650"
+                    MinimumWidthRequest="100">
+                    <controls:RecGraphicsView.Drawable>
+                        <controls:RectDrawable />
+                    </controls:RecGraphicsView.Drawable>
+                </controls:RecGraphicsView>
+            </controls:PanContainer>
+        </Grid>-->
+
+
+    <!--<Grid>
+            <controls:PanContainer>
+                <BoxView Color="Blue" WidthRequest="100" HeightRequest="300" />
+            </controls:PanContainer>
+        </Grid>-->
+
 </ContentPage>

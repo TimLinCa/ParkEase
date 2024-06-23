@@ -35,8 +35,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string address;
 
-        [ObservableProperty]
-        private string city;
+        private double latitude;
+
+        private double longitude;
 
         [ObservableProperty]
         private double fee;
@@ -103,7 +104,6 @@ namespace ParkEase.ViewModel
             this.parkEaseModel = model;
             companyName = string.Empty;
             address = string.Empty;
-            city = string.Empty;
             fee = 0;
             limitHour = 0;
             rectWidth = 100;
@@ -116,7 +116,6 @@ namespace ParkEase.ViewModel
             addNewFloorClicked = false;
 
             _ = GetUserDataFromDatabase();
-            
         }
 
         public float RectWidth
@@ -184,7 +183,7 @@ namespace ParkEase.ViewModel
         //https://www.mongodb.com/docs/drivers/csharp/current/usage-examples/updateOne/
 
 
-        // List of User's parking property address
+        // List of User's parking property 
         private async Task GetPropertyAddress()
         {
             try
@@ -223,6 +222,62 @@ namespace ParkEase.ViewModel
             }
         }
 
+        // verify address and save latitude, longitude
+        public ICommand AddressCommand => new RelayCommand(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(Address))
+            {
+                // Handle empty address case
+                return;
+            }
+
+            try
+            {
+                // https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device/geocoding?view=net-maui-8.0&tabs=android
+                IEnumerable<Location> locations = await Geocoding.Default.GetLocationsAsync(Address);
+                Location location = locations?.FirstOrDefault();
+
+                if (location != null)
+                {
+                    // Perform reverse geocoding to verify the address
+                    IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(location.Latitude, location.Longitude);
+                    Placemark placemark = placemarks?.FirstOrDefault();
+                    bool test = NormalizeAddress(placemark.FeatureName).Contains(NormalizeAddress(Address));
+
+                    if (test)
+                    {
+                        // Compare the input address with the reverse geocoded address
+
+                        latitude = location.Latitude;
+                        longitude = location.Longitude;
+                    }
+                    else
+                    {
+                        await dialogService.ShowAlertAsync("error", "Invalid Address", "OK");
+
+                    }
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("error", "Invalid Address", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("error", ex.Message, "OK");
+            }
+        });
+
+        // AddressCommand helper
+        private string NormalizeAddress(string address)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                return string.Empty;
+            }
+            return new string(address.ToLower().Where(char.IsLetterOrDigit).ToArray());
+        }
+
         // Load Parking Information base on Address
         public ICommand LoadParkingInfoCommand => new RelayCommand(async () =>
         {
@@ -239,7 +294,6 @@ namespace ParkEase.ViewModel
                         selectedCompanyName = selectedProperty.CompanyName;
                         CompanyName = selectedProperty.CompanyName;
                         Address = selectedProperty.Address;
-                        City = selectedProperty.City;
                         Fee = selectedProperty.ParkingInfo.Fee;
                         LimitHour = selectedProperty.ParkingInfo.LimitedHour;
                         listFloorInfos = selectedProperty.FloorInfo;
@@ -415,7 +469,8 @@ namespace ParkEase.ViewModel
                         var update = Builders<PrivateParking>.Update
                                         .Set(p => p.CompanyName, CompanyName)
                                         .Set(p => p.Address, Address)
-                                        .Set(p => p.City, City)
+                                        .Set(p => p.Latitude, latitude)
+                                        .Set(p => p.Longitude, longitude)
                                         .Set(p => p.CreatedBy, parkEaseModel.User.Email)
                                         .Set(p => p.ParkingInfo, new ParkingInfo { Fee = Fee, LimitedHour = LimitHour })
                                         .Set(p => p.FloorInfo, listFloorInfos);
@@ -433,7 +488,8 @@ namespace ParkEase.ViewModel
                         {
                             CompanyName = CompanyName,
                             Address = Address,
-                            City = City,
+                            Latitude = latitude,
+                            Longitude = longitude,
                             CreatedBy = parkEaseModel.User.Email,
                             ParkingInfo = new ParkingInfo
                             {
@@ -534,7 +590,6 @@ namespace ParkEase.ViewModel
         {
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
-                    !string.IsNullOrEmpty(City) &&
                     listFloorInfos.Count() > 0;
         }
 
@@ -542,7 +597,6 @@ namespace ParkEase.ViewModel
         {
             CompanyName = "";
             Address = "";
-            City = "";
             Fee = 0;
             LimitHour = 0;
             listFloorInfos.Clear();
