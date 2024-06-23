@@ -3,6 +3,7 @@ using Microsoft.Maui.Controls.Shapes;
 using Newtonsoft.Json;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Data;
+using ParkEase.Messages;
 using ParkEase.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ParkEase.Messages;
 
 namespace ParkEase.Controls
 {
@@ -415,9 +415,9 @@ namespace ParkEase.Controls
             // assigned to the static variable
             currentInstance = (GMapMobile)sender; //sender the object that raised the event
             location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
-            DataService.SetLocation(location);
             if (location != null)
             {
+                DataService.SetLocation(location);
                 // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator
                 string jsCommand = $"initMapWithCircle({location.Latitude}, {location.Longitude});";
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
