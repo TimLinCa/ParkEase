@@ -191,16 +191,16 @@ namespace ParkEase.ViewModel
         }
 
 
-        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
+/*        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
             //var result = qrCode;
             BarcodeResult = qrCode;
             await dialogService.ShowAlertAsync("Error", $"{BarcodeResult}", "OK");
             GridVisible = false;
             await LoadDataCommand();
-        });
+        });*/
 
-        [RelayCommand]
+/*        [RelayCommand]
         public async Task ScannerButton()
         {
             try
@@ -211,7 +211,7 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        }
+        }*/
 
 
         private async Task ShowSelectedMap()
@@ -308,7 +308,7 @@ namespace ParkEase.ViewModel
                 }
 
                 // Filter privateStatusData based on selectedPropertyId
-                privateStatusData = status.Where(item => item.AreaId == "667480e5b36704987ba78ffa").ToList();
+                privateStatusData = status.Where(item => item.AreaId == privateParkingId).ToList();
             }
             catch (Exception ex)
             {

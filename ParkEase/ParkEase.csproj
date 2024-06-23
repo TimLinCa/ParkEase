@@ -63,6 +63,7 @@
 	<ItemGroup>
 	  <None Remove="appsettings.json" />
 	  <None Remove="Resources\Images\parkease_logo.png" />
+	  <None Remove="Resources\Images\qr_code.png" />
 	</ItemGroup>
 
 	<ItemGroup>

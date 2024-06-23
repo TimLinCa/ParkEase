@@ -21,7 +21,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.1*" />
+            <!--<RowDefinition Height="0.1*" />-->
             <RowDefinition Height="0.1*" />
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -35,29 +35,27 @@
                 Text="Test Load Data" />
         </Grid>-->
 
+        <Grid Grid.Row="0" BackgroundColor="White">
+            <material:PickerField
+                Title="Pick a floor"
+                Margin="20,10"
+                AllowClear="True"
+                Icon="{FontImageSource FontFamily=MaterialOutlined,
+                                       Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
+                ItemsSource="{Binding FloorNames}"
+                SelectedItem="{Binding SelectedFloorName}"
+                ZIndex="0" />
+        </Grid>
 
-        <!--<Picker Title="Pick a floor" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" />-->
-        <material:PickerField
-            Title="Pick a floor"
-            Grid.Row="1"
-            Margin="20,0"
-            AllowClear="True"
-            Background="White"
-            Icon="{FontImageSource FontFamily=MaterialOutlined,
-                                   Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
-            ItemsSource="{Binding FloorNames}"
-            SelectedItem="{Binding SelectedFloorName}"
-            ZIndex="99" />
-
-
+        <!--  GraphicsView  -->
         <controls:RecGraphicsView
             x:Name="RectangleDrawableView"
-            Grid.Row="2"
+            Grid.Row="1"
             HorizontalOptions="FillAndExpand"
             ImageSource="{Binding ImgSourceData}"
             ListRectangleFill="{Binding ListRectangleFill}"
             VerticalOptions="FillAndExpand"
-            ZIndex="0">
+            ZIndex="99">
             <controls:RecGraphicsView.Drawable>
                 <controls:RectDrawable />
             </controls:RecGraphicsView.Drawable>

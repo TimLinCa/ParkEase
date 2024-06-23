@@ -1,86 +1,77 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ParkEase.Page.PrivateSearchPage"
-             xmlns:vm="clr-namespace:ParkEase.ViewModel"
-             x:DataType="vm:PrivateSearchViewModel"
-             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             xmlns:converter="clr-namespace:ParkEase.Converters">
+<ContentPage
+    x:Class="ParkEase.Page.PrivateSearchPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converter="clr-namespace:ParkEase.Converters"
+    xmlns:local="clr-namespace:ParkEase.ViewModel"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:ParkEase.ViewModel"
+    xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+    x:DataType="vm:PrivateSearchViewModel">
 
     <ContentPage.Resources>
-        <converter:BarcodeDetectionEventConverter x:Key="BarcodeConverter"></converter:BarcodeDetectionEventConverter>
+        <converter:BarcodeDetectionEventConverter x:Key="BarcodeConverter" />
     </ContentPage.Resources>
 
-    
-    
+
     <VerticalStackLayout>
-        
-        <StackLayout Padding="10">
-            <SearchBar Placeholder="Search Address"
-                   Text="{Binding SearchText}" />
 
-            <ListView ItemsSource="{Binding Addresses,Mode=TwoWay}" SelectedItem="{Binding SelectedAddress}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextCell Text="{Binding .}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <Label Text="{Binding EmailExistsMessage}" TextColor="Red" />
-        </StackLayout>
-        <!--<HorizontalStackLayout Padding="10">
-            <SearchBar Placeholder="Search Address" Text="{Binding SearchText}" WidthRequest="330"/>
-           
-            <ListView ItemsSource="{Binding Addresses,Mode=TwoWay}" SelectedItem="{Binding SelectedAddress}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextCell Text="{Binding .}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <Label Text="{Binding EmailExistsMessage}" TextColor="Red" />
+        <HorizontalStackLayout Margin="0,8,0,10" Spacing="10">
+            <SearchBar
+                HorizontalOptions="Start"
+                Placeholder="Search Address"
+                Text="{Binding SearchText}"
+                WidthRequest="320" />
+            <ImageButton
+                Margin="0,0,10,0"
+                Command="{Binding ScannerButtonCommand}"
+                HeightRequest="30"
+                IsVisible="{Binding BarcodeButtonVisible}"
+                Source="{Binding ScannerImage}"
+                VerticalOptions="Center"
+                WidthRequest="30" />
+        </HorizontalStackLayout>
 
-            
+        <Label
+            Margin="20,10,20,0"
+            Text="{Binding AddressMessage}"
+            TextColor="Red" />
 
-        </HorizontalStackLayout>-->
+
+        <ListView ItemsSource="{Binding AddressDistanceList, Mode=TwoWay}" SelectedItem="{Binding SelectedAddress}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="local:AddressDistance">
+                    <ViewCell>
+                        <Grid Padding="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="60" />
+                            </Grid.ColumnDefinitions>
+                            <Label Margin="8,0,0,0" Text="{Binding Address}" />
+                            <Label
+                                Grid.Column="1"
+                                Margin="0,0,10,0"
+                                HorizontalOptions="End"
+                                Text="{Binding Distance, StringFormat='{0:F2} km'}" />
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+
         <Grid IsVisible="{Binding GridVisible}" VerticalOptions="Start">
-
-            <zxing:CameraBarcodeReaderView
-                IsDetecting="{Binding GridVisible}"
-                VerticalOptions="Center">
+            <zxing:CameraBarcodeReaderView IsDetecting="{Binding GridVisible}" VerticalOptions="Center">
                 <zxing:CameraBarcodeReaderView.Behaviors>
                     <toolkit:EventToCommandBehavior
-                Command="{Binding BarcodesDetectedCommand}"
-                EventArgsConverter="{StaticResource BarcodeConverter}"
-                EventName="BarcodesDetected" />
+                        Command="{Binding BarcodesDetectedCommand}"
+                        EventArgsConverter="{StaticResource BarcodeConverter}"
+                        EventName="BarcodesDetected" />
                 </zxing:CameraBarcodeReaderView.Behaviors>
             </zxing:CameraBarcodeReaderView>
-
         </Grid>
 
-
-
-
-
-
-
-
-
-
-        <Button
-            Text="button"
-            Command="{Binding NavigatePrivateMapPage}"
-            />
-
-        <!-- QR CODE-->
-        <ImageButton Grid.Row="0"
-            IsVisible="{Binding BarcodeButtonVisible}"
-            Source="{Binding ScannerImage}"
-            HorizontalOptions="Center"
-            WidthRequest="200"
-            HeightRequest="200"
-            Command="{Binding ScannerButtonCommand}" />
     </VerticalStackLayout>
 </ContentPage>
