@@ -1,6 +1,6 @@
 import os
 import boto3
-from dotenv import load_dotenv,dotenv_values
+from dotenv import load_dotenv
 load_dotenv()
 
 class AwsParameterManager(object):

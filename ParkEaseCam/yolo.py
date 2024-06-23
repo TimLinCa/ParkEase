@@ -1,14 +1,15 @@
 import cv2
-import numpy as np
 import pickle
-import pandas as pd
+from pandas import DataFrame
 from ultralytics import YOLO
 import cvzone
-import gridfs
+from gridfs import GridFS
 from pymongo import MongoClient
 from AWSService import AwsParameterManager
 from datetime import datetime
 import threading
+import os
+import sys
 
 stopSignal = False
 parameterManager = AwsParameterManager()
@@ -16,17 +17,27 @@ onlineClient = MongoClient(parameterManager.get_parameters('/ParkEase/Configs/Co
 onlineDb = onlineClient[parameterManager.get_parameters('/ParkEase/Configs/DatabaseName')]
 client = MongoClient('localhost', 27017)
 localDb = client.ParkEase
+
+#https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 def stopTesting():
     global stopSignal
     stopSignal = True
 def parkingLot_detect_cam(cam_index,config_data):
     polylines,area_names=config_data['polylines'],config_data['area_names']
 
-    with open("coco.txt", "r") as my_file:
+    with open(resource_path("coco.txt"), "r") as my_file:
         data = my_file.read()
         class_list = data.split("\n")
 
-    model=YOLO('yolov8s.pt')
+    model=YOLO(resource_path('yolov8s.pt'))
 
     cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -45,7 +56,7 @@ def parkingLot_detect_cam(cam_index,config_data):
 
         results=model.predict(frame)
         a=results[0].boxes.data
-        px=pd.DataFrame(a).astype("float")
+        px=DataFrame(a).astype("float")
         carPosition =[]
         #detecting cars
         for index,row in px.iterrows():
@@ -93,11 +104,11 @@ def parkingLot_detect_video(video_filePath,config_file_path):
         data = pickle.load(f)
         polylines,area_names=data['polylines'],data['area_names']
 
-    with open("coco.txt", "r") as my_file:
+    with open(resource_path("coco.txt"), "r") as my_file:
         data = my_file.read()
         class_list = data.split("\n")
 
-    model=YOLO('yolov8s.pt')
+    model=YOLO(resource_path('yolov8s.pt'))
 
     cap=cv2.VideoCapture(video_filePath)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -116,7 +127,7 @@ def parkingLot_detect_video(video_filePath,config_file_path):
 
         results=model.predict(frame)
         a=results[0].boxes.data
-        px=pd.DataFrame(a).astype("float")
+        px=DataFrame(a).astype("float")
         carPosition =[]
         #detecting cars
         for index,row in px.iterrows():
@@ -161,7 +172,7 @@ def parkingLot_detect_video(video_filePath,config_file_path):
 
 def start_detect_cam(camIndex,configName):
     CamConfig = localDb.CamConfig
-    ConfigGridFs = gridfs.GridFS(localDb)
+    ConfigGridFs = GridFS(localDb)
     area_config = CamConfig.find_one({"name":configName})
     data = ConfigGridFs.find_one({"filename": configName})
     cam_config = pickle.loads(data.read())
@@ -189,11 +200,11 @@ def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
 
     local_status = {s['index']: s['status'] for s in status}
     polylines = cam_config['polylines']
-    with open("coco.txt", "r") as my_file:
+    with open(resource_path("coco.txt"), "r") as my_file:
         data = my_file.read()
         class_list = data.split("\n")
 
-    model=YOLO('yolov8s.pt')
+    model=YOLO(resource_path('yolov8s.pt'))
 
     cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -207,7 +218,7 @@ def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
 
         results=model.predict(frame,verbose=False)
         a=results[0].boxes.data
-        px=pd.DataFrame(a).astype("float")
+        px=DataFrame(a).astype("float")
         carPosition =[]
         #detecting cars
         for index,row in px.iterrows():
@@ -269,11 +280,11 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor):
     local_status = {s['index']: s['status'] for s in status}
     polylines = cam_config['polylines']
 
-    with open("coco.txt", "r") as my_file:
+    with open(resource_path("coco.txt"), "r") as my_file:
         data = my_file.read()
         class_list = data.split("\n")
 
-    model=YOLO('yolov8s.pt')
+    model=YOLO(resource_path('yolov8s.pt'))
 
     cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -287,7 +298,7 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor):
 
         results=model.predict(frame,verbose=False)
         a=results[0].boxes.data
-        px=pd.DataFrame(a).astype("float")
+        px=DataFrame(a).astype("float")
         carPosition =[]
         #detecting cars
         for index,row in px.iterrows():
@@ -351,11 +362,11 @@ def start_detect_video(video_filePath,config_file_path,areaType,id):
         data = pickle.load(f)
         polylines=data['polylines']
 
-    with open("coco.txt", "r") as my_file:
+    with open(resource_path("coco.txt"), "r") as my_file:
         data = my_file.read()
         class_list = data.split("\n")
     
-    model=YOLO('yolov8s.pt')
+    model=YOLO(resource_path('yolov8s.pt'))
 
     cap=cv2.VideoCapture(video_filePath)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -368,7 +379,7 @@ def start_detect_video(video_filePath,config_file_path,areaType,id):
             continue
         results=model.predict(frame,verbose=False)
         a=results[0].boxes.data
-        px=pd.DataFrame(a).astype("float")
+        px=DataFrame(a).astype("float")
         carPosition =[]
         #detecting cars
         for index,row in px.iterrows():

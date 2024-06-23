@@ -1,15 +1,14 @@
 #QtDesinger Reference: https://github.com/Phatthawat/OBJECT-COUNTING-MACHINE-USING-COMPUTER-VISION
 #Parking lot Reference: https://www.youtube.com/watch?v=MyvylXVWYjY&t=3000s
 #Polygon Reference: https://stackoverflow.com/questions/52751121/pyqt-user-editable-polygons
-import os
 import subprocess
-import cv2,time,sys,sysinfo,cvzone
+import cv2,time,sysinfo
 from AWSService import AwsParameterManager
-from PyQt5 import uic,QtGui,QtCore,QtWidgets
+from PyQt5 import uic,QtCore,QtWidgets
 from PyQt5.QtMultimedia import QCameraInfo
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog,QMessageBox
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, QTimer, QDateTime, Qt
-from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
+from PyQt5.QtWidgets import QApplication, QMainWindow,QMessageBox
+from PyQt5.QtCore import QThread, pyqtSignal,QTimer, QDateTime
+from PyQt5.QtGui import QImage, QPixmap
 from Polygon import AnnotationView, Instructions, GripItem,PolygonAnnotation
 import numpy as np
 import gridfs

@@ -1,4 +1,3 @@
-
 import psutil
 #from gpiozero import CPUTemperature
 

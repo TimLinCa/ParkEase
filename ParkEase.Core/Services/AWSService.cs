@@ -14,6 +14,7 @@ namespace ParkEase.Core.Services
 {
     public class AWSService : IAWSService
     {
+        //https://stackoverflow.com/questions/69700124/reading-the-values-from-parameter-store-using-amazonsimplesystemsmanagementclien
         private readonly AmazonSimpleSystemsManagementClient client;
         public AWSService(IConfiguration configuration) 
         {

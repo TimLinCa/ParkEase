@@ -1,6 +1,7 @@
 from PyQt5 import QtGui,QtCore,QtWidgets
 from PyQt5.QtGui import QPainter
 from enum import Enum
+
 class AnnotationView(QtWidgets.QGraphicsView):
     factor = 2.0
 
