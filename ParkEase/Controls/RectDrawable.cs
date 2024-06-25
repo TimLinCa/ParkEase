@@ -65,6 +65,9 @@ namespace ParkEase.Controls
                             offsetY = (dirtyRect.Height - drawHeight) / 2;
                         }*/
 
+                        float dirtyRectWidth = dirtyRect.Width;
+                        float dirtyRectHeight = dirtyRect.Height;
+
                         float viewRatio = 1134 / 830;
                         float imageRatio = image.Width / image.Height;
                         float offsetX, offsetY, drawWidth, drawHeight;
