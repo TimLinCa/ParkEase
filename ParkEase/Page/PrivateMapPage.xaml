@@ -4,7 +4,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:barcode="zxing.ne"
-    xmlns:behaviors="clr-namespace:ParkEase.Behaviors"
     xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
     xmlns:converter="clr-namespace:ParkEase.Converters"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
@@ -46,6 +45,7 @@
                 SelectedItem="{Binding SelectedFloorName}"
                 ZIndex="0" />
         </Grid>
+
 
         <!--  GraphicsView  -->
         <controls:RecGraphicsView

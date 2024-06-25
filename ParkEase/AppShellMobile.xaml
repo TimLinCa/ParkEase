@@ -26,7 +26,7 @@
             <Tab.Icon>
                 <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Location_on}" />
             </Tab.Icon>
-            <ShellContent ContentTemplate="{DataTemplate page:PrivateSearchPage}" Route="PrivateSearchPage" />
+            <ShellContent ContentTemplate="{DataTemplate page:PrivateSearchPage}" Route="PrivateSearchPage"/>
         </Tab>
     </TabBar>
 </Shell>

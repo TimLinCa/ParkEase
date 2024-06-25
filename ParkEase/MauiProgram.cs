@@ -95,7 +95,7 @@ namespace ParkEase
             {
                 BindingContext = provider.GetRequiredService<UserMapViewModel>()
             });
-
+            
             builder.Services.AddSingleton<PrivateMapViewModel>();
             builder.Services.AddSingleton(provider => new PrivateMapPage
             {

@@ -22,6 +22,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using ParkEase.Messages;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using ParkEase.Page;
 
 namespace ParkEase.ViewModel
 { 
@@ -189,6 +190,24 @@ namespace ParkEase.ViewModel
         {
             _ = ShowSelectedMap();
         }
+
+
+        [RelayCommand]
+        public async Task GoSeachPage()
+        {
+            try
+            {
+                await Shell.Current.GoToAsync(nameof(PrivateSearchPage));
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+
+
+
 
 
 /*        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
