@@ -105,8 +105,6 @@ namespace ParkEase.ViewModel
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
 
-            privateParkingId = DataService.GetId();
-
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.parkEaseModel = model;
@@ -121,10 +119,23 @@ namespace ParkEase.ViewModel
             ScannerText = "";
             scannerImage = "scanner_image.png";
             arrowBack = "arrow_icon.png";
-
-            _ = LoadParkingData();
-            //_ = LoadAddress();
         }
+
+        public ICommand LoadedCommand => new RelayCommand(async () =>
+        {
+            privateParkingId = parkEaseModel.PrivateMapId;
+            await LoadParkingData();
+        });
+
+        public ICommand UnLoadedCommand => new RelayCommand(() =>
+        {
+            parkingLotData?.Clear();
+            FloorNames?.Clear();
+            listFloorInfos?.Clear();
+            privateStatusData?.Clear();
+            ListRectangleFill?.Clear();
+            ImgSourceData = null;
+        });
 
         /*private async Task LoadAddress()
         {
@@ -136,13 +147,6 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                parkingLotData?.Clear();
-                FloorNames?.Clear();
-                listFloorInfos?.Clear();
-                privateStatusData?.Clear();
-                ListRectangleFill?.Clear();
-                ImgSourceData = null;
-
                 // Fetch PrivateParking data from MongoDB
                 var data = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
@@ -181,6 +185,11 @@ namespace ParkEase.ViewModel
 
                 // Filter privateStatusData based on selectedPropertyId
                 privateStatusData = status.Where(item => item.AreaId == privateParkingId).ToList();
+                if(FloorNames.FirstOrDefault() != null)
+                {
+                    SelectedFloorName = FloorNames.First();
+                }
+              
             }
             catch (Exception ex)
             {
@@ -261,7 +270,7 @@ namespace ParkEase.ViewModel
 
         public ICommand NavigatePrivateSearchPage => new RelayCommand(async () =>
         {
-            await Shell.Current.GoToAsync(nameof(PrivateSearchPage));
+            await Shell.Current.GoToAsync($"///{nameof(PrivateSearchPage)}");
         });
 
         // Just a test function -> will be removed later

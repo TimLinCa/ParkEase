@@ -13,6 +13,8 @@ namespace ParkEase.Core.Model
         public readonly bool developerMode;
         
         public User User { get; set; }
+
+        public string PrivateMapId { get; set; }
         public ParkEaseModel(bool developerMode = true)
         {
             this.developerMode = developerMode;

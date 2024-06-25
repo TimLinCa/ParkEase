@@ -38,7 +38,7 @@
             Margin="20,10,20,0"
             Text="{Binding AddressMessage}"
             TextColor="Red"
-            IsVisible="False"/>
+            IsVisible="{Binding ErrorMessageVisable}"/>
             
 
 

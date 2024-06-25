@@ -55,6 +55,9 @@ namespace ParkEase.ViewModel
         private string addressMessage;
 
         [ObservableProperty]
+        private bool errorMessageVisable;
+
+        [ObservableProperty]
         private string searchText;
 
         [ObservableProperty]
@@ -88,6 +91,7 @@ namespace ParkEase.ViewModel
             EnableScanner = true;
             GridVisible = false;
             BarcodeButtonVisible = true;
+            errorMessageVisable = false;
             ScannerText = "";
             scannerImage = "qr_code.png";
             addressDistanceList = new ObservableCollection<AddressDistance>();
@@ -135,6 +139,7 @@ namespace ParkEase.ViewModel
 
                     if (AddressDistanceList?.Count == 0)
                     {
+                        ErrorMessageVisable = true;
                         AddressMessage = "No matching addresses found";
                     }
                     else
@@ -172,8 +177,9 @@ namespace ParkEase.ViewModel
             try
             {
                 idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress.Address)?.Id;
-                DataService.SetId(idResult);
-                await Shell.Current.GoToAsync(nameof(PrivateMapPage), false);
+                parkEaseModel.PrivateMapId = idResult;
+                WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
+                await Shell.Current.GoToAsync(nameof(PrivateMapPage));
                 //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
             }
             catch (Exception ex)
@@ -187,7 +193,8 @@ namespace ParkEase.ViewModel
             //var result = qrCode;
             idResult = qrCode;
             GridVisible = !GridVisible;
-            DataService.SetId(idResult);
+            parkEaseModel.PrivateMapId = idResult;
+            WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
             await Shell.Current.GoToAsync(nameof(PrivateMapPage));
         });
 
