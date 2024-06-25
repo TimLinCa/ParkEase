@@ -26,24 +26,16 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <!--<RowDefinition Height="0.1*" />-->
             <RowDefinition Height="0.1*" />
-            <RowDefinition />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-
-
-        <!--<Grid Background="White" ZIndex="99">
-            <Button
-                Grid.Row="0"
-                Command="{Binding TestLoadData}"
-                HorizontalOptions="Center"
-                Text="Test Load Data" />
-        </Grid>-->
 
         <Grid
             Grid.Row="0"
-            Margin="10,5"
-            BackgroundColor="White">
+            Padding="10,5"
+            BackgroundColor="White"
+            HorizontalOptions="FillAndExpand"
+            ZIndex="99">
             <ImageButton
                 Margin="0,0,10,0"
                 Command="{Binding NavigatePrivateSearchPage}"
@@ -61,55 +53,27 @@
                 ItemsSource="{Binding FloorNames}"
                 SelectedItem="{Binding SelectedFloorName}"
                 VerticalOptions="Center"
-                WidthRequest="320"
-                ZIndex="0" />
+                WidthRequest="320" />
         </Grid>
 
 
         <!--  GraphicsView  -->
         <!--  Original  -->
-        <!--<controls:RecGraphicsView
-            x:Name="RectangleDrawableView"
-            Grid.Row="1"
-            HorizontalOptions="FillAndExpand"
-            ImageSource="{Binding ImgSourceData}"
-            ListRectangleFill="{Binding ListRectangleFill}"
-            VerticalOptions="FillAndExpand"
-            ZIndex="99">
-            <controls:RecGraphicsView.Drawable>
-                <controls:RectDrawable />
-            </controls:RecGraphicsView.Drawable>
-        </controls:RecGraphicsView>-->
-
         <controls:RecGraphicsView
             x:Name="RectangleDrawableView"
             Grid.Row="1"
             HorizontalOptions="FillAndExpand"
             ImageSource="{Binding ImgSourceData}"
             ListRectangleFill="{Binding ListRectangleFill}"
+            Scale="0.8"
             VerticalOptions="FillAndExpand"
-            ZIndex="99">
-            <controls:RecGraphicsView.GestureRecognizers>
-                <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
-                <PanGestureRecognizer PanUpdated="OnPanUpdated" />
-            </controls:RecGraphicsView.GestureRecognizers>
+            ZIndex="0">
             <controls:RecGraphicsView.Drawable>
                 <controls:RectDrawable />
             </controls:RecGraphicsView.Drawable>
         </controls:RecGraphicsView>
 
-
-        <!--<Grid Grid.Row="2">
-        <behaviors:PinchGestureBehavior>
-        <BoxView
-            HeightRequest="300"
-            WidthRequest="200"
-            Color="Blue" />
-    </behaviors:PinchGestureBehavior>
-</Grid>-->
-
     </Grid>
-
 
 
 
