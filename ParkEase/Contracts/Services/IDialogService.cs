@@ -12,5 +12,6 @@ namespace ParkEase.Contracts.Services
 
         Task ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng);
 
+        Task DismissBottomSheetAsync();
     }
 }

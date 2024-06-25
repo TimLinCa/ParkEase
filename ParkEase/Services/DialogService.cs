@@ -47,5 +47,14 @@ namespace ParkEase.Services
             await currentBottomSheet.ShowAsync();
         }
 
+        public async Task DismissBottomSheetAsync()
+        {
+            if (currentBottomSheet != null)
+            {
+                await currentBottomSheet.DismissAsync();
+                currentBottomSheet = null;
+            }
+        }
+
     }
 }

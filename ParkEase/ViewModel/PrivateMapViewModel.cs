@@ -43,12 +43,6 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private IImage imgSourceData;
 
-        private string selectedPropertyId;
-
-        private string rectStrokeColor;
-
-        //private List<Rectangle> listRectangles;
-
         private List<PrivateParking> parkingLotData;
 
         [ObservableProperty]
@@ -61,8 +55,6 @@ namespace ParkEase.ViewModel
         private double fee;
         private string limitHour;
         private List<FloorInfo> listFloorInfos;
-
-        //private List<FloorInfo> listFloorInfos;
 
         private readonly IMongoDBService mongoDBService;
 
@@ -95,11 +87,6 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
-
-        private double currentScale = 1;
-        private double startScale = 1;
-        private double xOffset = 0;
-        private double yOffset = 0;
 
 
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
@@ -136,12 +123,6 @@ namespace ParkEase.ViewModel
             ListRectangleFill?.Clear();
             ImgSourceData = null;
         });
-
-        /*private async Task LoadAddress()
-        {
-            var parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-            AddressList = parkingLotData.Select(data => data.Address).ToList();
-        }*/
 
         private async Task LoadParkingData()
         {
@@ -183,7 +164,7 @@ namespace ParkEase.ViewModel
                     return;
                 }
 
-                // Filter privateStatusData based on selectedPropertyId
+                // Filter privateStatusData based on privateParkingId
                 privateStatusData = status.Where(item => item.AreaId == privateParkingId).ToList();
                 if(FloorNames.FirstOrDefault() != null)
                 {
@@ -215,10 +196,6 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         }
-
-
-
-
 
         private async Task ShowSelectedMap()
         {
@@ -270,6 +247,7 @@ namespace ParkEase.ViewModel
 
         public ICommand NavigatePrivateSearchPage => new RelayCommand(async () =>
         {
+            await dialogService.DismissBottomSheetAsync();
             await Shell.Current.GoToAsync($"///{nameof(PrivateSearchPage)}");
         });
 
