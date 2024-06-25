@@ -4,7 +4,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:barcode="zxing.ne"
-    xmlns:behaviors="clr-namespace:ParkEase.Behaviors"
     xmlns:controls="clr-namespace:ParkEase.Controls;assembly=ParkEase"
     xmlns:converter="clr-namespace:ParkEase.Converters"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
@@ -35,20 +34,34 @@
                 Text="Test Load Data" />
         </Grid>-->
 
-        <Grid Grid.Row="0" BackgroundColor="White">
+        <Grid
+            Grid.Row="0"
+            Margin="10,5"
+            BackgroundColor="White">
+            <ImageButton
+                Margin="0,0,10,0"
+                Command="{Binding NavigatePrivateSearchPage}"
+                HeightRequest="30"
+                HorizontalOptions="Start"
+                Source="{Binding ArrowBack}"
+                VerticalOptions="Center"
+                WidthRequest="30" />
             <material:PickerField
                 Title="Pick a floor"
-                Margin="20,10"
                 AllowClear="True"
+                HorizontalOptions="End"
                 Icon="{FontImageSource FontFamily=MaterialOutlined,
                                        Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                 ItemsSource="{Binding FloorNames}"
                 SelectedItem="{Binding SelectedFloorName}"
+                VerticalOptions="Center"
+                WidthRequest="320"
                 ZIndex="0" />
         </Grid>
 
         <!--  GraphicsView  -->
-        <controls:RecGraphicsView
+        <!--  Original  -->
+        <!--<controls:RecGraphicsView
             x:Name="RectangleDrawableView"
             Grid.Row="1"
             HorizontalOptions="FillAndExpand"
@@ -59,7 +72,25 @@
             <controls:RecGraphicsView.Drawable>
                 <controls:RectDrawable />
             </controls:RecGraphicsView.Drawable>
+        </controls:RecGraphicsView>-->
+
+        <controls:RecGraphicsView
+            x:Name="RectangleDrawableView"
+            Grid.Row="1"
+            HorizontalOptions="FillAndExpand"
+            ImageSource="{Binding ImgSourceData}"
+            ListRectangleFill="{Binding ListRectangleFill}"
+            VerticalOptions="FillAndExpand"
+            ZIndex="99">
+            <controls:RecGraphicsView.GestureRecognizers>
+                <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+                <PanGestureRecognizer PanUpdated="OnPanUpdated" />
+            </controls:RecGraphicsView.GestureRecognizers>
+            <controls:RecGraphicsView.Drawable>
+                <controls:RectDrawable />
+            </controls:RecGraphicsView.Drawable>
         </controls:RecGraphicsView>
+
 
         <!--<Grid Grid.Row="2">
         <behaviors:PinchGestureBehavior>

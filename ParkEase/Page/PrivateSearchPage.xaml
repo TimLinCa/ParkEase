@@ -61,6 +61,10 @@
             </ListView.ItemTemplate>
         </ListView>
 
+        <Button
+            Text="button"
+            Command="{Binding NavigatePrivateMapPage}"
+            />
 
         <Grid IsVisible="{Binding GridVisible}" VerticalOptions="Start">
             <zxing:CameraBarcodeReaderView IsDetecting="{Binding GridVisible}" VerticalOptions="Center">

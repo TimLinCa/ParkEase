@@ -346,11 +346,11 @@ namespace ParkEase.ViewModel
             {
                 try
                 {
-                    if (!addNewFloorClicked)
+                    /*if (!addNewFloorClicked)
                     {
                         await dialogService.ShowAlertAsync("", "Please make sure that you entered floor name and clicked Add button before uploading image.", "OK");
                         return;
-                    }
+                    }*/
                     if (MediaPicker.Default.IsCaptureSupported)
                     {
                         FileResult myPhoto = await MediaPicker.PickPhotoAsync();

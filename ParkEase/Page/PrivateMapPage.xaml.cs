@@ -9,77 +9,56 @@ public partial class PrivateMapPage : ContentPage
     private double startScale = 1;
     private double xOffset = 0;
     private double yOffset = 0;
+    private double panX, panY;
     public PrivateMapPage()
     {
         InitializeComponent();
     }
 
-    /*private void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
+    void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
+        {
+            switch (e.Status)
+            {
+                case GestureStatus.Started:
+                    // Store the current scale factor applied to the wrapped user interface element,
+                    // and zero the components for the center point of the translate transform.
+                    startScale = RectangleDrawableView.Scale;
+                    RectangleDrawableView.AnchorX = e.ScaleOrigin.X;
+                    RectangleDrawableView.AnchorY = e.ScaleOrigin.Y;
+                    break;
+                case GestureStatus.Running:
+                    // Calculate the scale factor to be applied.
+                    currentScale += (e.Scale - 1) * startScale;
+                    currentScale = Math.Max(1, currentScale);
+                    RectangleDrawableView.Scale = currentScale;
+                    break;
+                case GestureStatus.Completed:
+                    // Store the final scale factor applied to the wrapped user interface element.
+                    startScale = currentScale;
+                    break;
+            }
+        }
+    //https://learn.microsoft.com/en-us/answers/questions/1163990/in-net-maui-how-can-i-implement-zooming-and-scroll
+
+
+    private async void OnPanUpdated(object sender, PanUpdatedEventArgs e)
     {
-        viewModel.OnPinchUpdated(e);
+        switch (e.StatusType)
+        {
+            case GestureStatus.Running:
+                // Translate and pan.
+                double boundsX = RectangleDrawableView.Width;
+                double boundsY = RectangleDrawableView.Height;
+                RectangleDrawableView.TranslationX = Math.Clamp(panX + e.TotalX, -boundsX, boundsX);
+                RectangleDrawableView.TranslationY = Math.Clamp(panY + e.TotalY, -boundsY, boundsY);
+                break;
+
+            case GestureStatus.Completed:
+                // Store the translation applied during the pan
+                panX = RectangleDrawableView.TranslationX;
+                panY = RectangleDrawableView.TranslationY;
+                break;
+        }
     }
-
-    private void OnPanUpdated(object sender, PanUpdatedEventArgs e)
-    {
-        viewModel.OnPanUpdated(e);
-    }*/
-
-    //private void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
-    //{
-    //    if (e.Status == GestureStatus.Started)
-    //    {
-    //        // Store the current scale factor applied to the wrapped user interface element,
-    //        // and zero the components for the center point of the translate transform.
-    //        startScale = RectangleDrawableViewMobile.Scale;
-    //        RectangleDrawableViewMobile.AnchorX = 0;
-    //        RectangleDrawableViewMobile.AnchorY = 0;
-    //    }
-
-    //    if (e.Status == GestureStatus.Running)
-    //    {
-    //        // Calculate the scale factor to be applied.
-    //        currentScale += (e.Scale - 1) * startScale;
-    //        currentScale = Math.Max(1, currentScale);
-
-    //        // Apply the scale factor to the wrapped user interface element.
-    //        RectangleDrawableViewMobile.Scale = currentScale;
-    //    }
-
-    //    if (e.Status == GestureStatus.Completed)
-    //    {
-    //        // Store the translation delta's applied during the pan gesture.
-    //        xOffset = RectangleDrawableViewMobile.TranslationX;
-    //        yOffset = RectangleDrawableViewMobile.TranslationY;
-    //    }
-    //}
-
-    //private void OnPanUpdated(object sender, PanUpdatedEventArgs e)
-    //{
-    //    if (e.StatusType == GestureStatus.Running)
-    //    {
-    //        // Translate the image based on the pan gesture.
-    //        RectangleDrawableViewMobile.TranslationX = xOffset + e.TotalX;
-    //        RectangleDrawableViewMobile.TranslationY = yOffset + e.TotalY;
-    //    }
-
-    //    if (e.StatusType == GestureStatus.Completed)
-    //    {
-    //        if (RectangleDrawableViewMobile.TranslationX < 0)
-    //        {
-    //            RectangleDrawableViewMobile.TranslationX = 0;
-    //            xOffset = 0;
-    //        }
-
-
-    //        if (RectangleDrawableViewMobile.TranslationY < 0)
-    //        {
-    //            RectangleDrawableViewMobile.TranslationY = 0;
-    //            yOffset = 0;
-    //        }
-
-    //        // Store the translation applied during the pan gesture.
-    //        xOffset = RectangleDrawableViewMobile.TranslationX;
-    //        yOffset = RectangleDrawableViewMobile.TranslationY;
-    //    }
-    //}
+    //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/pan?view=net-maui-8.0
 }

@@ -46,7 +46,7 @@ namespace ParkEase.ViewModel
         private string idResult;
 
         [ObservableProperty]
-        private string selectedAddress;
+        private AddressDistance selectedAddress;
 
         [ObservableProperty]
         private ObservableCollection<AddressDistance> addressDistanceList;
@@ -120,6 +120,7 @@ namespace ParkEase.ViewModel
             MatchedAddress();
         }
 
+
         private async Task MatchedAddress()
         {
             try
@@ -161,7 +162,7 @@ namespace ParkEase.ViewModel
             return distance;
         }
 
-        partial void OnSelectedAddressChanged(string? value)
+        partial void OnSelectedAddressChanged(AddressDistance? value)
         {
             AddressSelectedCommand();
         }
@@ -170,7 +171,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress)?.Id;
+                idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress.Address)?.Id;
                 DataService.SetId(idResult);
                 await Shell.Current.GoToAsync(nameof(PrivateMapPage));
             }

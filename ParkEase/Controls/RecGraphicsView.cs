@@ -62,15 +62,15 @@ namespace ParkEase.Controls
 
         public RecGraphicsView()
         {
-            PanGestureRecognizer panGesture = new PanGestureRecognizer();
+            /*PanGestureRecognizer panGesture = new PanGestureRecognizer();
             panGesture.PanUpdated += OnPanUpdated;
             GestureRecognizers.Add(panGesture);
             PinchGestureRecognizer pinchGesture = new PinchGestureRecognizer();
             pinchGesture.PinchUpdated += OnPinchUpdated;
-            GestureRecognizers.Add(pinchGesture);
+            GestureRecognizers.Add(pinchGesture);*/
 
         }
-        private async void OnPanUpdated(object sender, PanUpdatedEventArgs e)
+       /* private async void OnPanUpdated(object sender, PanUpdatedEventArgs e)
         {
             switch (e.StatusType)
             {
@@ -88,10 +88,10 @@ namespace ParkEase.Controls
                     panY = TranslationY;
                     break;
             }
-        }
+        }*/
         //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/pan?view=net-maui-8.0
 
-        void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
+        /*void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
         {
             switch (e.Status)
             {
@@ -113,7 +113,7 @@ namespace ParkEase.Controls
                     startScale = currentScale;
                     break;
             }
-        }
+        }*/
         //https://learn.microsoft.com/en-us/answers/questions/1163990/in-net-maui-how-can-i-implement-zooming-and-scroll
 
         private static void ImageSourcePropertyChanged(BindableObject bindable, object oldValue, object newValue)
