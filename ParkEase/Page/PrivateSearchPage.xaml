@@ -48,21 +48,21 @@
 
 
 
-        <ListView ItemsSource="{Binding AddressDistanceList, Mode=TwoWay}" SelectedItem="{Binding SelectedAddress}">
+        <ListView ItemsSource="{Binding AddressDistanceList, Mode=TwoWay}" SelectedItem="{Binding SelectedAddress, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:AddressDistance">
                     <ViewCell>
                         <Grid Padding="12">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="0.8*" />
+                                <ColumnDefinition Width="0.2*" />
                             </Grid.ColumnDefinitions>
                             <Label Margin="8,0,0,0" Text="{Binding Address}" />
                             <Label
                                 Grid.Column="1"
                                 Margin="0,0,10,0"
                                 HorizontalOptions="End"
-                                Text="{Binding Distance, StringFormat='{0:F2} km'}" />
+                                Text="{Binding Distance}" />
                         </Grid>
                     </ViewCell>
                 </DataTemplate>

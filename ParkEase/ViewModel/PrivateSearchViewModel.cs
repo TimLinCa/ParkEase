@@ -45,6 +45,8 @@ namespace ParkEase.ViewModel
 
         private string idResult;
 
+        private bool isNavigating = false;
+
         [ObservableProperty]
         private AddressDistance selectedAddress;
 
@@ -111,7 +113,7 @@ namespace ParkEase.ViewModel
 
         // Load address from database and sort by distance
         private async Task LoadAddresses()
-        {
+        {  
             try
             {
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
@@ -119,7 +121,7 @@ namespace ParkEase.ViewModel
                 addressDistanceFullList = parkingLotData.Select(parkingLot => new AddressDistance
                 {
                     Address = parkingLot.Address,
-                    Distance = CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude)
+                    Distance = $"{CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude).ToString("F2")} km"
                 }).OrderBy(a => a.Distance).ToList();
 
                 AddressDistanceList = new ObservableCollection<AddressDistance>(addressDistanceFullList);
@@ -179,16 +181,23 @@ namespace ParkEase.ViewModel
 
         partial void OnSelectedAddressChanged(AddressDistance? value)
         {
-            AddressSelectedCommand();
+            if (!isNavigating)
+            {
+                AddressSelectedCommand();
+            }
         }
 
         private async Task AddressSelectedCommand()
         {
             try
             {
+                isNavigating = true;
+              
                 idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress.Address)?.Id;
                 parkEaseModel.PrivateMapId = idResult;
                 WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
+                SelectedAddress = null;
+                isNavigating = false;
                 await Shell.Current.GoToAsync(nameof(PrivateMapPage));
             }
             catch (Exception ex)
@@ -199,17 +208,31 @@ namespace ParkEase.ViewModel
 
         public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
-            idResult = qrCode;
-            GridVisible = !GridVisible;
-            parkEaseModel.PrivateMapId = idResult;
-            WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
-            await Shell.Current.GoToAsync(nameof(PrivateMapPage));
+            try
+            {
+                idResult = qrCode;
+                GridVisible = !GridVisible;
+                parkEaseModel.PrivateMapId = idResult;
+                WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
+                //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
+                MainThread.BeginInvokeOnMainThread(MyMainThreadCode);
+            }
+            catch(Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
         });
 
-/*        public ICommand CloseCameraCommand => new RelayCommand(() =>
+        void MyMainThreadCode()
         {
-            GridVisible = !GridVisible;
-        });*/
+            Shell.Current.GoToAsync(nameof(PrivateMapPage));
+        }
+
+        /*        public ICommand CloseCameraCommand => new RelayCommand(() =>
+                {
+                    GridVisible = !GridVisible;
+                });*/
 
         [RelayCommand]
         public async Task ScannerButton()
@@ -229,6 +252,6 @@ namespace ParkEase.ViewModel
     public class AddressDistance
     {
         public string Address { get; set; }
-        public double Distance { get; set; }
+        public string Distance { get; set; }
     }
 }
