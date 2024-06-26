@@ -68,9 +68,6 @@ namespace ParkEase.Controls
                             offsetY = (dirtyRect.Height - drawHeight) / 2;
                         }*/
 
-                        float dirtyRectWidth = dirtyRect.Width;
-                        float dirtyRectHeight = dirtyRect.Height;
-
                         float viewRatio = 1134 / 830;
                         float imageRatio = image.Width / image.Height;
                         float offsetX, offsetY, drawWidth, drawHeight;
@@ -140,19 +137,6 @@ namespace ParkEase.Controls
                                     linearGradientPaint.StartColor = Color.FromRgba("#C31728");
                                     linearGradientPaint.EndColor = Color.FromRgba("#DFA7AD");
                                 }
-                                /*SolidPaint linearGradientPaint = new SolidPaint();
-                                if (rectangle.Color == "green")
-                                {
-                                    linearGradientPaint.Color = Color.FromRgba("#538c50");
-                                    //99BC85
-                                    //linearGradientPaint.Color = Color.FromRgba("#99BC85");
-                                }
-                                else
-                                {
-                                    linearGradientPaint.Color = Color.FromRgba("#C23B22");
-                                    //linearGradientPaint.Color = Color.FromRgba("194, 59, 34, 127");
-                                }*/
-
 
                                 float pointX = rectangle.Rect.X;
                                 float pointY = rectangle.Rect.Y;

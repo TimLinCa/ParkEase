@@ -170,7 +170,6 @@ namespace ParkEase.ViewModel
                 {
                     SelectedFloorName = FloorNames.First();
                 }
-              
             }
             catch (Exception ex)
             {

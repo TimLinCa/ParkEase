@@ -76,7 +76,7 @@ namespace ParkEase.ViewModel
         private string scannerText;
 
         [ObservableProperty]
-        private string scannerImage;
+        private string scannerImage = "qr_code.png";
 
         [ObservableProperty]
         private string arrowBack = "arrow_icon.png";
@@ -96,7 +96,6 @@ namespace ParkEase.ViewModel
             BarcodeButtonVisible = true;
             errorMessageVisable = false;
             ScannerText = "";
-            scannerImage = "qr_code.png";
             addressDistanceList = new ObservableCollection<AddressDistance>();
         }
 
@@ -191,7 +190,6 @@ namespace ParkEase.ViewModel
                 parkEaseModel.PrivateMapId = idResult;
                 WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
                 await Shell.Current.GoToAsync(nameof(PrivateMapPage));
-                //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
             }
             catch (Exception ex)
             {
@@ -201,7 +199,6 @@ namespace ParkEase.ViewModel
 
         public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
         {
-            //var result = qrCode;
             idResult = qrCode;
             GridVisible = !GridVisible;
             parkEaseModel.PrivateMapId = idResult;
@@ -209,10 +206,10 @@ namespace ParkEase.ViewModel
             await Shell.Current.GoToAsync(nameof(PrivateMapPage));
         });
 
-        public ICommand CloseCameraCommand => new RelayCommand(() =>
+/*        public ICommand CloseCameraCommand => new RelayCommand(() =>
         {
             GridVisible = !GridVisible;
-        });
+        });*/
 
         [RelayCommand]
         public async Task ScannerButton()
@@ -227,14 +224,6 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
         }
-
-
-        public ICommand NavigatePrivateMapPage => new RelayCommand(async () =>
-        {
-            // Implement the logic to navigate to the Forgot Password Page
-            //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
-            await Shell.Current.GoToAsync(nameof(PrivateMapPage));
-        });
     }
 
     public class AddressDistance
