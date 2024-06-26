@@ -19,7 +19,7 @@
         <toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
         <toolkit:EventToCommandBehavior Command="{Binding UnLoadedCommand}" EventName="Unloaded" />
     </ContentPage.Behaviors>
-    
+
     <ContentPage.Resources>
         <converter:BarcodeDetectionEventConverter x:Key="BarcodeConverter" />
     </ContentPage.Resources>
@@ -59,19 +59,23 @@
 
         <!--  GraphicsView  -->
         <!--  Original  -->
-        <controls:RecGraphicsView
-            x:Name="RectangleDrawableView"
-            Grid.Row="1"
-            HorizontalOptions="FillAndExpand"
-            ImageSource="{Binding ImgSourceData}"
-            ListRectangleFill="{Binding ListRectangleFill}"
-            Scale="0.8"
-            VerticalOptions="FillAndExpand"
-            ZIndex="0">
-            <controls:RecGraphicsView.Drawable>
-                <controls:RectDrawable />
-            </controls:RecGraphicsView.Drawable>
-        </controls:RecGraphicsView>
+
+        <Grid Grid.Row="1" Background="White">
+            <controls:RecGraphicsView
+                HorizontalOptions="FillAndExpand"
+                ImageSource="{Binding ImgSourceData}"
+                ListRectangleFill="{Binding ListRectangleFill}"
+                VerticalOptions="FillAndExpand"
+                ZIndex="0">
+                <controls:RecGraphicsView.Drawable>
+                    <controls:RectDrawable />
+                </controls:RecGraphicsView.Drawable>
+            </controls:RecGraphicsView>
+        </Grid>
+
+
+
+        <!--<Image Source="test.png" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"/>-->
 
     </Grid>
 

@@ -11,6 +11,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using SharpCompress.Compressors.Xz;
 using Microsoft.Maui;
 using Syncfusion.Maui.Core.Internals;
+using Microsoft.Maui.Handlers;
 
 namespace ParkEase.Controls
 {
@@ -27,6 +28,10 @@ namespace ParkEase.Controls
         double yOffset = 0;
         private static object drawlock = new object();
         private static RecGraphicsView _currentInstance;
+        private double imageWidth = 1134;
+        private double imageHeight = 830;
+
+
 
         public IImage ImageSource
         {
@@ -59,62 +64,135 @@ namespace ParkEase.Controls
 
         public static readonly BindableProperty ListRectangleFillProperty = BindableProperty.Create(nameof(ListRectangleFill), typeof(ObservableCollection<Rectangle>), typeof(RecGraphicsView), propertyChanged: ListRectangleFillPropertyChanged);
 
+        private bool moving = false;
+        private bool zooming = false;
 
         public RecGraphicsView()
         {
             if (DeviceInfo.Platform == DevicePlatform.Android)
             {
-                PanGestureRecognizer panGesture = new PanGestureRecognizer();
-                PinchGestureRecognizer pinchGesture = new PinchGestureRecognizer();
-                GestureRecognizers.Add(pinchGesture);
-                GestureRecognizers.Add(panGesture);
-                panGesture.PanUpdated += OnPanUpdated;
-                pinchGesture.PinchUpdated += OnPinchUpdated;
+                //PanGestureRecognizer panGesture = new PanGestureRecognizer();
+                //PinchGestureRecognizer pinchGesture = new PinchGestureRecognizer();
+                //panGesture.PanUpdated += OnPanUpdated;
+                //pinchGesture.PinchUpdated += OnPinchUpdated;
+                //GestureRecognizers.Add(pinchGesture);
+                //GestureRecognizers.Add(panGesture);
             }
 
         }
         private async void OnPanUpdated(object sender, PanUpdatedEventArgs e)
         {
+            if (zooming) return;
+            Console.WriteLine($"Pan:{e.StatusType.ToString()},{e.TotalX},{e.TotalY}");
             switch (e.StatusType)
             {
                 case GestureStatus.Running:
                     // Translate and pan.
-                    double boundsX = Width;
-                    double boundsY = Height;
-                    TranslationX = Math.Clamp(panX + e.TotalX, -boundsX, boundsX);
-                    TranslationY = Math.Clamp(panY + e.TotalY, -boundsY, boundsY);
+                    //var screenCoordinates = GetScreenCoordinates(this);
+                    moving = true;
+                    double boundsX = imageWidth - Width;
+                    double boundsY = imageHeight - Height;
+                    TranslationX = Math.Clamp(panX + e.TotalX, -boundsX, 0);
+                    TranslationY = Math.Clamp(panY + e.TotalY, 0, boundsY);
+
                     break;
 
                 case GestureStatus.Completed:
                     // Store the translation applied during the pan
+                    moving = false;
                     panX = TranslationX;
                     panY = TranslationY;
                     break;
             }
+
+            //switch (e.StatusType)
+            //{
+            //    case GestureStatus.Running:
+            //        // Translate and ensure we don't pan beyond the wrapped user interface element bounds.
+            //        TranslationX = Math.Max(Math.Min(0, panX + e.TotalX), -Math.Abs(Width - DeviceDisplay.MainDisplayInfo.Width));
+            //        TranslationY = Math.Max(Math.Min(0, panY + e.TotalY), -Math.Abs(Height - DeviceDisplay.MainDisplayInfo.Height));
+            //        break;
+
+            //    case GestureStatus.Completed:
+            //        // Store the translation applied during the pan
+            //        panX = TranslationX;
+            //        panY = TranslationY;
+            //        break;
+            //}
         }
         //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/gestures/pan?view=net-maui-8.0
 
         void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
         {
-            switch (e.Status)
+            if (moving) return;
+            //switch (e.Status)
+            //{
+            //    case GestureStatus.Started:
+            //        // Store the current scale factor applied to the wrapped user interface element,
+            //        // and zero the components for the center point of the translate transform.
+            //        zooming = true;
+            //        startScale = Scale;
+            //        AnchorX = e.ScaleOrigin.X;
+            //        AnchorY = e.ScaleOrigin.Y;
+            //        break;
+            //    case GestureStatus.Running:
+            //        // Calculate the scale factor to be applied.
+            //        currentScale += (e.Scale - 1) * startScale;
+            //        currentScale = Math.Max(1, currentScale);
+            //        Scale = currentScale;
+            //        break;
+            //    case GestureStatus.Completed:
+            //        // Store the final scale factor applied to the wrapped user interface element.
+            //        zooming = false;
+            //        startScale = currentScale;
+            //        break;
+            //}
+            Console.WriteLine($"Pan:{e.Status.ToString()},{e.Scale}");
+
+            if (e.Status == GestureStatus.Started)
             {
-                case GestureStatus.Started:
-                    // Store the current scale factor applied to the wrapped user interface element,
-                    // and zero the components for the center point of the translate transform.
-                    startScale = Scale;
-                    AnchorX = e.ScaleOrigin.X;
-                    AnchorY = e.ScaleOrigin.Y;
-                    break;
-                case GestureStatus.Running:
-                    // Calculate the scale factor to be applied.
-                    currentScale += (e.Scale - 1) * startScale;
-                    currentScale = Math.Max(1, currentScale);
-                    Scale = currentScale;
-                    break;
-                case GestureStatus.Completed:
-                    // Store the final scale factor applied to the wrapped user interface element.
-                    startScale = currentScale;
-                    break;
+                // Store the current scale factor applied to the wrapped user interface element,
+                // and zero the components for the center point of the translate transform.
+                startScale = Scale;
+                AnchorX = 0;
+                AnchorY = 0;
+            }
+            if (e.Status == GestureStatus.Running)
+            {
+                // Calculate the scale factor to be applied.
+                currentScale += (e.Scale - 1) * startScale;
+                currentScale = Math.Max(1, currentScale);
+
+                // The ScaleOrigin is in relative coordinates to the wrapped user interface element,
+                // so get the X pixel coordinate.
+                double renderedX = X + xOffset;
+                double deltaX = renderedX / Width;
+                double deltaWidth = Width / (Width * startScale);
+                double originX = (e.ScaleOrigin.X - deltaX) * deltaWidth;
+
+                // The ScaleOrigin is in relative coordinates to the wrapped user interface element,
+                // so get the Y pixel coordinate.
+                double renderedY = Y + yOffset;
+                double deltaY = renderedY / Height;
+                double deltaHeight = Height / (Height * startScale);
+                double originY = (e.ScaleOrigin.Y - deltaY) * deltaHeight;
+
+                // Calculate the transformed element pixel coordinates.
+                double targetX = xOffset - (originX * Width) * (currentScale - startScale);
+                double targetY = yOffset - (originY * Height) * (currentScale - startScale);
+
+                // Apply translation based on the change in origin.
+                TranslationX = Math.Clamp(targetX, -Width * (currentScale - 1), 0);
+                TranslationY = Math.Clamp(targetY, -Height * (currentScale - 1), 0);
+
+                // Apply scale factor
+                Scale = currentScale;
+            }
+            if (e.Status == GestureStatus.Completed)
+            {
+                // Store the translation delta's of the wrapped user interface element.
+                xOffset = TranslationX;
+                yOffset = TranslationY;
             }
         }
         //https://learn.microsoft.com/en-us/answers/questions/1163990/in-net-maui-how-can-i-implement-zooming-and-scroll
@@ -125,9 +203,16 @@ namespace ParkEase.Controls
             {
                 return;
             }
+           
 
             drawable.ImageSource = (IImage)newValue;
             reRender(view);
+            view.TranslationX = 0;
+            view.TranslationY = 0;
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                view.getDrawingInfo(drawable.ImageSource);
+            }
         }
 
         private static void ListRectangle_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -189,5 +274,81 @@ namespace ParkEase.Controls
                 }
             }
         }
+
+        private void getDrawingInfo(IImage image)
+        {
+            if (image == null) return;
+            float viewRatio = 1134 / 830;
+            float imageRatio = image.Width / image.Height;
+            float offsetX, offsetY, drawWidth, drawHeight;
+
+            if (imageRatio <= viewRatio)
+            {
+                drawHeight = 830;
+                drawWidth = drawHeight / imageRatio;
+
+                offsetY = 0;
+                offsetX = (1134 - drawWidth) / 2;
+            }
+            else
+            {
+                drawWidth = 1134;
+                drawHeight = drawWidth / imageRatio;
+
+                offsetX = 0;
+                offsetY = (830 - drawHeight) / 2;
+            }
+
+            imageWidth = drawWidth;
+            imageHeight = drawHeight;
+
+            double scaleX = Width / imageWidth;
+            double scaleY = Height / imageHeight;
+            if (scaleX < scaleY)
+            {
+                Scale = scaleX;
+                TranslationX = -imageWidth * scaleX/4 - 30.5;
+            }
+            else
+            {
+                Scale = scaleY;
+            }
+        }
+
+        private static (double X, double Y) GetScreenCoordinates(RecGraphicsView view)
+        {
+            // A view's default X- and Y-coordinates are LOCAL with respect to the boundaries of its parent,
+            // and NOT with respect to the screen. This method calculates the SCREEN coordinates of a view.
+            // The coordinates returned refer to the top left corner of the view.
+
+            // Initialize with the view's "local" coordinates with respect to its parent
+            double screenCoordinateX = view.X;
+            double screenCoordinateY = view.Y;
+
+            // Get the view's parent (if it has one...)
+            if (view.Parent.GetType() != typeof(App))
+            {
+                VisualElement parent = (VisualElement)view.Parent;
+
+                // Loop through all parents
+                while (parent != null)
+                {
+                    // Add in the coordinates of the parent with respect to ITS parent
+                    screenCoordinateX += parent.X;
+                    screenCoordinateY += parent.Y;
+
+                    // If the parent of this parent isn't the app itself, get the parent's parent.
+                    if (parent.Parent.GetType() == typeof(App))
+                        parent = null;
+                    else
+                        parent = (VisualElement)parent.Parent;
+                }
+            }
+
+            // Return the final coordinates...which are the global SCREEN coordinates of the view
+            return (screenCoordinateX, screenCoordinateY);
+        }
+
+
     }
 }

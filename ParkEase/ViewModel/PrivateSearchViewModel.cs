@@ -95,8 +95,17 @@ namespace ParkEase.ViewModel
             ScannerText = "";
             scannerImage = "qr_code.png";
             addressDistanceList = new ObservableCollection<AddressDistance>();
-            _ = LoadAddresses();
         }
+
+        public ICommand LoadedCommand => new RelayCommand(async () =>
+        {
+            await LoadAddresses();
+        });
+
+        public ICommand UnLoadedCommand => new RelayCommand(() =>
+        {
+            AddressDistanceList = new ObservableCollection<AddressDistance>();
+        });
 
         // Load address from database and sort by distance
         private async Task LoadAddresses()

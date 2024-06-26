@@ -30,6 +30,9 @@ namespace ParkEase.Controls
 
         public float RectHeight { get; set; } = 50;
 
+        public float DrawingImageWidth { get; set; }
+        public float DrawingImageHeight { get; set; }
+
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
             lock (drawLock)
@@ -88,7 +91,9 @@ namespace ParkEase.Controls
                             offsetX = 0;
                             offsetY = (830 - drawHeight) / 2;
                         }
-
+                        
+                        DrawingImageWidth = drawWidth;
+                        DrawingImageHeight = drawHeight;
                         canvas.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
                         if (ListRectangle?.Count > 0)
