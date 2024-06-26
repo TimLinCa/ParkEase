@@ -32,12 +32,16 @@
 
         <Grid
             Grid.Row="0"
-            Padding="10,5"
+            Padding="10,10,10,5"
             BackgroundColor="White"
             HorizontalOptions="FillAndExpand"
             ZIndex="99">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.2*" />
+                <ColumnDefinition Width="0.8*" />
+            </Grid.ColumnDefinitions>
             <ImageButton
-                Margin="0,0,10,0"
+                Margin="5,0,10,0"
                 Command="{Binding NavigatePrivateSearchPage}"
                 HeightRequest="30"
                 HorizontalOptions="Start"
@@ -46,14 +50,15 @@
                 WidthRequest="30" />
             <material:PickerField
                 Title="Pick a floor"
+                Grid.Column="1"
+                Margin="0,0,10,0"
                 AllowClear="True"
-                HorizontalOptions="End"
+                HorizontalOptions="FillAndExpand"
                 Icon="{FontImageSource FontFamily=MaterialOutlined,
                                        Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                 ItemsSource="{Binding FloorNames}"
                 SelectedItem="{Binding SelectedFloorName}"
-                VerticalOptions="Center"
-                WidthRequest="320" />
+                VerticalOptions="Center" />
         </Grid>
 
 
