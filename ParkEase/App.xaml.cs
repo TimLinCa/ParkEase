@@ -13,7 +13,8 @@ namespace ParkEase
 
             if (DeviceInfo.Platform == DevicePlatform.Android)
             {
-                MainPage = new AppShellMobile();
+                AppShellMobileViewModel appShellMobileViewModel = new AppShellMobileViewModel();
+                MainPage = new AppShellMobile(appShellMobileViewModel);
             }
             else if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {

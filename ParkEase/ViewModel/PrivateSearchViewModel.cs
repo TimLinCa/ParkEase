@@ -195,7 +195,6 @@ namespace ParkEase.ViewModel
               
                 idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress.Address)?.Id;
                 parkEaseModel.PrivateMapId = idResult;
-                WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
                 SelectedAddress = null;
                 isNavigating = false;
                 await Shell.Current.GoToAsync(nameof(PrivateMapPage));
@@ -213,8 +212,6 @@ namespace ParkEase.ViewModel
                 idResult = qrCode;
                 GridVisible = !GridVisible;
                 parkEaseModel.PrivateMapId = idResult;
-                WeakReferenceMessenger.Default.Send<PrivateIdChangedMessage>(new PrivateIdChangedMessage(idResult));
-                //await Shell.Current.GoToAsync(nameof(PrivateMapPage));
                 MainThread.BeginInvokeOnMainThread(MyMainThreadCode);
             }
             catch(Exception ex)
