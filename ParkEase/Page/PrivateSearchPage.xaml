@@ -29,9 +29,10 @@
                 Placeholder="Search Address"
                 Text="{Binding SearchText}"
                 WidthRequest="320" />
+            
+            <!--Deleted "Command="{Binding ScannerButtonCommand}""-->
             <ImageButton
                 Margin="0,0,10,0"
-                Command="{Binding ScannerButtonCommand}"
                 HeightRequest="30"
                 IsVisible="{Binding BarcodeButtonVisible}"
                 Source="{Binding ScannerImage}"
@@ -43,7 +44,7 @@
             Margin="20,10,20,0"
             IsVisible="{Binding ErrorMessageVisable}"
             Text="{Binding AddressMessage}"
-            TextColor="Red" />
+            TextColor="Red"/>
 
 
 
@@ -69,15 +70,28 @@
         </ListView>
 
         <Grid IsVisible="{Binding GridVisible}" VerticalOptions="Start">
-            <zxing:CameraBarcodeReaderView IsDetecting="{Binding GridVisible}" VerticalOptions="Center">
+            
+            <zxing:CameraBarcodeReaderView IsDetecting="{Binding GridVisible}" VerticalOptions="Start">
+                
                 <zxing:CameraBarcodeReaderView.Behaviors>
                     <toolkit:EventToCommandBehavior
                         Command="{Binding BarcodesDetectedCommand}"
                         EventArgsConverter="{StaticResource BarcodeConverter}"
                         EventName="BarcodesDetected" />
                 </zxing:CameraBarcodeReaderView.Behaviors>
+                
             </zxing:CameraBarcodeReaderView>
+            
+            
         </Grid>
+        <ImageButton
+            Margin="0, 100, 0, 0"
+            Command="{Binding CloseCameraCommand}"
+            HeightRequest="30"
+            HorizontalOptions="Center"
+            Source="{Binding ArrowBack}"
+            VerticalOptions="End"
+            WidthRequest="30" />
 
     </VerticalStackLayout>
 </ContentPage>

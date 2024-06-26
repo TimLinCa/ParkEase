@@ -52,7 +52,7 @@ namespace ParkEase.ViewModel
         private ObservableCollection<AddressDistance> addressDistanceList;
 
         [ObservableProperty]
-        private string addressMessage;
+        private string addressMessage = "No matching addresses found";
 
         [ObservableProperty]
         private bool errorMessageVisable;
@@ -77,6 +77,9 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private string scannerImage;
+
+        [ObservableProperty]
+        private string arrowBack = "arrow_icon.png";
 
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
@@ -149,16 +152,15 @@ namespace ParkEase.ViewModel
                     if (AddressDistanceList?.Count == 0)
                     {
                         ErrorMessageVisable = true;
-                        AddressMessage = "No matching addresses found";
                     }
                     else
                     {
-                        AddressMessage = string.Empty;
+                        ErrorMessageVisable = false;
                     }
                 }
                 else
                 {
-                    AddressMessage = string.Empty;
+                    ErrorMessageVisable = false;
                     AddressDistanceList = new ObservableCollection<AddressDistance>(addressDistanceFullList);
                 }
             }
@@ -207,12 +209,17 @@ namespace ParkEase.ViewModel
             await Shell.Current.GoToAsync(nameof(PrivateMapPage));
         });
 
+        public ICommand CloseCameraCommand => new RelayCommand(() =>
+        {
+            GridVisible = !GridVisible;
+        });
+
         [RelayCommand]
         public async Task ScannerButton()
         {
             try
             {
-                BarcodeButtonVisible = !BarcodeButtonVisible;
+                //BarcodeButtonVisible = !BarcodeButtonVisible;
                 GridVisible = !GridVisible;
             }
             catch (Exception ex)
