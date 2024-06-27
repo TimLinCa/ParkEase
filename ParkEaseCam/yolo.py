@@ -182,16 +182,15 @@ def start_detect_cam(camIndex,configName):
 
     areaType = area_config.get('areaType')
     if(areaType == 'Public'):
-        publicStatus = onlineDb.PublicStatus
-        start_detect_cam_public(camIndex,area_config,cam_config,publicStatus)
+        start_detect_cam_public(camIndex,area_config,cam_config)
     else:
         # get the floor from spliting the configName by '_' in the last element
         floor = configName.split('_')[-1]
         start_detect_cam_private(camIndex,area_config,cam_config,floor)
 
-def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
-    logDC = localDb.PublicLog
-    statusDC = localDb.PublicStatus
+def start_detect_cam_public(cam_index,area_config,cam_config):
+    logDC = onlineDb.PublicLog
+    statusDC = onlineDb.PublicStatus
 
     areaId = area_config.get("areaId")
     cam_name = area_config.get("displayName")
@@ -269,8 +268,8 @@ def start_detect_cam_public(cam_index,area_config,cam_config,logDC):
     cap.release()
 
 def start_detect_cam_private(cam_index,area_config,cam_config,floor):
-    logDC = localDb.PrivateLog
-    statusDC = localDb.PrivateStatus
+    logDC = onlineDb.PrivateLog
+    statusDC = onlineDb.PrivateStatus
 
     lotIds = area_config.get('lotIds')
     areaId = area_config.get("areaId")

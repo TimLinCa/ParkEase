@@ -80,10 +80,7 @@
             <zxing:CameraBarcodeReaderView IsDetecting="{Binding GridVisible}" VerticalOptions="Start">
 
                 <zxing:CameraBarcodeReaderView.Behaviors>
-                    <toolkit:EventToCommandBehavior
-                        Command="{Binding BarcodesDetectedCommand}"
-                        EventArgsConverter="{StaticResource BarcodeConverter}"
-                        EventName="BarcodesDetected" />
+                    <toolkit:EventToCommandBehavior Command="{Binding BarcodesDetectedCommand}" EventArgsConverter="{StaticResource BarcodeConverter}" />
                 </zxing:CameraBarcodeReaderView.Behaviors>
 
             </zxing:CameraBarcodeReaderView>

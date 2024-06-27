@@ -140,7 +140,7 @@ namespace ParkEase.Controls
                             geodesic: true,
                             strokeColor: color,
                             strokeOpacity: 1.0,
-                            strokeWeight: 4
+                            strokeWeight: 10
                         });
 
                         line.originalColor = color; // Store the original color

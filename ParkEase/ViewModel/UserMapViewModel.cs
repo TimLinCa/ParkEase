@@ -12,6 +12,7 @@ using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -39,6 +40,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private double radius;
 
+        private Location? location;
+        private Task loadingLocationTask;
+
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
@@ -46,10 +50,22 @@ namespace ParkEase.ViewModel
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
         }
+
+        public ICommand PageLoadedCommand => new RelayCommand(async() =>
+        {
+            
+        });
+
         public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
         {
             await LoadMapDataAsync();
+            location = await Geolocation.GetLocationAsync();
         });
+
+        private async Task LoadLocationTask()
+        {
+            location = await Geolocation.GetLocationAsync();
+        }
 
         // Fetches parking data from the database and displays it on the map
         private async Task LoadMapDataAsync()
@@ -165,14 +181,12 @@ namespace ParkEase.ViewModel
             }
 
             radius_out /= 1000.0;
-            var location = await Geolocation.GetLocationAsync();
-            System.Diagnostics.Debug.WriteLine($"Location: {location.Latitude}, {location.Longitude}");
+            if(location == null) location = await Geolocation.GetLocationAsync(); ;
 
             // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, location.Latitude, location.Longitude, radius_out)).ToList();
             Radius = radius_out;
             MapLines = new ObservableCollection<MapLine>(linesInRange);
-            
         });
 
         //From chatGPT 
@@ -185,7 +199,7 @@ namespace ParkEase.ViewModel
 
                 // Pythagorean theorem
                 var distance = Math.Sqrt(Math.Pow(pointLat - centerLat, 2) + Math.Pow(pointLng - centerLng, 2));
-                if (distance <= radius /111  ) 
+                if (distance <= radius / 110.567) 
                 {
                     return true;
                 }

@@ -103,11 +103,13 @@ namespace ParkEase.ViewModel
 
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
+           
             await LoadAddresses();
         });
 
         public ICommand UnLoadedCommand => new RelayCommand(() =>
         {
+            GridVisible = false;
             AddressDistanceList = new ObservableCollection<AddressDistance>();
         });
 

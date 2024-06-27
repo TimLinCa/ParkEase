@@ -19,6 +19,7 @@ using Amazon;
 using The49.Maui.BottomSheet;
 
 using ZXing.Net.Maui.Controls;
+using ZXing;
 
 namespace ParkEase
 {
