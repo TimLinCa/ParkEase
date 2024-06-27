@@ -20,6 +20,7 @@ using The49.Maui.BottomSheet;
 
 using ZXing.Net.Maui.Controls;
 using ZXing;
+using Camera.MAUI;
 
 namespace ParkEase
 {
@@ -45,6 +46,7 @@ namespace ParkEase
                 .UseUraniumUIMaterial()
                 .UseMauiCommunityToolkit()
                 .UseBottomSheet()
+                .UseMauiCameraView()
                 .ConfigureSyncfusionCore()
                 .ConfigureFonts(fonts =>
                 {
@@ -104,10 +106,7 @@ namespace ParkEase
             });
 
             builder.Services.AddSingleton<PrivateSearchViewModel>();
-            builder.Services.AddSingleton(provider => new PrivateSearchPage
-            {
-                BindingContext = provider.GetRequiredService<PrivateSearchViewModel>()
-            });
+            builder.Services.AddSingleton(provider => new PrivateSearchPage(provider.GetRequiredService<PrivateSearchViewModel>()));
 
 
             builder.Services.AddTransient<MyBottomSheet>(provider => new MyBottomSheet(provider.GetRequiredService<BottomSheetViewModel>()));

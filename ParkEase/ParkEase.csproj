@@ -77,6 +77,8 @@
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
 		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.304.21" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+		<PackageReference Include="Camera.MAUI" Version="1.5.1" />
+		<PackageReference Include="Camera.MAUI.ZXing" Version="1.0.0" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="7.0.1" />
 		<PackageReference Include="CommunityToolkit.Maui.Maps" Version="2.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
@@ -96,7 +98,6 @@
 		<PackageReference Include="The49.Maui.BottomSheet" Version="8.0.3" />
 		<PackageReference Include="UraniumUI.Icons.MaterialIcons" Version="2.8.1" />
 		<PackageReference Include="UraniumUI.Material" Version="2.8.1" />
-		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>

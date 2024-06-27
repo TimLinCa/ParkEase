@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converter="clr-namespace:ParkEase.Converters"
+    xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
     xmlns:local="clr-namespace:ParkEase.ViewModel"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
@@ -75,16 +76,25 @@
         </ListView>
 
 
-        <Grid IsVisible="{Binding GridVisible}" VerticalOptions="Start">
-
-            <zxing:CameraBarcodeReaderView IsDetecting="{Binding GridVisible}" VerticalOptions="Start">
-
-                <zxing:CameraBarcodeReaderView.Behaviors>
-                    <toolkit:EventToCommandBehavior Command="{Binding BarcodesDetectedCommand}" EventArgsConverter="{StaticResource BarcodeConverter}" />
-                </zxing:CameraBarcodeReaderView.Behaviors>
-
-            </zxing:CameraBarcodeReaderView>
-
+        <Grid
+            HorizontalOptions="Fill"
+            IsVisible="{Binding GridVisible}"
+            VerticalOptions="Fill">
+            <cv:CameraView
+                x:Name="cameraView"
+                BarCodeDetectionEnabled="True"
+                BarCodeDetectionFrameRate="10"
+                CamerasLoaded="CameraLoaded"
+                HeightRequest="300"
+                VerticalOptions="Start"
+                WidthRequest="300">
+                <cv:CameraView.Behaviors>
+                    <toolkit:EventToCommandBehavior
+                        Command="{Binding BarcodeDetectEventCommand}"
+                        EventArgsConverter="{StaticResource BarcodeConverter}"
+                        EventName="BarcodeDetected" />
+                </cv:CameraView.Behaviors>
+            </cv:CameraView>
         </Grid>
 
     </VerticalStackLayout>

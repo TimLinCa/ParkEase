@@ -1,31 +1,22 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Camera.MAUI;
+using Camera.MAUI.ZXing;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ParkEase.Utilities;
-using System.Windows.Input;
-using ParkEase.Core.Contracts.Services;
-using ParkEase.Contracts.Services;
-using ParkEase.Core.Model;
-using ParkEase.Core.Data;
-using System.Collections.ObjectModel;
 using MongoDB.Driver;
+using ParkEase.Contracts.Services;
+using ParkEase.Core.Contracts.Services;
+using ParkEase.Core.Data;
+using ParkEase.Core.Model;
 using ParkEase.Core.Services;
-using IImage = Microsoft.Maui.Graphics.IImage;
-using Microsoft.Maui.Graphics.Platform;
-using System.Reflection;
-using ZXing.Net.Maui;
-using ParkEase.Page;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Microsoft.Maui.Controls;
-using CommunityToolkit.Mvvm.Messaging;
 using ParkEase.Messages;
-using Microsoft.Maui.Devices.Sensors;
+using ParkEase.Page;
+using System.Collections.ObjectModel;
+using System.Windows.Input;
+using ZXing.Net.Maui;
+using BarcodeFormat = Camera.MAUI.BarcodeFormat;
 
+public delegate void StartCameraAsyncHandler();
+public delegate void StopCameraAsyncHandler();
 
 namespace ParkEase.ViewModel
 {
@@ -46,6 +37,7 @@ namespace ParkEase.ViewModel
         private string idResult;
 
         private bool isNavigating = false;
+
 
         [ObservableProperty]
         private AddressDistance selectedAddress;
@@ -86,6 +78,13 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
 
+        public event StartCameraAsyncHandler StartCameraAsyncEvent;
+
+        public event StopCameraAsyncHandler StopCameraAsyncEvent;
+
+        private bool isDetecting = false;
+
+
         public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
 
@@ -94,7 +93,7 @@ namespace ParkEase.ViewModel
             this.dialogService = dialogService;
             this.parkEaseModel = model;
             EnableScanner = true;
-            GridVisible = false;
+            GridVisible = true;
             BarcodeButtonVisible = true;
             errorMessageVisable = false;
             ScannerText = "";
@@ -103,13 +102,12 @@ namespace ParkEase.ViewModel
 
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
-           
             await LoadAddresses();
         });
 
         public ICommand UnLoadedCommand => new RelayCommand(() =>
         {
-            GridVisible = false;
+            StopCamera();
             AddressDistanceList = new ObservableCollection<AddressDistance>();
         });
 
@@ -207,39 +205,55 @@ namespace ParkEase.ViewModel
             }
         }
 
-        public ICommand BarcodesDetectedCommand => new RelayCommand<string>(async qrCode =>
+        public ICommand BarcodeDetectEventCommand => new RelayCommand<string>(async qrCode =>
         {
             try
             {
                 idResult = qrCode;
+                StopCameraAsyncEvent?.Invoke();
                 GridVisible = !GridVisible;
                 parkEaseModel.PrivateMapId = idResult;
                 MainThread.BeginInvokeOnMainThread(MyMainThreadCode);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-
         });
+
+        private void OpenCamera()
+        {
+            StartCameraAsyncEvent?.Invoke();
+            isDetecting = true;
+            GridVisible = true;
+        }
+
+        private void StopCamera()
+        {
+            StopCameraAsyncEvent?.Invoke();
+            isDetecting = false;
+            GridVisible = false;
+        }
 
         void MyMainThreadCode()
         {
             Shell.Current.GoToAsync(nameof(PrivateMapPage));
         }
 
-        /*        public ICommand CloseCameraCommand => new RelayCommand(() =>
-                {
-                    GridVisible = !GridVisible;
-                });*/
-
         [RelayCommand]
         public async Task ScannerButton()
         {
             try
             {
-                //BarcodeButtonVisible = !BarcodeButtonVisible;
-                GridVisible = !GridVisible;
+                if (isDetecting)
+                {
+                    StopCamera();
+                }
+                else
+                {
+                    OpenCamera();
+                }
+              
             }
             catch (Exception ex)
             {
