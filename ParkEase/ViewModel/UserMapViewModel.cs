@@ -46,6 +46,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private double markerLongitude;
 
+        [ObservableProperty]
+        private bool showRedLines;
+
         private Location? location;
         private Task loadingLocationTask;
 
@@ -55,6 +58,7 @@ namespace ParkEase.ViewModel
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
+            ShowRedLines = true;
         }
 
         public ICommand PageLoadedCommand => new RelayCommand(async() =>
@@ -214,7 +218,7 @@ namespace ParkEase.ViewModel
             if(location == null) location = await Geolocation.GetLocationAsync(); ;
 
             // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
-            List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, location.Latitude, location.Longitude, radius_out)).ToList();
+            List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, location.Latitude, location.Longitude, radius_out) && (ShowRedLines || line.Color != "red")).ToList();
             Radius = radius_out;
             MapLines = new ObservableCollection<MapLine>(linesInRange);
         });

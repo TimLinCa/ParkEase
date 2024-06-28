@@ -17,6 +17,7 @@
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="0.1*" />
+            <RowDefinition Height="0.1*" />
         </Grid.RowDefinitions>
         <controls:GMapMobile
             Grid.Row="0"
@@ -37,7 +38,7 @@
             <StackLayout
                 HorizontalOptions="CenterAndExpand"
                 Orientation="Horizontal"
-                Spacing="10"
+                Spacing="8"
                 VerticalOptions="CenterAndExpand">
                 <Label
                     Text="Select Range:"
@@ -59,12 +60,39 @@
                         <x:String>1000 meters</x:String>
                     </Picker.Items>
                 </Picker>
+                <StackLayout
+                    HorizontalOptions="CenterAndExpand"
+                    Orientation="Vertical"
+                    Spacing="-10"
+                    VerticalOptions="CenterAndExpand">
+
+                    <Label
+                        Text="All Parking Areas"
+                        TextColor="Black"
+                        VerticalOptions="Center" />
+                    <CheckBox HorizontalOptions="Center" IsChecked="{Binding ShowRedLines}" />
+                </StackLayout>
+            </StackLayout>
+        </Grid>
+
+        <Grid
+            Grid.Row="2"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+            <StackLayout
+                HorizontalOptions="CenterAndExpand"
+                Orientation="Horizontal"
+                Spacing="10"
+                VerticalOptions="CenterAndExpand">
+
                 <Button
                     Command="{Binding UpdateRangeCommand}"
                     Text="Update Range"
                     VerticalOptions="Center" />
+
             </StackLayout>
         </Grid>
+
     </Grid>
 </ContentPage>
 
