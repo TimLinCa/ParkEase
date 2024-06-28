@@ -8,6 +8,7 @@ using ParkEase.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,14 +38,28 @@ namespace ParkEase.Controls
             get => (MapLine)GetValue(SelectedLineProperty); set { SetValue(SelectedLineProperty, value); }
         }
 
+        public double MarkerLatitude
+        {
+            get => (double)GetValue(MarkerLatitudeProperty); set => SetValue(MarkerLatitudeProperty, value);
+        }
+
+        public double MarkerLongitude
+        {
+            get => (double)GetValue(MarkerLongitudeProperty); set => SetValue(MarkerLongitudeProperty, value);
+        }
+
         public static readonly BindableProperty LinesProperty = BindableProperty.Create(nameof(Lines), typeof(ObservableCollection<MapLine>), typeof(GMapMobile), propertyChanged: LinesPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly BindableProperty SelectedLineProperty = BindableProperty.Create(nameof(SelectedLine), typeof(MapLine), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly BindableProperty RadiusProperty = BindableProperty.Create(nameof(Radius), typeof(double), typeof(GMapMobile), propertyChanged: RadiusPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
+        public static readonly BindableProperty MarkerLatitudeProperty = BindableProperty.Create(nameof(MarkerLatitude), typeof(double), typeof(GMapMobile), propertyChanged: OnMarkerLatitudeChanged);
+
+        public static readonly BindableProperty MarkerLongitudeProperty = BindableProperty.Create(nameof(MarkerLongitude), typeof(double), typeof(GMapMobile), propertyChanged: OnMarkerLongitudeChanged);
         public GMapMobile()
         {
+            currentInstance = this;
             var apiKey = Environment.GetEnvironmentVariable("GoogleAKYKey");
             HorizontalOptions = LayoutOptions.FillAndExpand;
             VerticalOptions = LayoutOptions.FillAndExpand;
@@ -103,6 +118,19 @@ namespace ParkEase.Controls
                     directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true }); // taking the directions computed by DirectionsService and displaying them on the map
                     directionsRenderer.setMap(map);  // render the computed directions on the specified map                  
                 }
+
+                // Add a marker to the map  
+                function addMarker(lat, lng, title, icon) {
+                    const marker = new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        title: title,
+                        icon: {
+                            url: icon,
+                            scaledSize: new google.maps.Size(24, 24)
+                        }
+                    });
+                }  
 
                 function clearLines() {
                     lines.forEach(line => line.setMap(null));
@@ -282,11 +310,7 @@ namespace ParkEase.Controls
                 // Display the route steps in the bottom sheet
                 function navigateToLine() {
                     if (!selectedLineCoordinates) return;  // If no line is selected, it exits the function
-
-                    
-                    //const midPointIndex = Math.floor(selectedLineCoordinates.length / 2);
-                    //const midPoint = selectedLineCoordinates[midPointIndex];
-
+                  
                     const endPoint = selectedLineCoordinates[selectedLineCoordinates.length - 1];
 
                     const request = {
@@ -340,6 +364,12 @@ namespace ParkEase.Controls
                     await EvaluateJavaScriptAsync("window.postMessage('GetDirections');"); // send a message to the JavaScript function
                 });
             });
+
+            // Subscribe to MessagingCenter messages
+            MessagingCenter.Subscribe<UserMapViewModel, (double lat, double lng, string title)>(this, "AddMarker", async (sender, args) =>
+            {
+                await AddMarkerAsync(args.lat, args.lng, args.title);
+            });
         }
 
         private async void GMapMobile_Navigating(object? sender, WebNavigatingEventArgs e)
@@ -384,6 +414,32 @@ namespace ParkEase.Controls
             }
         }
 
+        private static void OnMarkerLatitudeChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is GMapMobile view)
+            {
+                view.UpdateMarker();
+            }
+        }
+
+        private static void OnMarkerLongitudeChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is GMapMobile view)
+            {
+                view.UpdateMarker();
+            }
+        }
+
+        private async void UpdateMarker()
+        {
+            Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
+            if (MarkerLatitude != 0 && MarkerLongitude != 0)
+            {
+                await AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
+            }
+        }
+
+
         private static async void Lines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
@@ -423,9 +479,30 @@ namespace ParkEase.Controls
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
                 LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
 
+                // Add marker after the map is initialized
+                await currentInstance.AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
+
             }
         }
 
+        public async Task AddMarkerAsync(double lat, double lng, string title)
+        {
+            // SVG data URL for the circle "P" logo
+            var markerIconPath = "data:image/svg+xml;base64," + Convert.ToBase64String(Encoding.UTF8.GetBytes(@"
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+              <circle cx='12' cy='12' r='10' fill='#512BD4'/>
+              <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
+             </svg>
+         "));
+
+            // JavaScript command to add the marker with the specified icon
+            string jsCommand = $@"
+            addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
+        ";
+            Debug.WriteLine($"Adding marker: {lat}, {lng}, {title}");
+
+            await EvaluateJavaScriptAsync(jsCommand);
+        }
         private async void HandleLineClicked(string info)
         {
             // Split the info string into individual points using ';' as the delimiter
