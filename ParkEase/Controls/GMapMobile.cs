@@ -331,7 +331,7 @@ namespace ParkEase.Controls
 
             //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/messagingcenter?view=net-maui-8.0
             // Listen for the GetDirections message from the BottomSheetViewModel
-            MessagingCenter.Subscribe<BottomSheetViewModel>(this, "GetDirections", async (sender) =>
+            MessagingCenter.Subscribe<MyBottomSheet> (this, "GetDirections", async (sender) =>
             {
                 // Ensure the following code runs on the main thread - update the UI
                 await Device.InvokeOnMainThreadAsync(async () =>

@@ -21,28 +21,25 @@ namespace ParkEase.Services
 
         public async Task ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng)
         {
-
+   
             if (currentBottomSheet != null)
             {
-                await currentBottomSheet.DismissAsync(); /*https://stackoverflow.com/questions/76626365/how-do-i-dismiss-the-bottom-sheet-from-a-button-click-event-inside-the-bottom-sh*/
+                //https://github.com/the49ltd/The49.Maui.BottomSheet
+                if (!currentBottomSheet.DismissedState)
+                {
+                    await currentBottomSheet.DismissAsync(); /*https://stackoverflow.com/questions/76626365/how-do-i-dismiss-the-bottom-sheet-from-a-button-click-event-inside-the-bottom-sh*/
+                }
             }
 
-            var bottomSheetViewModel = new BottomSheetViewModel
-            {
-                Address = address,
-                ParkingFee = parkingFee,
-                LimitHour = limitHour,
-                Availability = availability,
-                ShowButton = ShowButton,
-                Lat = lat,
-                Lng = lng
-            };
+            currentBottomSheet = new MyBottomSheet();
 
-            currentBottomSheet = new MyBottomSheet(bottomSheetViewModel)
-            {
-                HasHandle = true,
-                HandleColor = Colors.Black
-            };
+            currentBottomSheet.SetAddress(address);
+            currentBottomSheet.SetParkingFee(parkingFee);
+            currentBottomSheet.SetLimitHour(limitHour);
+            currentBottomSheet.SetAvailability(availability);
+            currentBottomSheet.SetVisibilityNavigatedButton(ShowButton);
+            currentBottomSheet.SetLat(lat);
+            currentBottomSheet.SetLng(lng);
 
             await currentBottomSheet.ShowAsync();
         }

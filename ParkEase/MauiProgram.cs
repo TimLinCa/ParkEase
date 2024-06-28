@@ -107,9 +107,6 @@ namespace ParkEase
 
             builder.Services.AddSingleton<PrivateSearchViewModel>();
             builder.Services.AddSingleton(provider => new PrivateSearchPage(provider.GetRequiredService<PrivateSearchViewModel>()));
-
-
-            builder.Services.AddTransient<MyBottomSheet>(provider => new MyBottomSheet(provider.GetRequiredService<BottomSheetViewModel>()));
             #endregion
 
             builder.Services.AddSingleton(provider => new ParkEaseModel(developerMode));
