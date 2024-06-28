@@ -24,6 +24,8 @@ namespace ParkEase.Controls
         private static bool selfUpdatingLines = false;
         private static Location location;
         private bool isLoaded = false;
+        private List<string> markerIds = new List<string>(); // Track all marker IDs
+
         public ObservableCollection<MapLine> Lines
         {
             get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
@@ -87,19 +89,20 @@ namespace ParkEase.Controls
         <body>
             <div id=""map""></div>
             <script>
-                let map;
-                let directionsService;
-                let directionsRenderer;
-                let start = false;
-                let selectedPoints = [];
-                let lines = [];
-                let selectedLine = null;
-                let hoverLine = null;
-                let initial = true;
-                let userMarker = null;
-                let circle;
-                let currentLat;
-                let currentLng;
+                    let map;
+                    let directionsService;
+                    let directionsRenderer;
+                    let start = false;
+                    let selectedPoints = [];
+                    let lines = [];
+                    let selectedLine = null;
+                    let hoverLine = null;
+                    let initial = true;
+                    let userMarker = null;
+                    let circle;
+                    let currentLat;
+                    let currentLng;
+                    let markers = []; // Track all markers
 
                 // Initializes the Google Map 
                 function initMap(lat, lng) {
@@ -131,8 +134,18 @@ namespace ParkEase.Controls
                             scaledSize: new google.maps.Size(24, 24)
                         }
                     });
+                    markers.push(marker); // Add marker to the list
                 }  
 
+                // Clear all markers
+                function clearMarkers() {{
+                    for (let i = 0; i < markers.length; i++) {{
+                        markers[i].setMap(null);
+                    }}
+                    markers = [];
+                }}
+
+                // Clear all lines from the map
                 function clearLines() {
                     lines.forEach(line => line.setMap(null));
                     lines = [];
@@ -371,6 +384,12 @@ namespace ParkEase.Controls
             {
                 await AddMarkerAsync(args.lat, args.lng, args.title);
             });
+
+            // Subscribe to clear markers message
+            MessagingCenter.Subscribe<UserMapViewModel>(this, "ClearMarkers", async (sender) =>
+            {
+                await ClearMarkersAsync();
+            });
         }
 
         private async void GMapMobile_Navigating(object? sender, WebNavigatingEventArgs e)
@@ -433,7 +452,7 @@ namespace ParkEase.Controls
 
         private async void UpdateMarker()
         {
-            Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
+            System.Diagnostics.Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
             if (MarkerLatitude != 0 && MarkerLongitude != 0)
             {
                 await AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
@@ -499,13 +518,22 @@ namespace ParkEase.Controls
               <circle cx='12' cy='12' r='10' fill='#512BD4'/>
               <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
              </svg>
-         "));
+        "));
 
             // JavaScript command to add the marker with the specified icon
             string jsCommand = $@"
             addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
         ";
-            Debug.WriteLine($"Adding marker: {lat}, {lng}, {title}");
+            System.Diagnostics.Debug.WriteLine($"Adding marker: {lat}, {lng}, {title}");
+
+            await EvaluateJavaScriptAsync(jsCommand);
+        }
+
+        public async Task ClearMarkersAsync()
+        {
+            // JavaScript command to clear all markers
+            string jsCommand = "clearMarkers();";
+            System.Diagnostics.Debug.WriteLine("Clearing all markers");
 
             await EvaluateJavaScriptAsync(jsCommand);
         }
