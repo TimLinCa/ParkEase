@@ -21,8 +21,6 @@
         <controls:GMapMobile
             Grid.Row="0"
             Lines="{Binding MapLines}"
-            MarkerLatitude="{Binding MarkerLatitude}"
-            MarkerLongitude="{Binding MarkerLongitude}"
             Radius="{Binding Radius}"
             SelectedLine="{Binding SelectedMapLine}">
             <controls:GMapMobile.Behaviors>

@@ -40,12 +40,6 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private double radius;
 
-        [ObservableProperty]
-        private double markerLatitude;
-
-        [ObservableProperty]
-        private double markerLongitude;
-
         private Location? location;
         private Task loadingLocationTask;
 
@@ -64,10 +58,8 @@ namespace ParkEase.ViewModel
 
         public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
         {
+            await LoadMapDataAsync();
             location = await Geolocation.GetLocationAsync();
-            var loadMapDataTask = LoadMapDataAsync();
-            var loadPrivateParkingDataTask = LoadPrivateParkingDataAsync();
-            await Task.WhenAll(loadMapDataTask, loadPrivateParkingDataTask);
         });
 
         private async Task LoadLocationTask()
@@ -98,35 +90,13 @@ namespace ParkEase.ViewModel
                     }
                 }
 
-                dbMapLines = new List<MapLine>(lines);               
+                dbMapLines = new List<MapLine>(lines);
+                //MapLines = lines;
                 await LoadAvailableSpotsAsync(null);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading map data: {ex.Message}");
-            }
-        }
-
-        private async Task LoadPrivateParkingDataAsync()
-        {
-            try
-            {
-                var privateParkings = await mongoDBService.GetData<PrivateParking>("PrivateParking");
-                if (privateParkings == null || !privateParkings.Any())
-                {
-                    System.Diagnostics.Debug.WriteLine("No private parking data found.");
-                    return;
-                }
-
-                foreach (var privateParking in privateParkings)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
-                    MessagingCenter.Send(this, "AddMarker", (privateParking.Latitude, privateParking.Longitude, "Private Parking"));
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error loading private parking data: {ex.Message}");
             }
         }
 
