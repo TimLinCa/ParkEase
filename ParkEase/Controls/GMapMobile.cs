@@ -23,6 +23,7 @@ namespace ParkEase.Controls
         private static GMapMobile currentInstance;
         private static bool selfUpdatingLines = false;
         private static Location location;
+        private bool isLoaded = false;
         public ObservableCollection<MapLine> Lines
         {
             get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
@@ -468,21 +469,26 @@ namespace ParkEase.Controls
         // async indicates that the method contains asynchronous operations.
         private async void GMapMobile_Loaded(object? sender, EventArgs e)
         {
-            // assigned to the static variable
-            currentInstance = (GMapMobile)sender; //sender the object that raised the event
-            location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
-            if (location != null)
+            if(!isLoaded)
             {
-                DataService.SetLocation(location);
-                // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator
-                string jsCommand = $"initMapWithCircle({location.Latitude}, {location.Longitude});";
-                await currentInstance.EvaluateJavaScriptAsync(jsCommand);
-                LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
+                // assigned to the static variable
+                currentInstance = (GMapMobile)sender; //sender the object that raised the event
+                location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
+                if (location != null)
+                {
+                    DataService.SetLocation(location);
+                    // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator
+                    string jsCommand = $"initMapWithCircle({location.Latitude}, {location.Longitude});";
+                    await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+                    LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
 
-                // Add marker after the map is initialized
-                await currentInstance.AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
+                    // Add marker after the map is initialized
+                    await currentInstance.AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
 
+                }
+                isLoaded = true;
             }
+           
         }
 
         public async Task AddMarkerAsync(double lat, double lng, string title)
