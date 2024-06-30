@@ -24,6 +24,7 @@ namespace ParkEase.ViewModel
     public partial class UserMapViewModel : ObservableObject
     {
         private List<MapLine> dbMapLines;
+        private List<PrivateParking> allPrivateParkings;
 
         [ObservableProperty]
         private ObservableCollection<MapLine> mapLines; 
@@ -94,7 +95,6 @@ namespace ParkEase.ViewModel
                 }
 
                 dbMapLines = new List<MapLine>(lines);
-                //MapLines = lines;
                 await LoadAvailableSpotsAsync(null);
             }
             catch (Exception ex)
@@ -107,22 +107,16 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                var privateParkings = await mongoDBService.GetData<PrivateParking>("PrivateParking");
-                if (privateParkings == null || !privateParkings.Any())
+                allPrivateParkings = await mongoDBService.GetData<PrivateParking>("PrivateParking");
+                if (allPrivateParkings == null || !allPrivateParkings.Any())
                 {
-                    Debug.WriteLine("No private parking data found.");
+                    System.Diagnostics.Debug.WriteLine("No private parking data found.");
                     return;
-                }
-
-                foreach (var privateParking in privateParkings)
-                {
-                    Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
-                    MessagingCenter.Send(this, "AddMarker", (privateParking.Latitude, privateParking.Longitude, "Private Parking"));
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error loading private parking data: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error loading private parking data: {ex.Message}");
             }
         }
 
@@ -195,14 +189,14 @@ namespace ParkEase.ViewModel
             
             if (string.IsNullOrEmpty(SelectedRadius))
             {
-                Debug.WriteLine("SelectedRadius is null or empty");
+                System.Diagnostics.Debug.WriteLine("SelectedRadius is null or empty");
                 return;
             }
 
             // Parse selected radius to double (meters to kilometers)
             if (!double.TryParse(SelectedRadius.Split(' ')[0], out double radius_out))
             {
-                Debug.WriteLine("Failed to parse SelectedRadius");
+                System.Diagnostics.Debug.WriteLine("Failed to parse SelectedRadius");
                 return;
             }
 
@@ -212,6 +206,19 @@ namespace ParkEase.ViewModel
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out) && (ShowRedLines || line.Color != "red")).ToList();
             Radius = radius_out;
             MapLines = new ObservableCollection<MapLine>(linesInRange);
+
+            // Clear existing markers
+            MessagingCenter.Send(this, "ClearMarkers");
+
+            // Filter private parking locations based on the distance range
+            var privateParkingsInRange = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, location.Latitude, location.Longitude, radius_out)).ToList();
+
+            // Update markers for the filtered private parking locations
+            foreach (var privateParking in privateParkingsInRange)
+            {
+                System.Diagnostics.Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
+                MessagingCenter.Send(this, "AddMarker", (privateParking.Latitude, privateParking.Longitude, "Private Parking"));
+            }
         });
 
         //From chatGPT 
