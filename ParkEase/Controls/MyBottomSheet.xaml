@@ -7,7 +7,6 @@
     xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     Padding="16,32"
-    x:DataType="vm:BottomSheetViewModel"
     BackgroundColor="WhiteSmoke"
     HandleColor="Black"
     HasHandle="True">

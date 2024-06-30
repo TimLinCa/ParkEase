@@ -21,6 +21,7 @@ using The49.Maui.BottomSheet;
 using ZXing.Net.Maui.Controls;
 using ZXing;
 using Camera.MAUI;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace ParkEase
 {
@@ -115,6 +116,7 @@ namespace ParkEase
             builder.Services.AddSingleton<IDialogService, DialogService>();
             builder.Services.AddSingleton<IMongoDBService, MongoDBService>();
             builder.Services.AddSingleton<IAWSService, AWSService>();
+            builder.Services.AddSingleton<IGeolocatorService, GeolocatorService>();
             #endregion
 
 #if DEBUG

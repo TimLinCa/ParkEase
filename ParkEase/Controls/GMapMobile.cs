@@ -1,17 +1,12 @@
-﻿using Microsoft.Maui.Controls;
-using Microsoft.Maui.Controls.Shapes;
-using Newtonsoft.Json;
-using ParkEase.Contracts.Services;
+﻿using Newtonsoft.Json;
+using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Messages;
+using ParkEase.Services;
 using ParkEase.ViewModel;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ParkEase.Controls
 {
@@ -24,6 +19,8 @@ namespace ParkEase.Controls
         private static bool selfUpdatingLines = false;
         private static Location location;
         private bool isLoaded = false;
+        private IGeolocatorService geolocation;
+        private CancellationTokenSource cancellationTokenSource;
         public ObservableCollection<MapLine> Lines
         {
             get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
@@ -49,6 +46,16 @@ namespace ParkEase.Controls
             get => (double)GetValue(MarkerLongitudeProperty); set => SetValue(MarkerLongitudeProperty, value);
         }
 
+        public double LocationLat
+        {
+            get => (double)GetValue(LocationLatProperty); set => SetValue(LocationLatProperty, value);
+        }
+
+        public double LocationLng
+        {
+            get => (double)GetValue(LocationLngProperty); set => SetValue(LocationLngProperty, value);
+        }
+
         public static readonly BindableProperty LinesProperty = BindableProperty.Create(nameof(Lines), typeof(ObservableCollection<MapLine>), typeof(GMapMobile), propertyChanged: LinesPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly BindableProperty SelectedLineProperty = BindableProperty.Create(nameof(SelectedLine), typeof(MapLine), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
@@ -58,8 +65,14 @@ namespace ParkEase.Controls
         public static readonly BindableProperty MarkerLatitudeProperty = BindableProperty.Create(nameof(MarkerLatitude), typeof(double), typeof(GMapMobile), propertyChanged: OnMarkerLatitudeChanged);
 
         public static readonly BindableProperty MarkerLongitudeProperty = BindableProperty.Create(nameof(MarkerLongitude), typeof(double), typeof(GMapMobile), propertyChanged: OnMarkerLongitudeChanged);
+
+        public static readonly BindableProperty LocationLatProperty = BindableProperty.Create(nameof(LocationLat), typeof(double), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
+
+        public static readonly BindableProperty LocationLngProperty = BindableProperty.Create(nameof(LocationLng), typeof(double), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
+
         public GMapMobile()
         {
+            this.geolocation = AppServiceProvider.GetService<IGeolocatorService>();
             currentInstance = this;
             var apiKey = Environment.GetEnvironmentVariable("GoogleAKYKey");
             HorizontalOptions = LayoutOptions.FillAndExpand;
@@ -102,17 +115,10 @@ namespace ParkEase.Controls
                 let currentLng;
 
                 // Initializes the Google Map 
-                function initMap(lat, lng) {
-
-                    currentLat = lat;
-                    currentLng = lng;
+                function initMap() {
                     map = new google.maps.Map(document.getElementById('map'), {
-                        center: { lat: lat, lng: lng  },  // Specify the coordinates for the center of the map
                         zoom: 16// Specify the zoom level
                     });
-                    // GPS marker for the user 
-                    addUserMarker(lat, lng);
-                    drawCircle(lat, lng, 0.2);
 
                     //https://developers.google.com/maps/documentation/javascript/reference/directions
                     directionsService = new google.maps.DirectionsService(); // communicate with the Google Maps Directions API
@@ -153,6 +159,12 @@ namespace ParkEase.Controls
                             scaledSize: new google.maps.Size(20, 20) // Adjust the size as needed
                         }
                     });
+                    // Center the map on the new marker position
+                    if(initial){
+                        map.setCenter({ lat: lat, lng: lng });
+                        initial = false;
+                    }
+                    
                 }
 
                 function drawLine(latitude1, longitude1, latitude2, longitude2, color) {
@@ -260,46 +272,14 @@ namespace ParkEase.Controls
                 }
 
 
-                // Call this function to initialize the map with a circle
-                function initMapWithCircle(lat, lng) {
-                     initMap(lat, lng); // Initialize the map
-                     updateRange(); // Draw the circle and lines within the range
-                     
-                }
 
-                function updateRange() {
-                    const rangeSelect = document.getElementById('rangeSelect');
-                    const selectedRange = parseFloat(rangeSelect.value);
-                    drawCircle(currentLat, currentLng, selectedRange);
+                function updateLocation(lat,lng) {
+                    currentLat = lat;
+                    currentLng = lng;
+                    // GPS marker for the user 
+                    addUserMarker(lat, lng);
+                };
 
-                    // Clear existing lines
-                    lines.forEach(line => line.setMap(null));
-                    lines = [];
-
-                    // Redraw lines within the new range
-                    for (let line of allLines) { // allLines should be a separate array storing all original lines
-                        const start = line.path[0];
-                        const end = line.path[1];
-                        drawLine(start.lat, start.lng, end.lat, end.lng, line.strokeColor, currentLat, currentLng, selectedRange);
-                    }
-                } 
-
-                // Get user's current location
-                function getUserLocation() {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition((position) => {
-                            currentLat = position.coords.latitude;
-                            currentLng = position.coords.longitude;
-                            initMapWithCircle(currentLat, currentLng);
-                        }, (error) => {
-                            console.error(""Error getting location: "", error);
-                            // Handle error case, e.g., use a default location
-                        });
-                    } else {
-                        console.error(""Geolocation is not supported by this browser."");
-                        // Handle error case, e.g., use a default location
-                    }
-                }
 
                 let selectedLineCoordinates = null;
 
@@ -329,7 +309,6 @@ namespace ParkEase.Controls
                     });
                 }
 
-               
                 function receiveMessage(event) {
                     if (event.data === 'GetDirections') {
                         navigateToLine();
@@ -338,11 +317,6 @@ namespace ParkEase.Controls
                 
                 // listen for the message event
                 window.addEventListener('message', receiveMessage, false);
-
-                 // Initialize the map with the user's current location when the page loads
-                 window.onload = function() {
-                       getUserLocation();
-                   };
          
             </script>" +
                     @$"<script src=""https://maps.googleapis.com/maps/api/js?key={apiKey}&callback=initMap"" async defer></script>" +
@@ -356,7 +330,7 @@ namespace ParkEase.Controls
 
             //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/messagingcenter?view=net-maui-8.0
             // Listen for the GetDirections message from the BottomSheetViewModel
-            MessagingCenter.Subscribe<MyBottomSheet> (this, "GetDirections", async (sender) =>
+            MessagingCenter.Subscribe<MyBottomSheet>(this, "GetDirections", async (sender) =>
             {
                 // Ensure the following code runs on the main thread - update the UI
                 await Device.InvokeOnMainThreadAsync(async () =>
@@ -392,7 +366,7 @@ namespace ParkEase.Controls
                 return;
             }
             double newRadius = (double)newValue;
-            string jsCommand = $"drawCircle({location.Latitude},{location.Longitude},{newRadius});";
+            string jsCommand = $"drawCircle({view.LocationLat},{view.LocationLng},{newRadius});";
             view.EvaluateJavaScriptAsync(jsCommand);
         }
         private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -469,26 +443,35 @@ namespace ParkEase.Controls
         // async indicates that the method contains asynchronous operations.
         private async void GMapMobile_Loaded(object? sender, EventArgs e)
         {
-            if(!isLoaded)
+            if (!isLoaded)
             {
                 // assigned to the static variable
                 currentInstance = (GMapMobile)sender; //sender the object that raised the event
-                location = await Geolocation.GetLocationAsync(); // await is waiting for the operations completed.
-                if (location != null)
+
+                // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator
+                string jsCommand = $"initMap();";
+                await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+                LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
+
+                // Add marker after the map is initialized
+                if(cancellationTokenSource != null)
                 {
-                    DataService.SetLocation(location);
-                    // how to emulate GPS location in the Android emulator: https://stackoverflow.com/questions/2279647/how-to-emulate-gps-location-in-the-android-emulator
-                    string jsCommand = $"initMapWithCircle({location.Latitude}, {location.Longitude});";
-                    await currentInstance.EvaluateJavaScriptAsync(jsCommand);
-                    LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
-
-                    // Add marker after the map is initialized
-                    await currentInstance.AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
-
+                    cancellationTokenSource.Cancel();
                 }
+                cancellationTokenSource = new CancellationTokenSource();
+                CancellationToken token = cancellationTokenSource.Token;
+                var progress = new Progress<Location>(location =>
+                {
+                    LocationLat = location.Latitude;
+                    LocationLng = location.Longitude;
+                    DataService.SetLocation(location);
+                    string jsCommand = $"updateLocation({location.Latitude},{location.Longitude});";
+                    currentInstance.EvaluateJavaScriptAsync(jsCommand);
+                });
+                geolocation.StartListening(progress, token);
                 isLoaded = true;
             }
-           
+
         }
 
         public async Task AddMarkerAsync(double lat, double lng, string title)

@@ -49,8 +49,11 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private bool showRedLines;
 
-        private Location? location;
-        private Task loadingLocationTask;
+        [ObservableProperty]
+        private double locationLatitude;
+
+        [ObservableProperty]
+        private double locationLongitude;
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
@@ -61,22 +64,11 @@ namespace ParkEase.ViewModel
             ShowRedLines = true;
         }
 
-        public ICommand PageLoadedCommand => new RelayCommand(async() =>
-        {
-            
-        });
-
         public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
         {
             await LoadMapDataAsync();
             await LoadPrivateParkingDataAsync();
-            location = await Geolocation.GetLocationAsync();
         });
-
-        private async Task LoadLocationTask()
-        {
-            location = await Geolocation.GetLocationAsync();
-        }
 
         // Fetches parking data from the database and displays it on the map
         private async Task LoadMapDataAsync()
@@ -215,10 +207,9 @@ namespace ParkEase.ViewModel
             }
 
             radius_out /= 1000.0;
-            if(location == null) location = await Geolocation.GetLocationAsync(); ;
 
             // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
-            List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, location.Latitude, location.Longitude, radius_out) && (ShowRedLines || line.Color != "red")).ToList();
+            List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out) && (ShowRedLines || line.Color != "red")).ToList();
             Radius = radius_out;
             MapLines = new ObservableCollection<MapLine>(linesInRange);
         });

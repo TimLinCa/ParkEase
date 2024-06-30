@@ -48,7 +48,10 @@ namespace ParkEase.Services
         {
             if (currentBottomSheet != null)
             {
-                await currentBottomSheet.DismissAsync();
+                if (!currentBottomSheet.DismissedState)
+                {
+                    await currentBottomSheet.DismissAsync();
+                }
                 currentBottomSheet = null;
             }
         }
