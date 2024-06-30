@@ -211,7 +211,7 @@ namespace ParkEase.ViewModel
             MessagingCenter.Send(this, "ClearMarkers");
 
             // Filter private parking locations based on the distance range
-            var privateParkingsInRange = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, location.Latitude, location.Longitude, radius_out)).ToList();
+            var privateParkingsInRange = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, LocationLatitude, LocationLongitude, radius_out)).ToList();
 
             // Update markers for the filtered private parking locations
             foreach (var privateParking in privateParkingsInRange)
