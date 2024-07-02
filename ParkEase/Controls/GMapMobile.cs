@@ -555,7 +555,6 @@ namespace ParkEase.Controls
                 // Deserialize the JSON string into a list of Line objects
                 List<MapLine> lines = JsonConvert.DeserializeObject<List<MapLine>>(result);
 
-
                 // Find the line that matches the selected line based on the points
                 SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
 

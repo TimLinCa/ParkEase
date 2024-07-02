@@ -16,7 +16,7 @@
         FlyoutItemIsVisible="False"
         NavigationPage.HasNavigationBar="False"
         Shell.FlyoutBehavior="Disabled" />
-    
+
 
     <ShellContent
         Title="Public Map"
@@ -29,6 +29,12 @@
         ContentTemplate="{DataTemplate page:CreateMapPage}"
         IsVisible="{Binding CreateMapVisible}"
         Route="CreateMap" />
+
+    <ShellContent
+        Title="Analysis"
+        ContentTemplate="{DataTemplate page:AnalysisPage}"
+        IsVisible="{Binding AnalysisVisible}"
+        Route="AnalysisPage" />
 
     <Shell.FlyoutHeader>
         <Image

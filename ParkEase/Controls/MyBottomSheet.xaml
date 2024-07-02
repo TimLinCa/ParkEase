@@ -92,6 +92,5 @@
                 Text="Start Navigation" />
 
         </VerticalStackLayout>
-
     </VerticalStackLayout>
 </the49:BottomSheet>
