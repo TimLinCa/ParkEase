@@ -50,11 +50,7 @@ def parkingLot_detect_cam(cam_index,config_data):
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
 
-        count += 1
-        if count % 2 != 0:
-            continue
-
-        results=model.predict(frame)
+        results=model.predict(frame,verbose=False)
         a=results[0].boxes.data
         px=DataFrame(a).astype("float")
         carPosition =[]
@@ -69,7 +65,8 @@ def parkingLot_detect_cam(cam_index,config_data):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            if 'car' in c:
+            print(c)
+            if 'car' in c or 'truck' in c or 'bus' in c:
                 carPosition.append((cx,cy))
 
         #drawing polylines
@@ -140,7 +137,7 @@ def parkingLot_detect_video(video_filePath,config_file_path):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            if 'car' in c:
+            if 'car' in c or 'truck' in c or 'bus' in c:
                 carPosition.append((cx,cy))
 
         #drawing polylines
@@ -230,7 +227,7 @@ def start_detect_cam_public(cam_index,area_config,cam_config):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            if 'car' in c:
+            if 'car' in c or 'truck' in c or 'bus' in c:
                 carPosition.append((cx,cy))
 
         #drawing polylines
@@ -310,7 +307,7 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            if 'car' in c:
+            if 'car' in c or 'truck' in c or 'bus' in c:
                 carPosition.append((cx,cy))
 
         #drawing polylines
@@ -391,7 +388,7 @@ def start_detect_video(video_filePath,config_file_path,areaType,id):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            if 'car' in c:
+            if 'car' in c or 'truck' in c or 'bus' in c:
                 carPosition.append((cx,cy))
 
         #drawing polylines
