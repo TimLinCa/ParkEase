@@ -221,7 +221,14 @@ namespace ParkEase.Controls
             //Triger reRender
             if (sender is ObservableCollection<Rectangle> listRectangle && listRectangle.Count >= 0)
             {
-                reRender(_currentInstance);
+                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                {
+                    
+                }
+                else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                {
+                        
+                }
             }
         }
 

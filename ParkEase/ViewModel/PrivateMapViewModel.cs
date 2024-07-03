@@ -90,7 +90,7 @@ namespace ParkEase.ViewModel
 
         private CancellationTokenSource cts;
         private readonly object lockObj = new object();
-
+        private 
         readonly bool stopping = false;
 
 
@@ -126,7 +126,6 @@ namespace ParkEase.ViewModel
         public ICommand UnLoadedCommand => new RelayCommand(() =>
         {
             cts?.Cancel(); // Cancel the real-time update loop
-
             parkingLotData?.Clear();
             FloorNames?.Clear();
             listFloorInfos?.Clear();
@@ -232,9 +231,6 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                ImgSourceData = null;
-                ListRectangleFill.Clear();
-
                 // Fetch PrivateStatus data from MongoDB
                 var status = await mongoDBService.GetData<PrivateStatus>(CollectionName.PrivateStatus);
                 if (status == null || status.Count == 0)
@@ -260,10 +256,13 @@ namespace ParkEase.ViewModel
                     .ToDictionary(item => item.Index, item => item.Status);
 
                 // Fetch image data
-                var imageData = selectedMap.ImageData;
-                using (MemoryStream ms = new MemoryStream(imageData))
+                if(ImgSourceData==null)
                 {
-                    ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
+                    var imageData = selectedMap.ImageData;
+                    using (MemoryStream ms = new MemoryStream(imageData))
+                    {
+                        ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
+                    }
                 }
 
                 // Variable to count availability status (false means available lot)
@@ -286,6 +285,8 @@ namespace ParkEase.ViewModel
                     }
                     rectangles.Add(rectangle);
                 }
+
+
                 ListRectangleFill = rectangles;
                 //await dialogService.ShowBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
             }
