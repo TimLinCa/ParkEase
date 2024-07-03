@@ -148,7 +148,7 @@ namespace ParkEase.Controls
                             let line = new google.maps.Polyline({
                                 path: lineCoordinates,
                                 geodesic: true,
-                                strokeColor: color,s
+                                strokeColor: color,
                                 strokeOpacity: 1.0,
                                 strokeWeight: 4
                             });

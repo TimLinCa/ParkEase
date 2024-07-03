@@ -16,7 +16,7 @@ namespace ParkEase.Core.Services
     {
         //https://stackoverflow.com/questions/69700124/reading-the-values-from-parameter-store-using-amazonsimplesystemsmanagementclien
         private readonly AmazonSimpleSystemsManagementClient client;
-        public AWSService(IConfiguration configuration) 
+        public AWSService(IConfiguration configuration)
         {
             var credentials = new BasicAWSCredentials(configuration["AWSAccessKey"], configuration["AWSSecretKey"]);
             client = new AmazonSimpleSystemsManagementClient(credentials, RegionEndpoint.USEast2);

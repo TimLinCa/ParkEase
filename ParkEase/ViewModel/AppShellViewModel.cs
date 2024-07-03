@@ -19,10 +19,14 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private bool createMapVisible;
 
+        [ObservableProperty]
+        private bool analysisVisible;
+
         public AppShellViewModel()
         {
             mapVisible = true;
             createMapVisible = true;
+            analysisVisible = true;
             WeakReferenceMessenger.Default.Register<UserChangedMessage>(this,(o, e) =>
             {
                 UserChanged(e.Value);
@@ -39,10 +43,12 @@ namespace ParkEase.ViewModel
                     break;
                 case Roles.Administrator:
                     MapVisible = false;
+                    AnalysisVisible = true;
                     break;
                 case Roles.User:
                     MapVisible = false;
                     CreateMapVisible = false;
+                    AnalysisVisible = false;
                     break;
             }
         }

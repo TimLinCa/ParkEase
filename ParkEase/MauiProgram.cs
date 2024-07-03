@@ -22,6 +22,7 @@ using ZXing.Net.Maui.Controls;
 using ZXing;
 using Camera.MAUI;
 using Microsoft.Maui.Devices.Sensors;
+using System.Net.Http.Headers;
 
 namespace ParkEase
 {
@@ -108,6 +109,12 @@ namespace ParkEase
 
             builder.Services.AddSingleton<PrivateSearchViewModel>();
             builder.Services.AddSingleton(provider => new PrivateSearchPage(provider.GetRequiredService<PrivateSearchViewModel>()));
+
+            builder.Services.AddSingleton<AnalysisViewModel>();
+            builder.Services.AddSingleton(provider => new AnalysisPage()
+            {
+                BindingContext = provider.GetRequiredService<AnalysisViewModel>()
+            });
             #endregion
 
             builder.Services.AddSingleton(provider => new ParkEaseModel(developerMode));
