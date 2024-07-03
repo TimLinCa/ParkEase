@@ -54,7 +54,15 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private double locationLongitude;
 
-        public ObservableCollection<MultiSelectPopup.SelectableItem> SelectedOptions { get; set; }
+        [ObservableProperty]
+        private bool showPublicParking;
+
+        [ObservableProperty]
+        private bool showPrivateParking;
+
+        [ObservableProperty]
+        private bool showAvailableParking;
+
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
@@ -63,13 +71,17 @@ namespace ParkEase.ViewModel
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
 
-            ShowPublicParkingCommand = new RelayCommand(ShowPublicParking);
-            ShowPrivateParkingCommand = new RelayCommand(ShowPrivateParking);
-            ShowGreenLinesCommand = new RelayCommand(ShowGreenLines);
-            ClosePopupCommand = new RelayCommand(ClosePopup);
-            ShowPopupCommand = new RelayCommand(ShowPopup);
+            // Subscribe to property changed events
+            PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(ShowPublicParking) ||
+                    args.PropertyName == nameof(ShowPrivateParking) ||
+                    args.PropertyName == nameof(ShowAvailableParking))
+                {
+                    ApplyFilters();
+                }
+            };
 
-            SelectedOptions = new ObservableCollection<MultiSelectPopup.SelectableItem>();
         }
 
         public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
@@ -77,39 +89,6 @@ namespace ParkEase.ViewModel
             await LoadMapDataAsync();
             await LoadPrivateParkingDataAsync();
         });
-
-        public ICommand ShowPublicParkingCommand { get; }
-        public ICommand ShowPrivateParkingCommand { get; }
-        public ICommand ShowGreenLinesCommand { get; }
-        public ICommand ClosePopupCommand { get; }
-        public ICommand ShowPopupCommand { get; }
-
-
-        private async void ShowPublicParking()
-        {
-            await Application.Current.MainPage.DisplayAlert("Option Selected", "Public Parking", "OK");
-        }
-
-        private async void ShowPrivateParking()
-        {
-            await Application.Current.MainPage.DisplayAlert("Option Selected", "Private Parking", "OK");
-        }
-
-        private async void ShowGreenLines()
-        {
-            await Application.Current.MainPage.DisplayAlert("Option Selected", "Available Parking", "OK");
-        }
-
-        private async void ClosePopup()
-        {
-            await Application.Current.MainPage.Navigation.PopModalAsync();
-        }
-
-        private async void ShowPopup()
-        {
-            await Application.Current.MainPage.Navigation.PushModalAsync(new MultiSelectPopup());
-        }
-
 
         // Fetches parking data from the database and displays it on the map
         private async Task LoadMapDataAsync()
@@ -136,6 +115,7 @@ namespace ParkEase.ViewModel
 
                 dbMapLines = new List<MapLine>(lines);
                 await LoadAvailableSpotsAsync(null);
+                ApplyFilters();
             }
             catch (Exception ex)
             {
@@ -280,8 +260,38 @@ namespace ParkEase.ViewModel
             return false;
         }
 
-        
+        private void ApplyFilters()
+        {
+            if (Radius == 0) return;
 
+            List<MapLine> filteredLines = new List<MapLine>();
+            List<PrivateParking> filteredPrivateParkings = new List<PrivateParking>();
+
+            if (ShowPublicParking || ShowAvailableParking)
+            {
+                filteredLines = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, Radius)).ToList();
+            }
+
+            if (ShowAvailableParking)
+            {
+                filteredLines = filteredLines.Where(line => line.Color == "green").ToList();
+            }
+
+            MapLines = new ObservableCollection<MapLine>(filteredLines);
+
+            if (ShowPrivateParking)
+            {
+                filteredPrivateParkings = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, LocationLatitude, LocationLongitude, Radius)).ToList();
+            }
+
+            MessagingCenter.Send(this, "ClearMarkers");
+
+            foreach (var privateParking in filteredPrivateParkings)
+            {
+                Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
+                MessagingCenter.Send(this, "AddMarker", (privateParking.Latitude, privateParking.Longitude, "Private Parking"));
+            }
+        }
 
     }
 }
