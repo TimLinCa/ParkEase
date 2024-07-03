@@ -58,18 +58,12 @@
                         <x:String>1000 meters</x:String>
                     </Picker.Items>
                 </Picker>
-                <StackLayout
-                    HorizontalOptions="CenterAndExpand"
-                    Orientation="Vertical"
-                    Spacing="-10"
-                    VerticalOptions="CenterAndExpand">
+                <Button
+                    Command="{Binding ShowPopupCommand}"
+                    HorizontalOptions="Center"
+                    Text="More Options"
+                    VerticalOptions="Center" />
 
-                    <Label
-                        Text="All Parking Areas"
-                        TextColor="Black"
-                        VerticalOptions="Center" />
-                    <CheckBox HorizontalOptions="Center" IsChecked="{Binding ShowRedLines}" />
-                </StackLayout>
             </StackLayout>
         </Grid>
 
