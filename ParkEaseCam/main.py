@@ -14,7 +14,7 @@ import numpy as np
 import gridfs
 from functools import partial
 import pickle
-from yolo import parkingLot_detect_video,parkingLot_detect_cam,start_detect_video,stopTesting
+from yolo import parkingLot_detect_video,parkingLot_detect_cam,start_detect_video,stopTesting,start_detect_cam_db_test
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
@@ -460,8 +460,9 @@ class MainWindow(QMainWindow):
         if self.rab_cam.isChecked():
             global camIndex
             camIndex = self.camlist.currentIndex()
-            self.Worker_Opencv = camTestThreadClass()
-            self.Worker_Opencv.start()
+            self.Worker_Test = cameraDbTestThreadClass()
+            self.Worker_Test.label_configPath = self.label_configPath
+            self.Worker_Test.start()
         else:
             global videoPath
             if videoPath == '':
@@ -563,6 +564,15 @@ class videoTestThreadClass(QThread):
         parkingLot_detect_video(videoPath,self.txt_testConfigPath.text())
     def stop(self):
         self.ThreadActive = False
+        self.quit()
+
+class cameraDbTestThreadClass(QThread):
+    def run(self):
+        self.ThreadActive = True
+        start_detect_cam_db_test(camIndex,self.label_configPath.text())
+    def stop(self):
+        self.ThreadActive = False
+        stopTesting()
         self.quit()
 
 class videoDbTestThreadClass(QThread):

@@ -42,7 +42,6 @@ def parkingLot_detect_cam(cam_index,config_data):
     cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-    count=0
 
     while True:
         ret, frame = cap.read()
@@ -65,7 +64,7 @@ def parkingLot_detect_cam(cam_index,config_data):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            print(c)
+
             if 'car' in c or 'truck' in c or 'bus' in c:
                 carPosition.append((cx,cy))
 
@@ -159,6 +158,200 @@ def parkingLot_detect_video(video_filePath,config_file_path):
             if carInside == False:
                 cv2.polylines(frame,[polyline],True,(0,255,0),2)
             cvzone.putTextRect(frame,f'{area_names[i]}',tuple(polyline[0]),1,1)
+
+        cv2.imshow('FRAME', frame)
+        key = cv2.waitKey(50) & 0xFF
+        if key == 27:
+            break
+    cap.release()
+    cv2.destroyAllWindows()
+
+def start_detect_cam_db_test(camIndex,configName):
+    CamConfig = localDb.CamConfig
+    ConfigGridFs = GridFS(localDb)
+    area_config = CamConfig.find_one({"name":configName})
+    data = ConfigGridFs.find_one({"filename": configName})
+    cam_config = pickle.loads(data.read())
+    if(area_config is None or cam_config is None):
+        print("Config not found")
+        return 
+
+    areaType = area_config.get('areaType')
+    if(areaType == 'Public'):
+        start_detect_cam_public_db_test(camIndex,area_config,cam_config)
+    else:
+        # get the floor from spliting the configName by '_' in the last element
+        floor = configName.split('_')[-1]
+        start_detect_cam_private_db_test(camIndex,area_config,cam_config,floor)
+
+def start_detect_cam_public_db_test(cam_index,area_config,cam_config):
+    logDC = onlineDb.PublicLog
+    statusDC = onlineDb.PublicStatus
+
+    areaId = area_config.get("areaId")
+    cam_name = area_config.get("displayName")
+    query = {"areaId": areaId,"camName": cam_name}
+    status = statusDC.find(query)
+
+    local_status = {s['index']: s['status'] for s in status}
+
+    polylines,area_names=cam_config['polylines'],cam_config['area_names']
+    with open(resource_path("coco.txt"), "r") as my_file:
+        data = my_file.read()
+        class_list = data.split("\n")
+
+    model=YOLO(resource_path('yolov8s.pt'))
+
+    cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+    print(f"Camera {cam_name}, Running on {threading.current_thread().name}")
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            continue
+
+        results=model.predict(frame,verbose=False)
+        a=results[0].boxes.data
+        px=DataFrame(a).astype("float")
+        carPosition =[]
+        #detecting cars
+        for index,row in px.iterrows():
+            x1=int(row[0])
+            y1=int(row[1])
+            x2=int(row[2])
+            y2=int(row[3])
+            d=int(row[5])
+
+            
+            cx=int(x1+x2)//2
+            cy=int(y1+y2)//2
+
+            c=class_list[d]
+            # if 'car' in c or 'truck' in c or 'bus' in c:
+            #     carPosition.append((cx,cy))
+            carPosition.append((cx,cy))
+
+        #drawing polylines
+        for i,polyline in enumerate(polylines):
+            carInside = False
+
+            #checking if car is inside the polyline
+            for carP in carPosition:
+                result=cv2.pointPolygonTest(polyline,(carP[0],carP[1]),False)
+                #result: = 0 on edge, < 0 outside, > 0 inside
+                if result >= 0:
+                    carInside = True
+                    cv2.polylines(frame,[polyline],True,(0,0,255),2)
+                    break
+
+            if carInside == False:
+                cv2.polylines(frame,[polyline],True,(0,255,0),2)
+
+            cvzone.putTextRect(frame,f'{area_names[i]}',tuple(polyline[0]),1,1)
+
+            dir = {
+                    "areaId":areaId,
+                    "index" : i,
+                    "camName":cam_name,
+                    "status" : carInside,
+                    "timestamp": datetime.now()
+                }
+            #if car is inside the polyLine, update the status
+            if i in local_status:
+                if local_status[i] != carInside:
+                    statusDC.update_one({"areaId":areaId,"index": i,"camName":cam_name}, {'$set':dir}, upsert=True)
+            else:
+                statusDC.insert_one(dir)
+            
+            local_status[i] = carInside
+
+        cv2.imshow('FRAME', frame)
+        key = cv2.waitKey(50) & 0xFF
+        if key == 27:
+            break
+    cap.release()
+    cv2.destroyAllWindows()
+
+def start_detect_cam_private_db_test(cam_index,area_config,cam_config,floor):
+    logDC = onlineDb.PrivateLog
+    statusDC = onlineDb.PrivateStatus
+
+    lotIds = area_config.get('lotIds')
+    areaId = area_config.get("areaId")
+    cam_name = area_config.get("displayName")
+    query = {"areaId": areaId, "floor": floor,"camName": cam_name}
+    status = statusDC.find(query)
+    local_status = {s['index']: s['status'] for s in status}
+    polylines,area_names=cam_config['polylines'],cam_config['area_names']
+
+    with open(resource_path("coco.txt"), "r") as my_file:
+        data = my_file.read()
+        class_list = data.split("\n")
+
+    model=YOLO(resource_path('yolov8s.pt'))
+
+    cap=cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+    print(f"Camera {cam_name}, Running on {threading.current_thread().name}")
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            continue
+
+        results=model.predict(frame,verbose=False)
+        a=results[0].boxes.data
+        px=DataFrame(a).astype("float")
+        carPosition =[]
+        #detecting cars
+        for index,row in px.iterrows():
+            x1=int(row[0])
+            y1=int(row[1])
+            x2=int(row[2])
+            y2=int(row[3])
+            d=int(row[5])
+
+            c=class_list[d]
+            cx=int(x1+x2)//2
+            cy=int(y1+y2)//2
+            # if 'car' in c or 'truck' in c or 'bus' in c:
+            #     carPosition.append((cx,cy))
+            carPosition.append((cx,cy))
+
+        #drawing polylines
+        for i,polyline in enumerate(polylines):
+            carInside = False
+
+            #checking if car is inside the polyline
+            for carP in carPosition:
+                result=cv2.pointPolygonTest(polyline,(carP[0],carP[1]),False)
+                #result: = 0 on edge, < 0 outside, > 0 inside
+                if result > 0:
+                    carInside = True
+                    cv2.polylines(frame,[polyline],True,(0,0,255),2)
+                    break
+
+            if carInside == False:
+                cv2.polylines(frame,[polyline],True,(0,255,0),2)
+            cvzone.putTextRect(frame,f'{area_names[i]}',tuple(polyline[0]),1,1)
+            dir = {
+                    "areaId":areaId,
+                    "index" : i,
+                    "camName": cam_name,
+                    "lotId" : lotIds[str(i+1)],
+                    "status" : carInside,
+                    "floor" : floor,
+                    "timestamp": datetime.now()
+                }
+            if i in local_status:
+                if local_status[i] != carInside:
+                    statusDC.update_one({"areaId":areaId,"index": i,"camName":cam_name,"floor" : floor}, {'$set':dir}, upsert=True)  
+            else:
+                statusDC.insert_one(dir)
+            local_status[i] = carInside
 
         cv2.imshow('FRAME', frame)
         key = cv2.waitKey(50) & 0xFF
@@ -332,7 +525,7 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor):
                 }
             if i in local_status:
                 if local_status[i] != carInside:
-                    statusDC.update_one({"index": i,"camName":cam_name}, {'$set':dir}, upsert=True)  
+                    statusDC.update_one({"areaId":areaId,"index": i,"camName":cam_name,"floor" : floor,"camName":cam_name}, {'$set':dir}, upsert=True)  
                     logDC.insert_one(dir)
             else:
                 statusDC.insert_one(dir)
