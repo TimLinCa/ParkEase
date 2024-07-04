@@ -4,6 +4,7 @@ using ParkEase.Core.Data;
 using ParkEase.Messages;
 using ParkEase.Services;
 using ParkEase.ViewModel;
+using Syncfusion.Maui.Core.Carousel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -59,6 +60,16 @@ namespace ParkEase.Controls
             get => (double)GetValue(LocationLngProperty); set => SetValue(LocationLngProperty, value);
         }
 
+        public bool IsSearchInProgress
+        {
+            get => (bool)GetValue(IsSearchInProgressProperty); set => SetValue(IsSearchInProgressProperty, value);
+        }
+
+        public Location CenterLocation
+        {
+            get => (Location)GetValue(CenterLocationProperty); set => SetValue(CenterLocationProperty, value);
+        }
+
         public static readonly BindableProperty LinesProperty = BindableProperty.Create(nameof(Lines), typeof(ObservableCollection<MapLine>), typeof(GMapMobile), propertyChanged: LinesPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly BindableProperty SelectedLineProperty = BindableProperty.Create(nameof(SelectedLine), typeof(MapLine), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
@@ -72,6 +83,10 @@ namespace ParkEase.Controls
         public static readonly BindableProperty LocationLatProperty = BindableProperty.Create(nameof(LocationLat), typeof(double), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly BindableProperty LocationLngProperty = BindableProperty.Create(nameof(LocationLng), typeof(double), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
+
+        public static readonly BindableProperty IsSearchInProgressProperty = BindableProperty.Create(nameof(IsSearchInProgress), typeof(bool), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
+
+        public static readonly BindableProperty CenterLocationProperty = BindableProperty.Create(nameof(CenterLocation), typeof(Location), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay, propertyChanged: OnCenterLocationChanged);
 
         public GMapMobile()
         {
@@ -234,6 +249,11 @@ namespace ParkEase.Controls
                     pathStr = pathStr.slice(0, -1);
                     return pathStr;
                 }
+
+                function SetMapCenter(lat,lng)
+                {
+                    map.setCenter({ lat: lat, lng: lng });
+                }   
 
                 // Deletes the selected line
                 function deleteLine(index) {
@@ -409,7 +429,11 @@ namespace ParkEase.Controls
                 return;
             }
             double newRadius = (double)newValue;
-            string jsCommand = $"drawCircle({view.LocationLat},{view.LocationLng},{newRadius});";
+
+            double lat = view.IsSearchInProgress ? view.CenterLocation.Latitude : view.LocationLat;
+            double lng = view.IsSearchInProgress ? view.CenterLocation.Longitude : view.LocationLng;
+
+            string jsCommand = $"drawCircle({lat},{lng},{newRadius});";
             view.EvaluateJavaScriptAsync(jsCommand);
         }
         private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -450,6 +474,16 @@ namespace ParkEase.Controls
             }
         }
 
+        private static void OnCenterLocationChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is GMapMobile view)
+            {
+                string jscommand = "SetMapCenter(" + view.CenterLocation.Latitude + "," + view.CenterLocation.Longitude + ")";
+                view.EvaluateJavaScriptAsync(jscommand);
+            }
+        }
+
+
         private async void UpdateMarker()
         {
             System.Diagnostics.Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
@@ -466,18 +500,18 @@ namespace ParkEase.Controls
             {
                 if (e.OldItems != null)
                 {
-                    foreach(MapLine mapLine in e.OldItems)
+                    foreach (MapLine mapLine in e.OldItems)
                     {
                         string jsCommand = $"deleteLine({mapLine.Index})";
                         await currentInstance.EvaluateJavaScriptAsync(jsCommand);
 
-                        if (currentInstance.SelectedLine!= null && currentInstance.SelectedLine.Equals(mapLine))
+                        if (currentInstance.SelectedLine != null && currentInstance.SelectedLine.Equals(mapLine))
                         {
                             currentInstance.SelectedLine = null;
                         }
                     }
                     //Remove the line from map
-                    
+
                 }
             }
             else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
@@ -508,7 +542,7 @@ namespace ParkEase.Controls
                 LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
 
                 // Add marker after the map is initialized
-                if(cancellationTokenSource != null)
+                if (cancellationTokenSource != null)
                 {
                     cancellationTokenSource.Cancel();
                 }

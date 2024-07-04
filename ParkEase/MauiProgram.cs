@@ -124,6 +124,7 @@ namespace ParkEase
             builder.Services.AddSingleton<IMongoDBService, MongoDBService>();
             builder.Services.AddSingleton<IAWSService, AWSService>();
             builder.Services.AddSingleton<IGeolocatorService, GeolocatorService>();
+            builder.Services.AddSingleton<IGeocodingService, GeocodingService>();
             #endregion
 
 #if DEBUG
