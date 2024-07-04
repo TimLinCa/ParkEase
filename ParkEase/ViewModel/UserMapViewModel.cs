@@ -65,9 +65,13 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private bool showAvailableParking;
 
+        [ObservableProperty]
+        private string searchText;
+
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
+
         private CancellationTokenSource cts;
         //private readonly object lockObj = new object();
         //private bool stopping = false;
@@ -75,6 +79,7 @@ namespace ParkEase.ViewModel
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
+
 
             // Subscribe to property changed events
             PropertyChanged += (sender, args) =>
