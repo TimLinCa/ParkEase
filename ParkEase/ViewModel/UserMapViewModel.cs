@@ -387,7 +387,7 @@ namespace ParkEase.ViewModel
                             if (!MapLines.Any(mapline => mapline.Id == filteredLine.Id)) filteredLinesToAdd.Add(filteredLine);
                             else
                             {
-                                if (MapLines.First(mapline => mapline.Id == filteredLine.Id).Color != filteredLine.Color) filteredLinesToUpdate.Add(filteredLine);
+                                if (MapLines.First(mapline => mapline.Id == filteredLine.Id).Color.Equals(filteredLine.Color) ==  false) filteredLinesToUpdate.Add(filteredLine);
                             }
                         }
 
@@ -408,7 +408,8 @@ namespace ParkEase.ViewModel
                     {
                         MapLine lineToRemove = MapLines.FirstOrDefault(line => line.Id == mapLine.Id);
                         if (lineToRemove != null) await RemoveMapLine(lineToRemove);
-                        await AddMapLine(mapLine);
+                        if(ShowAvailableParking && mapLine.Color == "green") await AddMapLine(mapLine);
+                        else if(!ShowAvailableParking) await AddMapLine(mapLine);
                     }
 
                     foreach (MapLine mapLine in filteredLinesToAdd)

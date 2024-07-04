@@ -32,7 +32,10 @@ namespace ParkEase.Controls
         private double imageWidth = 1134;
         private double imageHeight = 830;
 
-
+        public ImageSource MapImage
+        {
+            get => (ImageSource)GetValue(MapImageProperty); set { SetValue(MapImageProperty, value); }
+        }
 
         public IImage ImageSource
         {
@@ -57,6 +60,8 @@ namespace ParkEase.Controls
                 SetValue(ListRectangleFillProperty, value);
             }
         }
+
+        public static readonly BindableProperty MapImageProperty = BindableProperty.Create(nameof(MapImage), typeof(ImageSource), typeof(RecGraphicsView), defaultBindingMode: BindingMode.TwoWay);    
 
 
         public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create(nameof(ImageSource), typeof(IImage), typeof(RecGraphicsView), propertyChanged: ImageSourcePropertyChanged);
@@ -198,7 +203,7 @@ namespace ParkEase.Controls
         }
         //https://learn.microsoft.com/en-us/answers/questions/1163990/in-net-maui-how-can-i-implement-zooming-and-scroll
 
-        private static void ImageSourcePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        private static async void ImageSourcePropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not RecGraphicsView { Drawable: RectDrawable drawable } view)
             {
@@ -271,12 +276,21 @@ namespace ParkEase.Controls
                 try
                 {
                     view.Invalidate();
+                    view.updateMapImage();
                 }
                 catch (Exception)
                 {
 
                 }
             }
+        }
+
+        private async Task updateMapImage()
+        {
+            Stream stream = await this.GetStreamAsync(ImageFileFormat.Jpeg);
+            MemoryStream memoryStream = new MemoryStream();
+            stream.CopyTo(memoryStream);
+            this.MapImage = Microsoft.Maui.Controls.ImageSource.FromStream(() => memoryStream);
         }
 
         private void getDrawingInfo(IImage image)
