@@ -58,32 +58,49 @@
                         <x:String>1000 meters</x:String>
                     </Picker.Items>
                 </Picker>
-                <Button
-                    Command="{Binding ShowPopupCommand}"
-                    HorizontalOptions="Center"
-                    Text="More Options"
-                    VerticalOptions="Center" />
+                <StackLayout
+                    HorizontalOptions="CenterAndExpand"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    VerticalOptions="CenterAndExpand">
+
+                    <Button
+                        Command="{Binding UpdateRangeCommand}"
+                        Text="Update Range"
+                        VerticalOptions="Center" />
+
+                </StackLayout>
 
             </StackLayout>
         </Grid>
 
-        <Grid
+        <StackLayout
             Grid.Row="2"
             HorizontalOptions="Center"
-            VerticalOptions="Center">
-            <StackLayout
-                HorizontalOptions="CenterAndExpand"
-                Orientation="Horizontal"
-                Spacing="10"
-                VerticalOptions="CenterAndExpand">
-
-                <Button
-                    Command="{Binding UpdateRangeCommand}"
-                    Text="Update Range"
+            Orientation="Horizontal"
+            VerticalOptions="End">
+            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                <CheckBox IsChecked="{Binding ShowPublicParking}" />
+                <Label
+                    Text="Public"
+                    TextColor="Black"
                     VerticalOptions="Center" />
-
             </StackLayout>
-        </Grid>
+            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                <CheckBox IsChecked="{Binding ShowPrivateParking}" />
+                <Label
+                    Text="Private"
+                    TextColor="Black"
+                    VerticalOptions="Center" />
+            </StackLayout>
+            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                <CheckBox IsChecked="{Binding ShowAvailableParking}" />
+                <Label
+                    Text="Available"
+                    TextColor="Black"
+                    VerticalOptions="Center" />
+            </StackLayout>
+        </StackLayout>
 
     </Grid>
 </ContentPage>
