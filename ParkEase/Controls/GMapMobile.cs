@@ -216,7 +216,6 @@ namespace ParkEase.Controls
 
                         line.setMap(map);
                         lines.push(line);
-                        window.location.href = ""myapp://updateIndex"";
                 }
 
                 // Returns the path of the line as a string
@@ -236,12 +235,39 @@ namespace ParkEase.Controls
                 }
 
                 // Deletes the selected line
-                function deleteLine(index) {
-                    let line = lines[index];
-                    line.setMap(null); // Removes the selected segment from the map
-                    lines.splice(lines.indexOf(line), 1); // Removes the selected segment from the array
-                    line = null;
-                    window.location.href = ""myapp://updateIndex"";         
+
+                function getLineByCoordinates(lat1, lng1, lat2, lng2) {
+                    for (let i = 0; i < lines.length; i++) {
+                        let path = lines[i].getPath();
+                        if (path.getLength() >= 2) {
+                            let startPoint = path.getAt(0);
+                            let endPoint = path.getAt(1);
+                            
+                            // Check if the line matches the given coordinates
+                            if ((isCloseEnough(startPoint.lat(), lat1) && isCloseEnough(startPoint.lng(), lng1) &&
+                                 isCloseEnough(endPoint.lat(), lat2) && isCloseEnough(endPoint.lng(), lng2)) ||
+                                (isCloseEnough(startPoint.lat(), lat2) && isCloseEnough(startPoint.lng(), lng2) &&
+                                 isCloseEnough(endPoint.lat(), lat1) && isCloseEnough(endPoint.lng(), lng1))) {
+                                return lines[i];
+                            }
+                        }
+                    }
+                    return null; // Return null if no line is found
+                }
+                
+                // Helper function to compare floating point numbers
+                function isCloseEnough(a, b, epsilon = 0.000001) {
+                    return Math.abs(a - b) < epsilon;
+                }
+
+                 // Deletes the selected line
+                function deleteLine(latitude1, longitude1, latitude2, longitude2) {
+                    let line = getLineByCoordinates(latitude1, longitude1, latitude2, longitude2);
+                    if (line != null) {
+                        line.setMap(null); // Removes the selected segment from the map
+                        lines.splice(lines.indexOf(line), 1); // Removes the selected segment from the array
+                        line = null;
+                    }
                 }
 
                 // Helper function to compare floating point numbers
@@ -384,23 +410,6 @@ namespace ParkEase.Controls
 
                 HandleLineClicked(info); // Call your C# function to handle the line click
             }
-
-            if (e.Url.StartsWith("myapp://updateIndex"))
-            {
-                e.Cancel = true;
-                var result = await this.EvaluateJavaScriptAsync("getLines()");
-                if (result != null)
-                {
-                    result = result.Replace("\\\"", "\"");
-                    // Deserialize the JSON string into a list of Line objects
-                    List<MapLine> lines = JsonConvert.DeserializeObject<List<MapLine>>(result);
-                    foreach (MapLine line in lines)
-                    {
-                        MapLine mapLine = Lines.First(mapline => mapline.Equals(line));
-                        mapLine.Index = line.Index;
-                    }
-                }
-            }
         }
         private static void RadiusPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
@@ -468,7 +477,8 @@ namespace ParkEase.Controls
                 {
                     foreach(MapLine mapLine in e.OldItems)
                     {
-                        string jsCommand = $"deleteLine({mapLine.Index})";
+                        //string jsCommand = $"deleteLine({mapLine.Index})";
+                        string jsCommand = $"deleteLine({mapLine.Points[0].Lat}, {mapLine.Points[0].Lng}, {mapLine.Points[1].Lat}, {mapLine.Points[1].Lng})";
                         await currentInstance.EvaluateJavaScriptAsync(jsCommand);
 
                         if (currentInstance.SelectedLine!= null && currentInstance.SelectedLine.Equals(mapLine))
