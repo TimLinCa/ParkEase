@@ -19,7 +19,6 @@
         <SearchBar
             Grid.Row="0"
             Placeholder="Enter address"
-            SearchCommand="{Binding SearchCommand}"
             Text="{Binding SearchText}" />
 
         <controls:GMapMobile

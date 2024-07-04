@@ -168,6 +168,11 @@ namespace ParkEase.ViewModel
             });
         });
 
+        public ICommand SearchCommand => new RelayCommand(async () =>
+        {
+
+        });
+
 
         // Fetches parking data from the database and displays it on the map
         private async Task LoadMapDataAsync()
