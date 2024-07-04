@@ -21,6 +21,7 @@ using System.Windows.Input;
 using Microsoft.Maui.Dispatching;
 using System.Linq;
 using System.Net;
+using ParkEase.Messages;
 
 namespace ParkEase.ViewModel
 {
@@ -31,6 +32,8 @@ namespace ParkEase.ViewModel
         private string availableSpots;
         private bool isMapLoaded = false;
         private List<PublicStatus> publicStatuses;
+
+
 
         [ObservableProperty]
         private ObservableCollection<MapLine> mapLines;
@@ -68,18 +71,25 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string searchText;
 
+        [ObservableProperty]
+        private bool isSearchInProgress;
+
+        [ObservableProperty]
+        private Location centerLocation;
+
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
+        private readonly IGeocodingService geocodingService;
 
         private CancellationTokenSource cts;
         //private readonly object lockObj = new object();
         //private bool stopping = false;
-        public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
+        public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, IGeocodingService geocodingService)
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
-
+            this.geocodingService = geocodingService;
 
             // Subscribe to property changed events
             PropertyChanged += (sender, args) =>
@@ -92,9 +102,33 @@ namespace ParkEase.ViewModel
                 }
             };
 
-
-
         }
+
+        public ICommand BackToCurrentLocationCommand => new RelayCommand(async () =>
+        {
+            IsSearchInProgress = false;
+            CenterLocation = new Location { Latitude = LocationLatitude, Longitude = LocationLongitude };
+        });
+
+        public ICommand SearchCommand => new RelayCommand(async () =>
+        {
+            if (!string.IsNullOrEmpty(SearchText))
+            {
+                IsSearchInProgress = true;
+                var location = await geocodingService.GetLocationAsync(SearchText);
+                if (location != null)
+                {
+                    CenterLocation = location;
+                    var locationtemp = DataService.GetLocation();
+                    // Optionally, refresh the map or do other necessary updates here
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Location not found", "Unable to find the specified location.");
+                }
+
+            }
+        });
 
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
@@ -126,6 +160,7 @@ namespace ParkEase.ViewModel
                         await ApplyFilters();
 
                         await Task.Delay(1000, token);
+
                     }
                     catch (Exception ex)
                     {
@@ -145,7 +180,7 @@ namespace ParkEase.ViewModel
 
         partial void OnSelectedMapLineChanged(MapLine? value)
         {
-            if(value == null)
+            if (value == null)
             {
                 dialogService.DismissBottomSheetAsync();
                 return;
@@ -348,6 +383,8 @@ namespace ParkEase.ViewModel
         {
             try
             {
+                double lat = IsSearchInProgress ? CenterLocation.Latitude : LocationLatitude;
+                double lng = IsSearchInProgress ? CenterLocation.Longitude : LocationLongitude;
                 if (Radius == 0) return;
                 publicStatuses = await mongoDBService.GetData<PublicStatus>(CollectionName.PublicStatus); // Get the statuses of the parking spots 
                 List<MapLine> filteredLines = new List<MapLine>();
@@ -355,7 +392,7 @@ namespace ParkEase.ViewModel
 
                 if (ShowPublicParking)
                 {
-                    filteredLines = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, Radius)).ToList();
+                    filteredLines = dbMapLines.Where(line => isPointInCircle(line.Points, lat, lng, Radius)).ToList();
 
                     foreach (var pd in filteredLines)
                     {
@@ -427,7 +464,7 @@ namespace ParkEase.ViewModel
 
                 if (ShowPrivateParking)
                 {
-                    filteredPrivateParkings = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, LocationLatitude, LocationLongitude, Radius)).ToList();
+                    filteredPrivateParkings = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, lat, lng, Radius)).ToList();
                 }
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {

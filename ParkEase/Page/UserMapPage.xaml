@@ -9,7 +9,6 @@
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:UserMapViewModel">
 
-
     <ContentPage.Behaviors>
         <toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
         <toolkit:EventToCommandBehavior Command="{Binding UnLoadedCommand}" EventName="Unloaded" />
@@ -25,21 +24,25 @@
         <SearchBar
             Grid.Row="0"
             Placeholder="Enter address"
+            SearchCommand="{Binding SearchCommand}"
             Text="{Binding SearchText}" />
 
         <controls:GMapMobile
             Grid.Row="1"
+            IsSearchInProgress="{Binding IsSearchInProgress}"
             Lines="{Binding MapLines}"
             LocationLat="{Binding LocationLatitude}"
             LocationLng="{Binding LocationLongitude}"
             MarkerLatitude="{Binding MarkerLatitude}"
             MarkerLongitude="{Binding MarkerLongitude}"
             Radius="{Binding Radius}"
+            CenterLocation="{Binding CenterLocation}"
             SelectedLine="{Binding SelectedMapLine}">
             <controls:GMapMobile.Behaviors>
                 <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
             </controls:GMapMobile.Behaviors>
         </controls:GMapMobile>
+
 
         <Grid
             Grid.Row="2"
