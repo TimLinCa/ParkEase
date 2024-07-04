@@ -7,6 +7,7 @@ using ParkEase.ViewModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace ParkEase.Controls
@@ -157,6 +158,7 @@ namespace ParkEase.Controls
                     lines = [];
                 }
 
+
                 // GPS marker for the user
                 function addUserMarker(lat, lng) {
                     if (userMarker) {
@@ -214,7 +216,7 @@ namespace ParkEase.Controls
 
                         line.setMap(map);
                         lines.push(line);
-                    
+                        window.location.href = ""myapp://updateIndex"";
                 }
 
                 // Returns the path of the line as a string
@@ -234,12 +236,17 @@ namespace ParkEase.Controls
                 }
 
                 // Deletes the selected line
-                function deleteLine() {
-                    if (selectedLine != null) {
-                        selectedLine.setMap(null); // Removes the selected segment from the map
-                        lines.splice(lines.indexOf(selectedLine), 1); // Removes the selected segment from the array
-                        selectedLine = null; // Reset selectedLine
-                    }
+                function deleteLine(index) {
+                    let line = lines[index];
+                    line.setMap(null); // Removes the selected segment from the map
+                    lines.splice(lines.indexOf(line), 1); // Removes the selected segment from the array
+                    line = null;
+                    window.location.href = ""myapp://updateIndex"";         
+                }
+
+                // Helper function to compare floating point numbers
+                function isCloseEnough(a, b, epsilon = 0.000001) {
+                    return Math.abs(a - b) < epsilon;
                 }
 
                 // Returns the list of drawn lines as a JSON string
@@ -252,7 +259,7 @@ namespace ParkEase.Controls
                               let point = path.getAt(j);
                               lineData.push({ Lat: point.lat(), Lng: point.lng() });
                           }
-                          result.push({ Index: i+1, Points: lineData });
+                          result.push({ Index: i, Points: lineData });
                       }
                       return JSON.stringify(result);
                 }
@@ -353,7 +360,7 @@ namespace ParkEase.Controls
                 });
             });
 
-            // Subscribe to MessagingCenter messages
+            // Subscribe to MessagingCenter messages(main thread)
             MessagingCenter.Subscribe<UserMapViewModel, (double lat, double lng, string title)>(this, "AddMarker", async (sender, args) =>
             {
                 await AddMarkerAsync(args.lat, args.lng, args.title);
@@ -376,6 +383,23 @@ namespace ParkEase.Controls
                 info = System.Net.WebUtility.UrlDecode(info);
 
                 HandleLineClicked(info); // Call your C# function to handle the line click
+            }
+
+            if (e.Url.StartsWith("myapp://updateIndex"))
+            {
+                e.Cancel = true;
+                var result = await this.EvaluateJavaScriptAsync("getLines()");
+                if (result != null)
+                {
+                    result = result.Replace("\\\"", "\"");
+                    // Deserialize the JSON string into a list of Line objects
+                    List<MapLine> lines = JsonConvert.DeserializeObject<List<MapLine>>(result);
+                    foreach (MapLine line in lines)
+                    {
+                        MapLine mapLine = Lines.First(mapline => mapline.Equals(line));
+                        mapLine.Index = line.Index;
+                    }
+                }
             }
         }
         private static void RadiusPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -406,6 +430,8 @@ namespace ParkEase.Controls
                 string jsCommand = $"drawLine({line.Points[0].Lat}, {line.Points[0].Lng}, {line.Points[1].Lat}, {line.Points[1].Lng},\"{line.Color}\");";
                 view.EvaluateJavaScriptAsync(jsCommand);
             }
+
+            view.SelectedLine = null;
         }
 
         private static void OnMarkerLatitudeChanged(BindableObject bindable, object oldValue, object newValue)
@@ -438,11 +464,20 @@ namespace ParkEase.Controls
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
             {
-                if (currentInstance.SelectedLine != null)
+                if (e.OldItems != null)
                 {
+                    foreach(MapLine mapLine in e.OldItems)
+                    {
+                        string jsCommand = $"deleteLine({mapLine.Index})";
+                        await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+
+                        if (currentInstance.SelectedLine!= null && currentInstance.SelectedLine.Equals(mapLine))
+                        {
+                            currentInstance.SelectedLine = null;
+                        }
+                    }
                     //Remove the line from map
-                    await currentInstance.EvaluateJavaScriptAsync("deleteLine()");
-                    currentInstance.SelectedLine = null;
+                    
                 }
             }
             else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
@@ -557,13 +592,6 @@ namespace ParkEase.Controls
 
                 // Find the line that matches the selected line based on the points
                 SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
-
-                // Notify the view model about the line click
-                var viewModel = BindingContext as UserMapViewModel;
-                if (viewModel != null && SelectedLine != null)
-                {
-                    await viewModel.OnLineClickedAsync(SelectedLine);
-                }
             }
         }
     }

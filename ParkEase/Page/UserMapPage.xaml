@@ -9,6 +9,12 @@
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:UserMapViewModel">
 
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
+        <toolkit:EventToCommandBehavior Command="{Binding UnLoadedCommand}" EventName="Unloaded" />
+    </ContentPage.Behaviors>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />

@@ -415,6 +415,7 @@ namespace ParkEase.Controls
     public class MapLine : IEquatable<MapLine>
     {
         public int Index { get; set; }
+        public string Id { get; set; }
         public List<MapPoint> Points { get; set; }
         public string Color { get; set; }
 
