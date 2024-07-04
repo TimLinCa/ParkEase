@@ -12,5 +12,6 @@ namespace ParkEase.Core.Data
         public int Index { get; set; }
         public bool Status { get; set; }
         public string Floor { get; set; }
+        public int LotId { get; set; }
     }
 }

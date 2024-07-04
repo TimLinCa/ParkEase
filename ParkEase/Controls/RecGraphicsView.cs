@@ -221,13 +221,9 @@ namespace ParkEase.Controls
             //Triger reRender
             if (sender is ObservableCollection<Rectangle> listRectangle && listRectangle.Count >= 0)
             {
-                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                if (DeviceInfo.Platform == DevicePlatform.WinUI)
                 {
-                    
-                }
-                else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
-                {
-                        
+                    reRender(_currentInstance);
                 }
             }
         }
