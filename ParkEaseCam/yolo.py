@@ -229,9 +229,9 @@ def start_detect_cam_public_db_test(cam_index,area_config,cam_config):
             cy=int(y1+y2)//2
 
             c=class_list[d]
-            # if 'car' in c or 'truck' in c or 'bus' in c:
-            #     carPosition.append((cx,cy))
-            carPosition.append((cx,cy))
+            if 'car' in c or 'truck' in c or 'bus' in c or 'cell phone' in c:
+                carPosition.append((cx,cy))
+            # carPosition.append((cx,cy))
 
         #drawing polylines
         for i,polyline in enumerate(polylines):
@@ -317,9 +317,9 @@ def start_detect_cam_private_db_test(cam_index,area_config,cam_config,floor):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            # if 'car' in c or 'truck' in c or 'bus' in c:
-            #     carPosition.append((cx,cy))
-            carPosition.append((cx,cy))
+            if 'car' in c or 'truck' in c or 'bus' in c or 'cell phone' in c:
+                carPosition.append((cx,cy))
+
 
         #drawing polylines
         for i,polyline in enumerate(polylines):
@@ -341,7 +341,7 @@ def start_detect_cam_private_db_test(cam_index,area_config,cam_config,floor):
                     "areaId":areaId,
                     "index" : i,
                     "camName": cam_name,
-                    "lotId" : lotIds[str(i+1)],
+                    "lotId" : int(lotIds[str(i+1)]),
                     "status" : carInside,
                     "floor" : floor,
                     "timestamp": datetime.now()

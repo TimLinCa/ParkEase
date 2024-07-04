@@ -234,7 +234,7 @@
             <Slider
                 x:Name="RectWidth"
                 Margin="0,0,0,15"
-                Maximum="250"
+                Maximum="600"
                 Minimum="10"
                 Value="{Binding RectWidth}" />
 
@@ -247,7 +247,7 @@
                 VerticalOptions="Center" />
             <Slider
                 x:Name="RectHeight"
-                Maximum="250"
+                Maximum="500"
                 Minimum="10"
                 Value="{Binding RectHeight}" />
 

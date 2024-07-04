@@ -253,7 +253,7 @@ namespace ParkEase.ViewModel
                 // Filter by selectedFloorName and Create a dictionary for quick lookup of statuses by index
                 var matchingStatus = privateStatusData
                     .Where(item => item.Floor == SelectedFloorName)
-                    .ToDictionary(item => item.Index, item => item.Status);
+                    .ToDictionary(item => item.LotId, item => item.Status);
 
                 // Fetch image data
                 if(ImgSourceData==null)
