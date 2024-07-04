@@ -69,7 +69,6 @@ namespace ParkEase.ViewModel
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
-        private readonly IGeocodingService geocodingService;
 
         private CancellationTokenSource cts;
         //private readonly object lockObj = new object();
@@ -78,7 +77,7 @@ namespace ParkEase.ViewModel
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
-            this.geocodingService = geocodingService;
+
 
             // Subscribe to property changed events
             PropertyChanged += (sender, args) =>
@@ -169,22 +168,6 @@ namespace ParkEase.ViewModel
             });
         });
 
-        public ICommand SearchCommand => new RelayCommand(async () =>
-        {
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                var location = await geocodingService.GetLocationAsync(SearchText);
-                if (location != null)
-                {
-                    LocationLatitude = location.Value.Latitude;
-                    LocationLongitude = location.Value.Longitude;
-                }
-                else
-                {
-                    await dialogService.ShowAlertAsync("Location not found", "Unable to find the specified location.");
-                }
-            }
-        });
 
         // Fetches parking data from the database and displays it on the map
         private async Task LoadMapDataAsync()
