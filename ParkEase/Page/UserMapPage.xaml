@@ -11,12 +11,19 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition />
             <RowDefinition Height="0.1*" />
-            <RowDefinition Height="0.1*" />
+            <RowDefinition Height="0.05*" />
         </Grid.RowDefinitions>
-        <controls:GMapMobile
+        <SearchBar
             Grid.Row="0"
+            Placeholder="Enter address"
+            SearchCommand="{Binding SearchCommand}"
+            Text="{Binding SearchText}" />
+
+        <controls:GMapMobile
+            Grid.Row="1"
             Lines="{Binding MapLines}"
             LocationLat="{Binding LocationLatitude}"
             LocationLng="{Binding LocationLongitude}"
@@ -30,7 +37,7 @@
         </controls:GMapMobile>
 
         <Grid
-            Grid.Row="1"
+            Grid.Row="2"
             HorizontalOptions="Center"
             VerticalOptions="Center">
             <StackLayout
@@ -75,7 +82,7 @@
         </Grid>
 
         <StackLayout
-            Grid.Row="2"
+            Grid.Row="3"
             HorizontalOptions="Center"
             Orientation="Horizontal"
             VerticalOptions="End">

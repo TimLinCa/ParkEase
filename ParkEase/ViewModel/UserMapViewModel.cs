@@ -63,9 +63,14 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private bool showAvailableParking;
 
+        [ObservableProperty]
+        private string searchText;
+
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
+        private readonly IGeocodingService geocodingService;
+
         private CancellationTokenSource cts;
         //private readonly object lockObj = new object();
         //private bool stopping = false;
@@ -73,6 +78,7 @@ namespace ParkEase.ViewModel
         {
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
+            this.geocodingService = geocodingService;
 
             // Subscribe to property changed events
             PropertyChanged += (sender, args) =>
@@ -161,6 +167,23 @@ namespace ParkEase.ViewModel
                 await LoadMapDataAsync();
                 await LoadPrivateParkingDataAsync();
             });
+        });
+
+        public ICommand SearchCommand => new RelayCommand(async () =>
+        {
+            if (!string.IsNullOrEmpty(SearchText))
+            {
+                var location = await geocodingService.GetLocationAsync(SearchText);
+                if (location != null)
+                {
+                    LocationLatitude = location.Value.Latitude;
+                    LocationLongitude = location.Value.Longitude;
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Location not found", "Unable to find the specified location.");
+                }
+            }
         });
 
         // Fetches parking data from the database and displays it on the map
@@ -303,7 +326,7 @@ namespace ParkEase.ViewModel
             // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out)).ToList();
             Radius = radius_out;
-            MapLines = new ObservableCollection<MapLine>(linesInRange);
+            
 
             // Clear existing markers
             MessagingCenter.Send(this, "ClearMarkers");
