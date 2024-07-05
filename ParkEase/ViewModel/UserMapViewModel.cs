@@ -98,7 +98,7 @@ namespace ParkEase.ViewModel
                     args.PropertyName == nameof(ShowPrivateParking) ||
                     args.PropertyName == nameof(ShowAvailableParking))
                 {
-                    ApplyFilters();
+                    //ApplyFilters();
                 }
             };
 
@@ -394,7 +394,7 @@ namespace ParkEase.ViewModel
 
                 if (ShowPublicParking)
                 {
-                    filteredLines = dbMapLines.Where(line => isPointInCircle(line.Points, lat, lng, Radius)).ToList();
+                    filteredLines = dbMapLines.Where(line => isPointInCircle(line.Points, lat, lng, Radius)).Select(line=> (MapLine)line.Clone()).ToList();
 
                     foreach (var pd in filteredLines)
                     {

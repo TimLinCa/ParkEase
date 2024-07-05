@@ -412,7 +412,7 @@ namespace ParkEase.Controls
         }
     }
 
-    public class MapLine : IEquatable<MapLine>
+    public class MapLine : IEquatable<MapLine>,ICloneable
     {
         public string Id { get; set; }
         public List<MapPoint> Points { get; set; }
@@ -436,5 +436,10 @@ namespace ParkEase.Controls
             }
             return isEquals;
         }
+
+        public object Clone()
+		{
+			return new MapLine(new List<MapPoint>(Points), Color) { Id=this.Id};
+		}
     }
 }
