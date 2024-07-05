@@ -132,6 +132,7 @@ namespace ParkEase.Controls
                     let currentLat;
                     let currentLng;
                     let markers = []; // Track all markers
+                    let previousSelectedMarker = null;
 
                 // Initializes the Google Map 
                 function initMap() {
@@ -156,7 +157,46 @@ namespace ParkEase.Controls
                             scaledSize: new google.maps.Size(24, 24)
                         }
                     });
-                    markers.push(marker); // Add marker to the list
+
+                    // Store the original color in the marker object
+                    marker.originalIcon = icon;  
+
+                    // Add marker to the list
+                    markers.push(marker); 
+
+                    // Add a click event listener to the marker 
+                    marker.addListener('click', function() {
+                        // Reset the color of the previously selected marker, if any
+                        if (previousSelectedMarker) {
+                            previousSelectedMarker.setIcon({
+                                url: previousSelectedMarker.originalIcon,
+                                scaledSize: new google.maps.Size(24, 24)
+                            });
+                        }
+
+                        // Reset the color of the previously selected line, if any
+                            if (selectedLine) {
+                                selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
+                                selectedLine = null;
+                            }
+
+                        // Change the marker color to yellow with black fill
+                            marker.setIcon({
+                                url: 'data:image/svg+xml;base64,' + btoa(`
+                                    <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                                        <circle cx='12' cy='12' r='12' fill='yellow'/>
+                                        <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='black'>P</text>
+                                    </svg>
+                                `),
+                                scaledSize: new google.maps.Size(24, 24)
+                            });
+
+                        // Update the previous selected marker
+                        previousSelectedMarker = marker;
+
+                        window.location.href = ""myapp://privateparkingclicked?lat="" + lat + ""&lng="" + lng + ""&title="" + title;
+                    });
+
                 }  
 
                 // Clear all markers
@@ -221,6 +261,16 @@ namespace ParkEase.Controls
                             if (selectedLine != null) {
                                 selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
                             }
+
+                            // Reset the color of the previously selected marker, if any
+                            if (previousSelectedMarker) {
+                                previousSelectedMarker.setIcon({
+                                    url: previousSelectedMarker.originalIcon,
+                                    scaledSize: new google.maps.Size(24, 24)
+                                });
+                                previousSelectedMarker = null;
+                            }
+
                             selectedLine = line; // Set the clicked line as the selected line
                             selectedLine.setOptions({ strokeColor: ""yellow"" });
 
@@ -407,9 +457,9 @@ namespace ParkEase.Controls
             });
 
             // Subscribe to MessagingCenter messages(main thread)
-            MessagingCenter.Subscribe<UserMapViewModel, (double lat, double lng, string title)>(this, "AddMarker", async (sender, args) =>
+            MessagingCenter.Subscribe<UserMapViewModel, (double lat, double lng, string title, string color)>(this, "AddMarker", async (sender, args) =>
             {
-                await AddMarkerAsync(args.lat, args.lng, args.title);
+                await AddMarkerAsync(args.lat, args.lng, args.title, args.color);
             });
 
             // Subscribe to clear markers message
@@ -430,7 +480,38 @@ namespace ParkEase.Controls
 
                 HandleLineClicked(info); // Call your C# function to handle the line click
             }
+            else if (e.Url.StartsWith("myapp://privateparkingclicked"))
+            {
+                e.Cancel = true; // Cancel the navigation
+
+                var query = new Uri(e.Url).Query;
+                var queryParameters = System.Web.HttpUtility.ParseQueryString(query);
+
+                var lat = double.Parse(queryParameters["lat"]);
+                var lng = double.Parse(queryParameters["lng"]);
+                var title = queryParameters["title"];
+
+                HandlePrivateParkingClicked(lat, lng, title);
+            }
         }
+
+        private async void HandlePrivateParkingClicked(double lat, double lng, string title)
+        {
+            var viewModel = BindingContext as UserMapViewModel;
+            if (viewModel != null)
+            {
+                var privateParking = await viewModel.GetPrivateParkingAsync(lat, lng);
+                if (privateParking != null)
+                {
+                    await viewModel.ShowPrivateParkingBottomSheet(privateParking);
+                }
+                else
+                {
+                    await viewModel.ShowPrivateParkingBottomSheet(null); // Show default message or handle the error
+                }
+            }
+        }
+
         private static void RadiusPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not GMapMobile view)
@@ -495,10 +576,10 @@ namespace ParkEase.Controls
 
         private async void UpdateMarker()
         {
-            System.Diagnostics.Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
+            Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
             if (MarkerLatitude != 0 && MarkerLongitude != 0)
             {
-                await AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
+                await AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking", "");
             }
         }
 
@@ -572,20 +653,20 @@ namespace ParkEase.Controls
 
         }
 
-        public async Task AddMarkerAsync(double lat, double lng, string title)
+        public async Task AddMarkerAsync(double lat, double lng, string title, string color)
         {
-            // SVG data URL for the circle "P" logo
-            var markerIconPath = "data:image/svg+xml;base64," + Convert.ToBase64String(Encoding.UTF8.GetBytes(@"
-            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
-              <circle cx='12' cy='12' r='10' fill='#512BD4'/>
-              <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
-             </svg>
-        "));
+            // SVG data URL for the circle "P" logo with color
+            var markerIconPath = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes($@"
+        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+          <circle cx='12' cy='12' r='10' fill='{color}'/>
+          <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
+         </svg>
+    "))}";
 
             // JavaScript command to add the marker with the specified icon
             string jsCommand = $@"
-            addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
-        ";
+        addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
+    ";
             System.Diagnostics.Debug.WriteLine($"Adding marker: {lat}, {lng}, {title}");
 
             await EvaluateJavaScriptAsync(jsCommand);
