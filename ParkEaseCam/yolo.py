@@ -65,7 +65,7 @@ def parkingLot_detect_cam(cam_index,config_data):
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
 
-            if 'car' in c or 'truck' in c or 'bus' in c:
+            if 'car' in c or 'truck' in c or 'bus' in c or 'cell phone' in c:
                 carPosition.append((cx,cy))
 
         #drawing polylines
@@ -420,7 +420,7 @@ def start_detect_cam_public(cam_index,area_config,cam_config):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            if 'car' in c or 'truck' in c or 'bus' in c:
+            if 'car' in c or 'truck' in c or 'bus' in c or 'cell phone' in c:
                 carPosition.append((cx,cy))
 
         #drawing polylines
@@ -500,7 +500,7 @@ def start_detect_cam_private(cam_index,area_config,cam_config,floor):
             c=class_list[d]
             cx=int(x1+x2)//2
             cy=int(y1+y2)//2
-            if 'car' in c or 'truck' in c or 'bus' in c:
+            if 'car' in c or 'truck' in c or 'bus' in c or 'cell phone' in c :
                 carPosition.append((cx,cy))
 
         #drawing polylines
