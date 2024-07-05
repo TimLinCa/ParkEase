@@ -386,7 +386,9 @@ namespace ParkEase.ViewModel
                 double lat = IsSearchInProgress ? CenterLocation.Latitude : LocationLatitude;
                 double lng = IsSearchInProgress ? CenterLocation.Longitude : LocationLongitude;
                 if (Radius == 0) return;
+
                 publicStatuses = await mongoDBService.GetData<PublicStatus>(CollectionName.PublicStatus); // Get the statuses of the parking spots 
+                var privateStatuses = await mongoDBService.GetData<PrivateStatus>("PrivateStatus"); // Get the statuses of private parking spots
                 List<MapLine> filteredLines = new List<MapLine>();
                 List<PrivateParking> filteredPrivateParkings = new List<PrivateParking>();
 
@@ -465,19 +467,24 @@ namespace ParkEase.ViewModel
                 if (ShowPrivateParking)
                 {
                     filteredPrivateParkings = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, lat, lng, Radius)).ToList();
+
+                    foreach (var privateParking in filteredPrivateParkings)
+                    {
+                        var privateStatus = privateStatuses.FirstOrDefault(ps => ps.AreaId == privateParking.Id);
+                        string color = privateStatus != null && privateStatus.Status ? "red" : "green";
+
+                        System.Diagnostics.Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
+                        await MainThread.InvokeOnMainThreadAsync(() =>
+                        {
+                            MessagingCenter.Send(this, "AddMarker", (privateParking.Latitude, privateParking.Longitude, "Private Parking", color));
+                        });
+                    }
                 }
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                else
                 {
-                    MessagingCenter.Send(this, "ClearMarkers");
-                });
-
-
-                foreach (var privateParking in filteredPrivateParkings)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {
-                        MessagingCenter.Send(this, "AddMarker", (privateParking.Latitude, privateParking.Longitude, "Private Parking"));
+                        MessagingCenter.Send(this, "ClearMarkers");
                     });
                 }
             }
