@@ -407,9 +407,9 @@ namespace ParkEase.Controls
             });
 
             // Subscribe to MessagingCenter messages(main thread)
-            MessagingCenter.Subscribe<UserMapViewModel, (double lat, double lng, string title, string color)>(this, "AddMarker", async (sender, args) =>
+            MessagingCenter.Subscribe<UserMapViewModel, (double lat, double lng, string title)>(this, "AddMarker", async (sender, args) =>
             {
-                await AddMarkerAsync(args.lat, args.lng, args.title, args.color);
+                await AddMarkerAsync(args.lat, args.lng, args.title);
             });
 
             // Subscribe to clear markers message
@@ -495,10 +495,10 @@ namespace ParkEase.Controls
 
         private async void UpdateMarker()
         {
-            Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
+            System.Diagnostics.Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
             if (MarkerLatitude != 0 && MarkerLongitude != 0)
             {
-                await AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking", "");
+                await AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking");
             }
         }
 
@@ -572,20 +572,20 @@ namespace ParkEase.Controls
 
         }
 
-        public async Task AddMarkerAsync(double lat, double lng, string title, string color)
+        public async Task AddMarkerAsync(double lat, double lng, string title)
         {
-            // SVG data URL for the circle "P" logo with color
-            var markerIconPath = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes($@"
-        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
-          <circle cx='12' cy='12' r='10' fill='{color}'/>
-          <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
-         </svg>
-    "))}";
+            // SVG data URL for the circle "P" logo
+            var markerIconPath = "data:image/svg+xml;base64," + Convert.ToBase64String(Encoding.UTF8.GetBytes(@"
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+              <circle cx='12' cy='12' r='10' fill='#512BD4'/>
+              <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
+             </svg>
+        "));
 
             // JavaScript command to add the marker with the specified icon
             string jsCommand = $@"
-        addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
-    ";
+            addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
+        ";
             System.Diagnostics.Debug.WriteLine($"Adding marker: {lat}, {lng}, {title}");
 
             await EvaluateJavaScriptAsync(jsCommand);
