@@ -132,6 +132,7 @@ namespace ParkEase.Controls
                     let currentLat;
                     let currentLng;
                     let markers = []; // Track all markers
+                    let previousSelectedMarker = null;
 
                 // Initializes the Google Map 
                 function initMap() {
@@ -156,7 +157,44 @@ namespace ParkEase.Controls
                             scaledSize: new google.maps.Size(24, 24)
                         }
                     });
-                    markers.push(marker); // Add marker to the list
+
+                    // Store the original color in the marker object
+                    marker.originalIcon = icon;  
+
+                    // Add marker to the list
+                    markers.push(marker); 
+
+                    // Add a click event listener to the marker 
+                    marker.addListener('click', function() {
+                        // Reset the color of the previously selected marker, if any
+                        if (previousSelectedMarker) {
+                            previousSelectedMarker.setIcon({
+                                url: previousSelectedMarker.originalIcon,
+                                scaledSize: new google.maps.Size(24, 24)
+                            });
+                        }
+
+                        // Reset the color of the previously selected line, if any
+                            if (selectedLine) {
+                                selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
+                                selectedLine = null;
+                            }
+
+                        // Change the marker color to yellow with black fill
+                            marker.setIcon({
+                                url: 'data:image/svg+xml;base64,' + btoa(`
+                                    <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                                        <circle cx='12' cy='12' r='12' fill='yellow'/>
+                                        <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='black'>P</text>
+                                    </svg>
+                                `),
+                                scaledSize: new google.maps.Size(24, 24)
+                            });
+
+                        // Update the previous selected marker
+                        previousSelectedMarker = marker;
+                    });
+
                 }  
 
                 // Clear all markers
@@ -221,6 +259,16 @@ namespace ParkEase.Controls
                             if (selectedLine != null) {
                                 selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
                             }
+
+                            // Reset the color of the previously selected marker, if any
+                            if (previousSelectedMarker) {
+                                previousSelectedMarker.setIcon({
+                                    url: previousSelectedMarker.originalIcon,
+                                    scaledSize: new google.maps.Size(24, 24)
+                                });
+                                previousSelectedMarker = null;
+                            }
+
                             selectedLine = line; // Set the clicked line as the selected line
                             selectedLine.setOptions({ strokeColor: ""yellow"" });
 
