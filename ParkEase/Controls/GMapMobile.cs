@@ -193,6 +193,8 @@ namespace ParkEase.Controls
 
                         // Update the previous selected marker
                         previousSelectedMarker = marker;
+
+                        window.location.href = ""myapp://privateparkingclicked?lat="" + lat + ""&lng="" + lng + ""&title="" + title;
                     });
 
                 }  
@@ -478,7 +480,38 @@ namespace ParkEase.Controls
 
                 HandleLineClicked(info); // Call your C# function to handle the line click
             }
+            else if (e.Url.StartsWith("myapp://privateparkingclicked"))
+            {
+                e.Cancel = true; // Cancel the navigation
+
+                var query = new Uri(e.Url).Query;
+                var queryParameters = System.Web.HttpUtility.ParseQueryString(query);
+
+                var lat = double.Parse(queryParameters["lat"]);
+                var lng = double.Parse(queryParameters["lng"]);
+                var title = queryParameters["title"];
+
+                HandlePrivateParkingClicked(lat, lng, title);
+            }
         }
+
+        private async void HandlePrivateParkingClicked(double lat, double lng, string title)
+        {
+            var viewModel = BindingContext as UserMapViewModel;
+            if (viewModel != null)
+            {
+                var privateParking = await viewModel.GetPrivateParkingAsync(lat, lng);
+                if (privateParking != null)
+                {
+                    await viewModel.ShowPrivateParkingBottomSheet(privateParking);
+                }
+                else
+                {
+                    await viewModel.ShowPrivateParkingBottomSheet(null); // Show default message or handle the error
+                }
+            }
+        }
+
         private static void RadiusPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not GMapMobile view)

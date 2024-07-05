@@ -512,5 +512,60 @@ namespace ParkEase.ViewModel
             });
         }
 
+        public async Task ShowPrivateParkingBottomSheet(PrivateParking privateParking)
+        {
+            if (privateParking == null)
+            {
+                await dialogService.ShowBottomSheet(
+                    "No Data",
+                    "N/A",
+                    "N/A",
+                    "N/A",
+                    false,
+                    "0",
+                    "0"
+                );
+                return;
+            }
+
+            var availableSpots = await GetAvailablePrivateSpots(privateParking);
+
+            await dialogService.ShowBottomSheet(
+                privateParking.Address,
+                $"{privateParking.ParkingInfo.Fee:C}/hour",
+                $"{privateParking.ParkingInfo.LimitedHour} hours",
+                $"{availableSpots} Available Spots",
+                true,
+                privateParking.Latitude.ToString(),
+                privateParking.Longitude.ToString()
+            );
+        }
+
+        public async Task<PrivateParking> GetPrivateParkingAsync(double lat, double lng)
+        {
+            try
+            {
+                var filter = Builders<PrivateParking>.Filter.And(
+                    Builders<PrivateParking>.Filter.Eq(pp => pp.Latitude, lat),
+                    Builders<PrivateParking>.Filter.Eq(pp => pp.Longitude, lng)
+                );
+
+                var privateParkingList = await mongoDBService.GetDataFilter<PrivateParking>("PrivateParking", filter);
+                return privateParkingList?.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error retrieving private parking data: {ex.Message}");
+                return null;
+            }
+        }
+
+        private async Task<int> GetAvailablePrivateSpots(PrivateParking privateParking)
+        {
+            // Logic to calculate available spots
+            var statuses = await mongoDBService.GetData<PrivateStatus>("PrivateStatus");
+            var availableSpots = statuses.Count(status => status.AreaId == privateParking.Id && !status.Status);
+            return availableSpots;
+        }
     }
 }
