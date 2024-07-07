@@ -194,6 +194,11 @@ namespace ParkEase.Controls
                         // Update the previous selected marker
                         previousSelectedMarker = marker;
 
+                         // Store the selected marker's coordinates
+                        selectedMarkerCoordinates = { lat: lat, lng: lng };
+
+                        selectedLineCoordinates = null; // Clear line coordinates 
+
                         window.location.href = ""myapp://privateparkingclicked?lat="" + lat + ""&lng="" + lng + ""&title="" + title;
                     });
 
@@ -277,6 +282,7 @@ namespace ParkEase.Controls
                             let lineInfo = getLineInfo(line);
                             window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
                             setSelectedLine(lineCoordinates);
+                            selectedMarkerCoordinates = null;
                         });
 
                         line.setMap(map);
@@ -425,9 +431,37 @@ namespace ParkEase.Controls
                     });
                 }
 
+                let selectedMarkerCoordinates = null;
+                
+                function navigateToMarker(lat, lng) {
+                    const request = {
+                        origin: { lat: currentLat, lng: currentLng },
+                        destination: { lat: lat, lng: lng },
+                        travelMode: google.maps.TravelMode.DRIVING
+                    };
+                    directionsService.route(request, function(result, status) {
+                        if (status == 'OK') {
+                            directionsRenderer.setDirections(result);
+                            displayRouteSteps(result);
+                        } else {
+                            alert('Directions request failed: ' + status);
+                        }
+                    });
+                }
+
+
                 function receiveMessage(event) {
-                    if (event.data === 'GetDirections') {
-                        navigateToLine();
+                    switch (event.data) {
+                        case 'GetDirections':
+                            if (selectedMarkerCoordinates) {
+                                navigateToMarker(selectedMarkerCoordinates.lat, selectedMarkerCoordinates.lng);
+                            } else if (selectedLineCoordinates) {
+                                navigateToLine();
+                            }
+                            break;
+                        default:
+                            console.warn('Unknown event data:', event.data);
+                            break;
                     }
                 }
                 

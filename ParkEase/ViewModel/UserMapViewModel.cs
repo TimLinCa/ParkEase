@@ -331,12 +331,13 @@ namespace ParkEase.ViewModel
 				await LoadAvailableSpotsAsync(parkingDataId);
 
 				// Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
-				//await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{AvailableSpots} Available Spots", true, lat, lng);
+				await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
 
-				await MainThread.InvokeOnMainThreadAsync(async () =>
-				{
-					await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
-				});
+				//await MainThread.InvokeOnMainThreadAsync(async () =>
+				//{
+				//	await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
+				//});
+
 			}
 			catch (Exception ex)
 			{
