@@ -20,18 +20,21 @@
 
     <ShellContent
         Title="Public Map"
+        Shell.NavBarIsVisible="False"
         ContentTemplate="{DataTemplate page:MapPage}"
         IsVisible="{Binding MapVisible}"
         Route="MapPage" />
 
     <ShellContent
         Title="Private Map"
+        Shell.NavBarIsVisible="False"
         ContentTemplate="{DataTemplate page:CreateMapPage}"
         IsVisible="{Binding CreateMapVisible}"
         Route="CreateMap" />
 
     <ShellContent
         Title="Analysis"
+        Shell.NavBarIsVisible="False"
         ContentTemplate="{DataTemplate page:AnalysisPage}"
         IsVisible="{Binding AnalysisVisible}"
         Route="AnalysisPage" />

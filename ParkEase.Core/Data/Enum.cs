@@ -13,4 +13,11 @@ namespace ParkEase.Core.Data
         Engineer,
         Developer
     }
+
+
+    public enum AreaType
+    {   
+        Public,
+		Private
+	}   
 }

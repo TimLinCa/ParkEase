@@ -111,7 +111,8 @@ namespace ParkEase.ViewModel
         private async Task RegisterEnvironmentVariable()
         {
             Environment.SetEnvironmentVariable("GoogleAKYKey", await awsService.GetParamenter("/ParkEase/APIKeys/google"));
-        }
+			Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(await awsService.GetParamenter("/ParkEase/APIKeys/Syncfusion"));
+		}
 
         public ICommand SignUpCommand => new RelayCommand(async () =>
         {

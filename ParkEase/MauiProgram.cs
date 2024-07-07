@@ -1,32 +1,25 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Camera.MAUI;
+using CommunityToolkit.Maui;
+using epj.RouteGenerator;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
+using ParkEase.Core.Model;
 using ParkEase.Core.Services;
 using ParkEase.Page;
 using ParkEase.Services;
 using ParkEase.ViewModel;
-using ParkEase.Controls;
-using UraniumUI;
-using epj.RouteGenerator;
-using ParkEase.Core.Model;
-using CommunityToolkit.Maui;
 using Syncfusion.Maui.Core.Hosting;
 using System.Reflection;
-using Microsoft.Extensions.Configuration;
-using Amazon.Runtime;
-using Amazon.SimpleSystemsManagement;
-using Amazon;
 using The49.Maui.BottomSheet;
-
+using UraniumUI;
 using ZXing.Net.Maui.Controls;
-using ZXing;
-using Camera.MAUI;
-using Microsoft.Maui.Devices.Sensors;
-using System.Net.Http.Headers;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace ParkEase
 {
-    [AutoRoutes("Page")]
+	[AutoRoutes("Page")]
     public static class MauiProgram
     {
         public static MauiApp CreateMauiApp()
@@ -44,7 +37,8 @@ namespace ParkEase
             builder.Configuration.AddConfiguration(config);
 
             builder.UseMauiApp<App>()
-                .UseUraniumUI()
+				.UseSkiaSharp(true)
+				.UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .UseMauiCommunityToolkit()
                 .UseBottomSheet()

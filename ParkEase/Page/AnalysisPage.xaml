@@ -3,17 +3,264 @@
     x:Class="ParkEase.Page.AnalysisPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="AnalysisPage">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="0.1*" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+    xmlns:calendar="clr-namespace:Syncfusion.Maui.Calendar;assembly=Syncfusion.Maui.Calendar"
+    xmlns:controls="clr-namespace:ParkEase.Controls"
+    xmlns:converters="clr-namespace:ParkEase.Converters"
+    xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+    xmlns:vm="clr-namespace:ParkEase.ViewModel"
+    Title="AnalysisPage"
+    x:DataType="vm:AnalysisViewModel">
 
-        <HorizontalStackLayout Grid.Row="0">
-            <Grid />
-        </HorizontalStackLayout>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-        <Grid Grid.Row="1" />
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
+    </ContentPage.Behaviors>
+
+    <Grid x:Name="HorizontalExpander">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border
+            x:Name="ExpandableContent"
+            Grid.Column="0"
+            WidthRequest="380">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.9*" />
+                    <RowDefinition Height="0.05*" />
+                </Grid.RowDefinitions>
+                <ScrollView Margin="0">
+                    <StackLayout Margin="20">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Title"
+                            HorizontalTextAlignment="Center"
+                            Text="Area" />
+                        <material:PickerField
+                            Title="Area Type"
+                            Grid.Column="0"
+                            Margin="5"
+                            ItemsSource="{Binding AreaTypeItemSource, Mode=TwoWay}"
+                            MinimumWidthRequest="150"
+                            SelectedItem="{Binding AreaTypeSelected}" />
+                        <material:AutoCompleteTextField
+                            Title="Area Name"
+                            Grid.Column="1"
+                            Margin="5"
+                            ItemsSource="{Binding AreaNameItemSource, Mode=TwoWay}"
+                            MinimumWidthRequest="150"
+                            SelectedText="{Binding AreaNameSelected}"
+                            Text="{Binding AreaName}">
+                            <material:AutoCompleteTextField.Behaviors>
+                                <toolkit:EventToCommandBehavior Command="{Binding AreaNameUnfocusedCommand}" EventName="Unfocused" />
+                            </material:AutoCompleteTextField.Behaviors>
+                        </material:AutoCompleteTextField>
+                        <HorizontalStackLayout>
+                            <material:CheckBox
+                                Margin="5"
+                                IsChecked="{Binding IsAllFloorCheck}"
+                                IsEnabled="{Binding IsAllFloorCheckEnabled}"
+                                MaximumHeightRequest="50"
+                                Text="All Floors" />
+                        </HorizontalStackLayout>
+
+                        <material:PickerField
+                            Title="Floor"
+                            Grid.Column="0"
+                            Margin="5"
+                            IsEnabled="{Binding IsFloorEnabled}"
+                            ItemsSource="{Binding FloorItemSource, Mode=TwoWay}"
+                            SelectedItem="{Binding FloorSelected}" />
+
+                        <BoxView
+                            StyleClass="Divider"
+                            WidthRequest="280"
+                            Color="LightGray" />
+
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Title"
+                            HorizontalTextAlignment="Center"
+                            Text="Date" />
+                        <HorizontalStackLayout>
+                            <material:CheckBox
+                                Margin="5"
+                                IsChecked="{Binding IsCurrentDayCheck}"
+                                MaximumHeightRequest="50"
+                                Text="Current Day" />
+                        </HorizontalStackLayout>
+
+                        <calendar:SfCalendar
+                            BackgroundColor="Transparent"
+                            IsVisible="{Binding IsCurrentDayCheck, Converter={StaticResource InverseBoolConverter}}"
+                            RangeSelectionDirection="Both"
+                            SelectionMode="Range" />
+                        <BoxView
+                            StyleClass="Divider"
+                            WidthRequest="280"
+                            Color="LightGray" />
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Title"
+                            HorizontalTextAlignment="Center"
+                            Text="Time" />
+
+                        <HorizontalStackLayout>
+                            <material:CheckBox
+                                Margin="5"
+                                IsChecked="{Binding IsAllDayCheck}"
+                                MaximumHeightRequest="50"
+                                Text="All Day" />
+                        </HorizontalStackLayout>
+
+
+                        <material:TimePickerField
+                            Title="Start Time"
+                            Margin="5"
+                            BackgroundColor="Transparent"
+                            Icon="{FontImageSource FontFamily=MaterialRegular,
+                                                   Glyph={x:Static m:MaterialRegular.Alarm}}"
+                            IsVisible="{Binding IsAllDayCheck, Converter={StaticResource InverseBoolConverter}}"
+                            Time="{Binding StartTime}" />
+
+                        <material:TimePickerField
+                            x:Name="EndTime"
+                            Title="End Time"
+                            Margin="5"
+                            BackgroundColor="Transparent"
+                            Icon="{FontImageSource FontFamily=MaterialRegular,
+                                                   Glyph={x:Static m:MaterialRegular.Alarm}}"
+                            IsVisible="{Binding IsAllDayCheck, Converter={StaticResource InverseBoolConverter}}"
+                            Time="{Binding EndTime}" />
+
+                    </StackLayout>
+                </ScrollView>
+                <Button
+                    Grid.Row="1"
+                    Margin="10,0,10,0"
+                    Command="{Binding ApplyCommand}"
+                    StyleClass="FilledButton"
+                    Text="Apply" />
+            </Grid>
+
+        </Border>
+
+        <Button
+            x:Name="ToggleButton"
+            Grid.Column="0"
+            Clicked="ToggleExpander"
+            HorizontalOptions="End"
+            MaximumHeightRequest="20"
+            Style="{StaticResource MAUIDefaultButton}"
+            Text="&lt;"
+            TranslationX="20"
+            TranslationY="-9"
+            ZIndex="99" />
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <BoxView
+                Grid.Row="0"
+                Grid.Column="0"
+                HeightRequest="1"
+                StyleClass="Divider"
+                VerticalOptions="End" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.2*" />
+                    <ColumnDefinition Width="0.8*" />
+                </Grid.ColumnDefinitions>
+                <Grid>
+
+                    <Label
+                        Margin="0,20,0,0"
+                        FontAttributes="Bold"
+                        FontSize="Large"
+                        HorizontalOptions="Center"
+                        Text="Average Usage" />
+
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="120"
+                        HorizontalOptions="Center"
+                        Text="50%"
+                        TextColor="Green"
+                        VerticalOptions="Center" />
+                </Grid>
+
+                <material:RadioButtonGroupView
+                    Grid.Column="1"
+                    Margin="60,15,0,0"
+                    VerticalOptions="Start">
+                    <HorizontalStackLayout Spacing="40">
+                        <material:RadioButton Text="Montly" />
+                        <material:RadioButton Text="Daily" />
+                        <material:RadioButton Text="Hourly" />
+                    </HorizontalStackLayout>
+                </material:RadioButtonGroupView>
+                <lvc:CartesianChart
+                    Grid.Column="1"
+                    Margin="50"
+                    Series="{Binding SeriesCollection}"
+                    ZoomMode="X" />
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.2*" />
+                    <ColumnDefinition Width="0.8*" />
+                </Grid.ColumnDefinitions>
+                <Grid>
+                    <Label
+                        Margin="0,20,0,0"
+                        FontAttributes="Bold"
+                        FontSize="Large"
+                        HorizontalOptions="Center"
+                        Text="Average Parkign Time" />
+
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="120"
+                        HorizontalOptions="Center"
+                        Text="12h20m"
+                        TextColor="Green"
+                        VerticalOptions="Center" />
+                </Grid>
+                <material:RadioButtonGroupView
+                    Grid.Column="1"
+                    Margin="60,15,0,0"
+                    VerticalOptions="Start">
+                    <HorizontalStackLayout Spacing="40">
+                        <material:RadioButton Text="Daily" />
+                        <material:RadioButton Text="Hourly" />
+                    </HorizontalStackLayout>
+                </material:RadioButtonGroupView>
+                <lvc:CartesianChart
+                    Grid.Column="1"
+                    Margin="50"
+                    Series="{Binding SeriesCollection}"
+                    ZoomMode="X" />
+            </Grid>
+
+
+        </Grid>
     </Grid>
 </ContentPage>

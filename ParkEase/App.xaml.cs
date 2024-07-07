@@ -15,9 +15,6 @@ namespace ParkEase
         {
             InitializeComponent();
 
-            // Register Syncfusion license
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("YOUR_SYNCFUSION_LICENSE_KEY");
-
             // Configure services
             ConfigureServices();
 
@@ -25,18 +22,17 @@ namespace ParkEase
             SetMainPage();
         }
 
-        private void ConfigureServices()
+        private async void ConfigureServices()
         {
             var services = new ServiceCollection();
 
             // Add ViewModels
             services.AddTransient<AppShellMobileViewModel>();
             services.AddTransient<AppShellViewModel>();
-            services.AddTransient<AppShellMobileViewModel>();
 
             // Build the service provider
             serviceProvider = services.BuildServiceProvider();
-        }
+		}
 
         private void SetMainPage()
         {
