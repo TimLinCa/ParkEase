@@ -277,8 +277,15 @@ namespace ParkEase.ViewModel
 			return availableSpots > 0 ? "green" : "red"; // Return green if there are available spots, red otherwise
 		}
 
-		// Loads the total number of available spots
-		private async Task LoadAvailableSpotsAsync(string parkingDataId)
+        private async Task<string> GetPrivateParkingColorAsync(string parkingId)
+        {
+            var statuses = await mongoDBService.GetData<PrivateStatus>("PrivateStatus");
+            var availableSpots = statuses.Count(status => status.AreaId == parkingId && !status.Status);
+            return availableSpots > 0 ? "green" : "red";
+        }
+
+        // Loads the total number of available spots
+        private async Task LoadAvailableSpotsAsync(string parkingDataId)
 		{
 			try
 			{
@@ -324,12 +331,13 @@ namespace ParkEase.ViewModel
 				await LoadAvailableSpotsAsync(parkingDataId);
 
 				// Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
-				//await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{AvailableSpots} Available Spots", true, lat, lng);
+				await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
 
-				await MainThread.InvokeOnMainThreadAsync(async () =>
-				{
-					await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
-				});
+				//await MainThread.InvokeOnMainThreadAsync(async () =>
+				//{
+				//	await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
+				//});
+
 			}
 			catch (Exception ex)
 			{
@@ -472,10 +480,9 @@ namespace ParkEase.ViewModel
 
 					foreach (var privateParking in filteredPrivateParkings)
 					{
-						var privateStatus = privateStatuses.FirstOrDefault(ps => ps.AreaId == privateParking.Id);
-						string color = privateStatus != null && privateStatus.Status ? "red" : "green";
+                        string color = await GetPrivateParkingColorAsync(privateParking.Id);
 
-						System.Diagnostics.Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
+                        System.Diagnostics.Debug.WriteLine($"Loaded private parking: {privateParking.Latitude}, {privateParking.Longitude}");
 						await MainThread.InvokeOnMainThreadAsync(() =>
 						{
 							MessagingCenter.Send(this, "AddMarker", (privateParking.Latitude, privateParking.Longitude, "Private Parking", color));

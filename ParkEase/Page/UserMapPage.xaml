@@ -14,109 +14,127 @@
         <toolkit:EventToCommandBehavior Command="{Binding UnLoadedCommand}" EventName="Unloaded" />
     </ContentPage.Behaviors>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="0.1*" />
-            <RowDefinition Height="0.05*" />
-        </Grid.RowDefinitions>
-        <SearchBar
-            Grid.Row="0"
-            Placeholder="Enter address"
-            SearchCommand="{Binding SearchCommand}"
-            Text="{Binding SearchText}" />
+    <AbsoluteLayout>
+        <Grid AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+                <RowDefinition Height="0.1*" />
+                <RowDefinition Height="0.05*" />
+            </Grid.RowDefinitions>
+            <SearchBar
+                Grid.Row="0"
+                Placeholder="Enter address"
+                SearchCommand="{Binding SearchCommand}"
+                Text="{Binding SearchText}" />
 
-        <controls:GMapMobile
-            Grid.Row="1"
-            IsSearchInProgress="{Binding IsSearchInProgress}"
-            Lines="{Binding MapLines}"
-            LocationLat="{Binding LocationLatitude}"
-            LocationLng="{Binding LocationLongitude}"
-            MarkerLatitude="{Binding MarkerLatitude}"
-            MarkerLongitude="{Binding MarkerLongitude}"
-            Radius="{Binding Radius}"
-            CenterLocation="{Binding CenterLocation}"
-            SelectedLine="{Binding SelectedMapLine}">
-            <controls:GMapMobile.Behaviors>
-                <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
-            </controls:GMapMobile.Behaviors>
-        </controls:GMapMobile>
+            <controls:GMapMobile
+                Grid.Row="1"
+                CenterLocation="{Binding CenterLocation}"
+                IsSearchInProgress="{Binding IsSearchInProgress}"
+                Lines="{Binding MapLines}"
+                LocationLat="{Binding LocationLatitude}"
+                LocationLng="{Binding LocationLongitude}"
+                MarkerLatitude="{Binding MarkerLatitude}"
+                MarkerLongitude="{Binding MarkerLongitude}"
+                Radius="{Binding Radius}"
+                SelectedLine="{Binding SelectedMapLine}">
+                <controls:GMapMobile.Behaviors>
+                    <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
+                </controls:GMapMobile.Behaviors>
+            </controls:GMapMobile>
 
 
-        <Grid
-            Grid.Row="2"
-            HorizontalOptions="Center"
-            VerticalOptions="Center">
-            <StackLayout
-                HorizontalOptions="CenterAndExpand"
-                Orientation="Horizontal"
-                Spacing="8"
-                VerticalOptions="CenterAndExpand">
-                <Label
-                    Text="Select Range:"
-                    TextColor="Black"
-                    VerticalOptions="Center" />
-                <Picker
-                    x:Name="RangePicker"
-                    Title="Please select"
-                    BackgroundColor="White"
-                    SelectedItem="{Binding SelectedRadius}"
-                    Style="{StaticResource MAUIDefaultPicker}"
-                    TextColor="Black"
-                    TitleColor="Black"
-                    VerticalOptions="Center"
-                    WidthRequest="150">
-                    <Picker.Items>
-                        <x:String>200 meters</x:String>
-                        <x:String>500 meters</x:String>
-                        <x:String>1000 meters</x:String>
-                    </Picker.Items>
-                </Picker>
+            <Grid
+                Grid.Row="2"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
                 <StackLayout
                     HorizontalOptions="CenterAndExpand"
                     Orientation="Horizontal"
-                    Spacing="10"
+                    Spacing="8"
                     VerticalOptions="CenterAndExpand">
-
-                    <Button
-                        Command="{Binding UpdateRangeCommand}"
-                        Text="Update Range"
+                    <Label
+                        Text="Select Range:"
+                        TextColor="Black"
                         VerticalOptions="Center" />
+                    <Picker
+                        x:Name="RangePicker"
+                        Title="Please select"
+                        BackgroundColor="White"
+                        SelectedItem="{Binding SelectedRadius}"
+                        Style="{StaticResource MAUIDefaultPicker}"
+                        TextColor="Black"
+                        TitleColor="Black"
+                        VerticalOptions="Center"
+                        WidthRequest="150">
+                        <Picker.Items>
+                            <x:String>200 meters</x:String>
+                            <x:String>500 meters</x:String>
+                            <x:String>1000 meters</x:String>
+                        </Picker.Items>
+                    </Picker>
+                    <StackLayout
+                        HorizontalOptions="CenterAndExpand"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        VerticalOptions="CenterAndExpand">
+
+                        <Button
+                            Command="{Binding UpdateRangeCommand}"
+                            Text="Update Range"
+                            VerticalOptions="Center" />
+
+                    </StackLayout>
 
                 </StackLayout>
+            </Grid>
 
+            <StackLayout
+                Grid.Row="3"
+                HorizontalOptions="Center"
+                Orientation="Horizontal"
+                VerticalOptions="End">
+                <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                    <CheckBox IsChecked="{Binding ShowPublicParking}" />
+                    <Label
+                        Text="Public"
+                        TextColor="Black"
+                        VerticalOptions="Center" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                    <CheckBox IsChecked="{Binding ShowPrivateParking}" />
+                    <Label
+                        Text="Private"
+                        TextColor="Black"
+                        VerticalOptions="Center" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                    <CheckBox IsChecked="{Binding ShowAvailableParking}" />
+                    <Label
+                        Text="Available"
+                        TextColor="Black"
+                        VerticalOptions="Center" />
+                </StackLayout>
             </StackLayout>
+
         </Grid>
 
-        <StackLayout
-            Grid.Row="3"
-            HorizontalOptions="Center"
-            Orientation="Horizontal"
-            VerticalOptions="End">
-            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
-                <CheckBox IsChecked="{Binding ShowPublicParking}" />
-                <Label
-                    Text="Public"
-                    TextColor="Black"
-                    VerticalOptions="Center" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
-                <CheckBox IsChecked="{Binding ShowPrivateParking}" />
-                <Label
-                    Text="Private"
-                    TextColor="Black"
-                    VerticalOptions="Center" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
-                <CheckBox IsChecked="{Binding ShowAvailableParking}" />
-                <Label
-                    Text="Available"
-                    TextColor="Black"
-                    VerticalOptions="Center" />
-            </StackLayout>
-        </StackLayout>
+        <ImageButton
+            Margin="20"
+            AbsoluteLayout.LayoutBounds="0.98,0.5,50,50"
+            AbsoluteLayout.LayoutFlags="PositionProportional"
+            BackgroundColor="white"
+            BorderColor="white"
+            BorderWidth="1"
+            Command="{Binding BackToCurrentLocationCommand}"
+            CornerRadius="10"
+            HeightRequest="50"
+            Source="Image/back_to.png"
+            WidthRequest="50" />
 
-    </Grid>
+    </AbsoluteLayout>
+
+
 </ContentPage>
 
