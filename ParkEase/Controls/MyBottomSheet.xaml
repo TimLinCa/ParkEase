@@ -80,6 +80,51 @@
             </VerticalStackLayout>
         </Frame>
 
+        <HorizontalStackLayout
+            x:Name="hs_ButtonLayout"
+            HorizontalOptions="Center"
+            Spacing="60">
+            <VerticalStackLayout
+                Margin="10"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+                <Image
+                    x:Name="ParkingLocationIcon"
+                    HeightRequest="30"
+                    Source="addcar.png"
+                    WidthRequest="35" />
+                <Label
+                    x:Name="ParkingLocationLabel"
+                    Margin="0,5,0,0"
+                    HorizontalOptions="Center"
+                    Text="Save Spot"
+                    TextColor="#512BD4" />
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="SaveOrRemoveParkingLocationCommand" />
+                </VerticalStackLayout.GestureRecognizers>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout
+                Margin="10"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+                <Image
+                    x:Name="ShareSpotIcon"
+                    HeightRequest="29"
+                    Source="shareicon.png"
+                    WidthRequest="30" />
+                <Label
+                    x:Name="ShareSpotLabel"
+                    Margin="0,5,0,0"
+                    HorizontalOptions="Center"
+                    Text="Share Spot"
+                    TextColor="#512BD4" />
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="ShareSpotButton_Clicked" />
+                </VerticalStackLayout.GestureRecognizers>
+            </VerticalStackLayout>
+        </HorizontalStackLayout>
+
         <VerticalStackLayout x:Name="vs_ButtonLayout" Spacing="10">
             <Button
                 Clicked="GetDirecitonsCommand"
