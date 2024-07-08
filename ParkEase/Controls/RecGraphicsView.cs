@@ -13,6 +13,7 @@ using Microsoft.Maui;
 using Syncfusion.Maui.Core.Internals;
 using Microsoft.Maui.Handlers;
 using Syncfusion.Maui.Core;
+using CommunityToolkit.Maui.Views;
 
 namespace ParkEase.Controls
 {
@@ -83,6 +84,10 @@ namespace ParkEase.Controls
                 //pinchGesture.PinchUpdated += OnPinchUpdated;
                 //GestureRecognizers.Add(pinchGesture);
                 //GestureRecognizers.Add(panGesture);
+
+                /*TapGestureRecognizer tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += OnTapGestureRecognizerTapped;
+                GestureRecognizers.Add(tapGesture);*/
             }
 
         }
@@ -276,7 +281,7 @@ namespace ParkEase.Controls
                 try
                 {
                     view.Invalidate();
-                    view.updateMapImage();
+                    view.UpdateMapImage();
                 }
                 catch (Exception)
                 {
@@ -285,7 +290,7 @@ namespace ParkEase.Controls
             }
         }
 
-        private async Task updateMapImage()
+        private async Task UpdateMapImage()
         {
             Stream stream = await this.GetStreamAsync(ImageFileFormat.Jpeg);
             MemoryStream memoryStream = new MemoryStream();

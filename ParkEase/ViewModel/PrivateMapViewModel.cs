@@ -23,6 +23,7 @@ using ParkEase.Messages;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using ParkEase.Page;
+using ParkEase.Controls;
 
 namespace ParkEase.ViewModel
 {
@@ -88,11 +89,11 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private BarcodeDetectionEventArgs barcodeDetectionEventArgs;
 
-        private CancellationTokenSource cts;
-        private readonly object lockObj = new object();
-        private 
+        private CancellationTokenSource cts; 
         readonly bool stopping = false;
 
+        [ObservableProperty]
+        private ImageSource mapImageData;
 
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
@@ -109,8 +110,6 @@ namespace ParkEase.ViewModel
             EnableScanner = true;
             GridVisible = false;
             ScannerText = "";
-            //scannerImage = "scanner_image.png";
-            //arrowBack = "arrow_icon.png";
         }
 
         public ICommand LoadedCommand => new RelayCommand(async () =>
