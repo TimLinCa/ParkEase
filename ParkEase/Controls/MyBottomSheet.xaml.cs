@@ -90,6 +90,7 @@ namespace ParkEase.Controls
         public void SetVisibilityNavigatedButton(bool showButton)
         {
             vs_ButtonLayout.IsVisible = showButton;
+            hs_ButtonLayout.IsVisible = showButton;
         }
 
         public void SetLat(string lat)
