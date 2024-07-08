@@ -37,28 +37,33 @@ namespace ParkEase.Controls
             await Launcher.OpenAsync(new Uri(uri)); /*https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.applicationmodel.launcher.openasync?view=net-maui-8.0#microsoft-maui-applicationmodel-launcher-openasync(system-uri)*/
         }
 
-        private void SaveOrRemoveParkingLocationCommand(object sender, EventArgs e)
+        private void SaveOrRemoveParkingLocationCommand(object sender, TappedEventArgs e)
         {
             if (!isLocationSaved)
             {
                 // Save the location
                 MessagingCenter.Send(this, "SaveParkingLocation", (Lat, Lng));
-                ParkingLocationIcon.Source = "removecar.png"; // Change icon
-                ParkingLocationLabel.Text = "Clear Spot"; // Change text
+                ParkingLocationIcon.Source = "removecar.png"; // Change the icon to indicate the spot is saved
+                ParkingLocationLabel.Text = "Clear Spot"; // Change the label text to indicate the spot can be cleared
             }
             else
             {
                 // Remove the location
                 MessagingCenter.Send(this, "RemoveParkingLocation", (Lat, Lng));
-                ParkingLocationIcon.Source = "addcar.png"; // Change icon back
-                ParkingLocationLabel.Text = "Save Spot"; // Change text back
+                ParkingLocationIcon.Source = "addcar.png"; // Change the icon back to indicate the spot can be saved
+                ParkingLocationLabel.Text = "Save Spot"; // Change the label text back to indicate the spot can be saved
             }
-            isLocationSaved = !isLocationSaved;
+            isLocationSaved = !isLocationSaved;  // Flip the value of isLocationSaved: if it was true, make it false; if it was false, make it true
         }
 
-        private async void ShareSpotButton_Clicked(object sender, EventArgs e)
+        private async void ShareSpotButton_Clicked(object sender, TappedEventArgs e)
         {
-            string locationUrl = $"https://www.google.com/maps/search/?api=1&query={Lat},{Lng}";
+            // Create a URL for the location using Google Maps
+            //https://developers.google.com/maps/documentation/urls/get-started
+            string locationUrl = $"https://www.google.com/maps/search/?api=1&query={Lat},{Lng}";  
+
+            // Open the share dialog with the location URL
+            //https://learn.microsoft.com/en-us/previous-versions/xamarin/essentials/share?tabs=android
             await Share.RequestAsync(new ShareTextRequest
             {
                 Title = "Share Parking Spot",
@@ -102,5 +107,6 @@ namespace ParkEase.Controls
         {
             Lng = lng;
         }
+
     }
 }
