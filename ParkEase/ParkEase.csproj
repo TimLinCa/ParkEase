@@ -113,6 +113,9 @@
 	  <Compile Update="AppShellMobile.xaml.cs">
 	    <DependentUpon>AppShellMobile.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Controls\ScannerPopUp.xaml.cs">
+	    <DependentUpon>ScannerPopUp.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Page\UserMapPage.xaml.cs">
 	    <DependentUpon>UserMapPage.xaml</DependentUpon>
 	  </Compile>
@@ -120,6 +123,12 @@
 
 	<ItemGroup>
 	  <MauiXaml Update="AppShellMobile.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Controls\ScannerPopUp.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Page\AnalysisPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Page\CreateMapPage.xaml">
@@ -132,6 +141,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Page\MapPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Page\MultiSelectPopUp.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Page\PrivateMapPage.xaml">
@@ -153,5 +165,7 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
+
+	<ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadGenericExceptionInfoBarParkEaseHideInfoBar="True" /></VisualStudio></ProjectExtensions>
 
 </Project>

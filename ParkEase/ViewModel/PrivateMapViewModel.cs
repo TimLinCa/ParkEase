@@ -114,7 +114,8 @@ namespace ParkEase.ViewModel
 
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
-            privateParkingId = parkEaseModel.PrivateMapId;
+            privateParkingId = DataService.GetId();
+            //privateParkingId = parkEaseModel.PrivateMapId;
             await LoadParkingData();
 
             cts = new CancellationTokenSource();

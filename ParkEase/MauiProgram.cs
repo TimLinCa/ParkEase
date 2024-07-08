@@ -102,7 +102,11 @@ namespace ParkEase
             });
 
             builder.Services.AddSingleton<PrivateSearchViewModel>();
-            builder.Services.AddSingleton(provider => new PrivateSearchPage(provider.GetRequiredService<PrivateSearchViewModel>()));
+            builder.Services.AddSingleton(provider => new PrivateSearchPage
+            {
+                BindingContext = provider.GetRequiredService<PrivateSearchViewModel>()
+            });
+
 
             builder.Services.AddSingleton<AnalysisViewModel>();
             builder.Services.AddSingleton(provider => new AnalysisPage()
