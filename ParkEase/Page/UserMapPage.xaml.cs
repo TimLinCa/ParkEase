@@ -1,16 +1,20 @@
 using Microsoft.Maui.Devices.Sensors;
+using UraniumUI.Pages;
+using UraniumUI;
 
 
-namespace ParkEase.Page;
-
-public partial class UserMapPage : ContentPage
+namespace ParkEase.Page
 {
-    public UserMapPage()
+    public partial class UserMapPage : UraniumContentPage
     {
-        InitializeComponent();
-      
+        public UserMapPage()
+        {
+            InitializeComponent();
+        }
 
+        private void OnButtonClicked(object sender, EventArgs e)
+        {
+            backdrop.IsPresented = true;
+        }
     }
-
-
 }
