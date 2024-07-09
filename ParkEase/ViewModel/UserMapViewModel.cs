@@ -81,6 +81,7 @@ namespace ParkEase.ViewModel
 		private readonly IMongoDBService mongoDBService;
 		private readonly IDialogService dialogService;
 		private readonly IGeocodingService geocodingService;
+		private bool isRangeUpdated = false;
 
 		private CancellationTokenSource cts;
 		//private readonly object lockObj = new object();
@@ -366,7 +367,9 @@ namespace ParkEase.ViewModel
 			// LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
 			List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out)).ToList();
 			Radius = radius_out;
-		});
+			isRangeUpdated = true;
+
+        });
 
 		//From chatGPT 
 		private bool isPointInCircle(List<MapPoint> points, double centerLat, double centerLng, double radius)
@@ -419,7 +422,13 @@ namespace ParkEase.ViewModel
 						filteredLines = filteredLines.Where(line => line.Color == "green").ToList();
 					}
 
-
+					if(isRangeUpdated)
+					{
+                        MapLines = new ObservableCollection<MapLine>(filteredLines);
+						SelectedMapLine = null;
+						isRangeUpdated = false;
+                        return;
+                    }
 					List<MapLine> filteredLinesToAdd = new List<MapLine>();
 					List<MapLine> filteredLinesToUpdate = new List<MapLine>();
 					List<MapLine> filteredLinesToDelete = new List<MapLine>();

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:ParkEase.Controls"
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
@@ -21,19 +22,60 @@
         <AbsoluteLayout>
             <Grid AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition />
                     <RowDefinition Height="0.1*" />
-                    <RowDefinition Height="0.05*" />
                 </Grid.RowDefinitions>
-                <SearchBar
-                    Grid.Row="0"
-                    Placeholder="Enter address"
-                    SearchCommand="{Binding SearchCommand}"
-                    Text="{Binding SearchText}" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.9*" />
+                        <ColumnDefinition Width="0.2*" />
+                    </Grid.ColumnDefinitions>
+                    <SearchBar
+                        HorizontalOptions="StartAndExpand"
+                        Placeholder="Enter address"
+                        SearchCommand="{Binding SearchCommand}"
+                        Text="{Binding SearchText}" />
+                    <Button
+                        Grid.Column="1"
+                        BackgroundColor="Transparent"
+                        Clicked="FilterExpand"
+                        HorizontalOptions="Center">
+                        <Button.ImageSource>
+                            <FontImageSource
+                                FontFamily="MaterialRegular"
+                                Glyph="{x:Static m:MaterialRegular.Tune}"
+                                Size="40"
+                                Color="Black" />
+                        </Button.ImageSource>
+                    </Button>
+                </Grid>
+
+                <VerticalStackLayout
+                    x:Name="FilterGrid"
+                    Grid.Row="1"
+                    HeightRequest="0">
+                    <input:CheckBox
+                        Margin="5"
+                        IsChecked="{Binding ShowPublicParking}"
+                        Text="Public Parking"
+                        Type="Filled" />
+                    <input:CheckBox
+                        Margin="5"
+                        IsChecked="{Binding ShowPrivateParking}"
+                        Text="Private Parking"
+                        Type="Filled" />
+                    <input:CheckBox
+                        Margin="5"
+                        IsChecked="{Binding ShowAvailableParking}"
+                        Text="Available Parking"
+                        Type="Filled" />
+                </VerticalStackLayout>
 
                 <controls:GMapMobile
-                    Grid.Row="1"
+                    Grid.Row="2"
                     CenterLocation="{Binding CenterLocation}"
                     IsSearchInProgress="{Binding IsSearchInProgress}"
                     Lines="{Binding MapLines}"
@@ -50,7 +92,7 @@
 
 
                 <Grid
-                    Grid.Row="2"
+                    Grid.Row="3"
                     HorizontalOptions="Center"
                     VerticalOptions="Center">
                     <StackLayout
@@ -113,32 +155,5 @@
         </AbsoluteLayout>
 
     </Grid>
-    <!--  Link:https://enisn-projects.io/docs/en/uranium/latest/themes/material/components/Backdrop  -->
-    <uranium:UraniumContentPage.Attachments>
-        <material:BackdropView
-            x:Name="backdrop"
-            Title="Filter"
-            BackgroundColor="LightBlue"
-            IconImageSource="Image/filter.png">
-            <VerticalStackLayout>
-                <input:CheckBox
-                    Margin="5"
-                    IsChecked="{Binding ShowPublicParking}"
-                    Text="Public Parking"
-                    Type="Filled" />
-                <input:CheckBox
-                    Margin="5"
-                    IsChecked="{Binding ShowPrivateParking}"
-                    Text="Private Parking"
-                    Type="Filled" />
-                <input:CheckBox
-                    Margin="5"
-                    IsChecked="{Binding ShowAvailableParking}"
-                    Text="Available Parking"
-                    Type="Filled" />
-
-            </VerticalStackLayout>
-        </material:BackdropView>
-    </uranium:UraniumContentPage.Attachments>
 
 </uranium:UraniumContentPage>
