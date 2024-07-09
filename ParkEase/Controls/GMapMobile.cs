@@ -159,6 +159,7 @@ namespace ParkEase.Controls
                             savedLocationMarker.setMap(null);
                         }
 
+                        // Create a new marker for the saved location   
                         savedLocationMarker = new google.maps.Marker({
                             position: { lat: lat, lng: lng },
                             map: map,
@@ -169,10 +170,14 @@ namespace ParkEase.Controls
                             }
                         });
 
-                        savedLocationMarker.originalIcon = icon; // Store the original icon
-                        return;
+                        // Store the original icon of the saved location marker
+                        savedLocationMarker.originalIcon = icon; 
+
+                        // Exit the function after handling the saved location marker
+                        return; 
                     }
 
+                    // Create a new marker for private markers
                     const marker = new google.maps.Marker({
                         position: { lat: lat, lng: lng },
                         map: map,
@@ -183,14 +188,15 @@ namespace ParkEase.Controls
                         }
                     });
 
-                    // Store the original color in the marker object
+                    // Store the original color in the private marker object
                     marker.originalIcon = icon;  
 
-                    // Add marker to the list
+                    // Add private marker to the list
                     markers.push(marker); 
 
-                    // Add a click event listener to the marker 
+                    // Add a click event listener to the private marker 
                     marker.addListener('click', function() {
+
                         // Reset the color of the previously selected marker, if any
                         if (previousSelectedMarker) {
                             previousSelectedMarker.setIcon({
@@ -222,24 +228,33 @@ namespace ParkEase.Controls
                          // Store the selected marker's coordinates
                         selectedMarkerCoordinates = { lat: lat, lng: lng };
 
-                        selectedLineCoordinates = null; // Clear line coordinates 
+                        // Clear line coordinates 
+                        selectedLineCoordinates = null;  
 
+                        // Redirect to a custom URL scheme with the marker's information
                         window.location.href = ""myapp://privateparkingclicked?lat="" + lat + ""&lng="" + lng + ""&title="" + title;
                     });
 
                 }  
 
                 // Clear all markers
-                function clearMarkers() {{
-                    for (let i = 0; i < markers.length; i++) {{
+                function clearMarkers() {
+
+                    // Loop through all markers and remove them from the map
+                    for (let i = 0; i < markers.length; i++) {
                         markers[i].setMap(null);
-                    }}
+                    }
+
+                    // Clear the markers array
                     markers = [];
+
+                    // Remove the saved location marker if it exists
                     if (savedLocationMarker) {
                             savedLocationMarker.setMap(null);
                             savedLocationMarker = null;
                         }
-                }}
+                }
+
 
                 // Clear all lines from the map
                 function clearLines() {
@@ -557,11 +572,13 @@ namespace ParkEase.Controls
                 await ClearMarkersAsync();
             });
 
+            // Subscribe to "SaveParkingLocation" message
             MessagingCenter.Subscribe<MyBottomSheet, (string lat, string lng)>(this, "SaveParkingLocation", (sender, args) =>
             {
                 SaveParkingLocation(args.lat, args.lng);
             });
 
+            // Subscribe to "RemoveParkingLocation" message
             MessagingCenter.Subscribe<MyBottomSheet, (string lat, string lng)>(this, "RemoveParkingLocation", (sender, args) =>
             {
                 RemoveParkingLocation(args.lat, args.lng);

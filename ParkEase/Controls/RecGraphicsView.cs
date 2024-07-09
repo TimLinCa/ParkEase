@@ -14,6 +14,8 @@ using Syncfusion.Maui.Core.Internals;
 using Microsoft.Maui.Handlers;
 using Syncfusion.Maui.Core;
 using CommunityToolkit.Maui.Views;
+using System.IO;
+using Microsoft.Maui.Controls.Compatibility;
 
 namespace ParkEase.Controls
 {
