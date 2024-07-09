@@ -2,8 +2,18 @@
 <ContentPage
     x:Class="ParkEase.Page.PrivateStatusPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:vm="clr-namespace:ParkEase.ViewModel"
+    x:DataType="vm:PrivateStatusViewModel">
 
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
+        <toolkit:EventToCommandBehavior Command="{Binding UnLoadedCommand}" EventName="Unloaded" />
+    </ContentPage.Behaviors>
 
     <ScrollView>
         <Grid>
@@ -13,21 +23,76 @@
             </Grid.ColumnDefinitions>
             <StackLayout Grid.Column="0" Padding="10">
                 <Label
-                    Margin="10"
+                    Margin="10,10,10,30"
                     FontSize="20"
                     HorizontalOptions="Center"
                     Text="Private Parking Status" />
-                <HorizontalStackLayout Margin="10">
-                    <Label
-                        FontAttributes="Bold"
-                        FontSize="15"
-                        Text="Company Name:" />
-                    <Label
-                        Margin="0,0,0,20"
-                        FontSize="15"
-                        Text="Place Holder" />
-                </HorizontalStackLayout>
 
+                <!--  Search bar for private parking address  -->
+                <!--<SearchBar
+                    HorizontalOptions="Start"
+                    Placeholder="Search Address"
+                    Text="{Binding SearchText}" />
+
+                <Label
+                    Margin="20,10,20,0"
+                    IsVisible="{Binding ErrorMessageVisable}"
+                    Text="{Binding PropertyAddressMessage}"
+                    TextColor="Red" />
+
+                <ListView
+                    x:Name="searchResults"
+                    ItemsSource="{Binding PropertyAddressList, Mode=TwoWay}"
+                    SelectedItem="{Binding AddressSelected, Mode=TwoWay}" />-->
+
+                <material:PickerField
+                    Title="Pick a floor"
+                    Grid.Column="1"
+                    Margin="0,0,10,30"
+                    AllowClear="True"
+                    HorizontalOptions="FillAndExpand"
+                    Icon="{FontImageSource FontFamily=MaterialOutlined,
+                                           Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
+                    ItemsSource="{Binding PropertyAddressList}"
+                    SelectedItem="{Binding AddressSelected}"
+                    VerticalOptions="Center" />
+
+                <!--  Labels for displaying parking data  -->
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Company name:" />
+                <Label Margin="10,3" Text="{Binding PropertySelected.CompanyName}" />
+
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Address:" />
+                <Label Margin="10,3" Text="{Binding PropertySelected.Address}" />
+
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Parking Fee:" />
+                <Label Margin="10,3" Text="{Binding PropertySelected.ParkingInfo.Fee}" />
+
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Limit hour:" />
+                <Label Margin="10,3" Text="{Binding PropertySelected.ParkingInfo.LimitedHour}" />
+
+                <material:PickerField
+                    Title="Pick a floor"
+                    Grid.Column="1"
+                    Margin="0,20,10,30"
+                    AllowClear="True"
+                    HorizontalOptions="FillAndExpand"
+                    Icon="{FontImageSource FontFamily=MaterialOutlined,
+                                           Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
+                    ItemsSource="{Binding FloorItemSource}"
+                    SelectedItem="{Binding FloorItemSelected, Mode=TwoWay}"
+                    VerticalOptions="Center" />
 
 
 
@@ -36,7 +101,7 @@
                 Grid.Column="1"
                 BackgroundColor="WhiteSmoke"
                 Stroke="#512BD4">
-                <Button Text="{Binding Test}" />
+                <!--<Button Text="{Binding Test}" />-->
             </Border>
         </Grid>
     </ScrollView>

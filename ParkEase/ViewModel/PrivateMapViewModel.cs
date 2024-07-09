@@ -131,9 +131,14 @@ namespace ParkEase.ViewModel
                         await stream.CopyToAsync(memoryStream);
                         byte[] imageData = memoryStream.ToArray();
 
+                        //https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/image?view=net-maui-8.0#load-an-image-from-a-stream
+
                         // Save file using FileSaver
                         var result = await fileSaver.SaveAsync(fileName, new MemoryStream(imageData), cts.Token);
                         cts.Cancel();
+
+                        //https://www.youtube.com/watch?v=Q9T-dRYq3Ps&t=417s
+                        // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/essentials/file-saver?tabs=android
 
                         if (result.IsSuccessful)
                         {
@@ -159,7 +164,10 @@ namespace ParkEase.ViewModel
                 // Handle any errors
                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to save image: {ex.Message}", "OK");
             }
-        }*/
+        }
+        
+
+         */
 
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
