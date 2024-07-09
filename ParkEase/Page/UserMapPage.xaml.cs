@@ -12,7 +12,7 @@ namespace ParkEase.Page
         public UserMapPage()
         {
             InitializeComponent();
-            ExpandedHeight = DeviceDisplay.Current.MainDisplayInfo.Height/ DeviceDisplay.Current.MainDisplayInfo.Density/ 6.2;
+            ExpandedHeight = DeviceDisplay.Current.MainDisplayInfo.Height/ DeviceDisplay.Current.MainDisplayInfo.Density/ 5.5;
         }
 
         private async void FilterExpand(object sender, EventArgs e)

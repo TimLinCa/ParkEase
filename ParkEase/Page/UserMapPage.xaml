@@ -23,40 +23,41 @@
             <Grid AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50" />
-                    <RowDefinition Height="Auto" />
                     <RowDefinition />
-                    <RowDefinition Height="0.1*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="50" />
                 </Grid.RowDefinitions>
 
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0.9*" />
-                        <ColumnDefinition Width="0.2*" />
-                    </Grid.ColumnDefinitions>
+
                     <SearchBar
                         HorizontalOptions="StartAndExpand"
                         Placeholder="Enter address"
                         SearchCommand="{Binding SearchCommand}"
                         Text="{Binding SearchText}" />
-                    <Button
-                        Grid.Column="1"
-                        BackgroundColor="Transparent"
-                        Clicked="FilterExpand"
-                        HorizontalOptions="Center">
-                        <Button.ImageSource>
-                            <FontImageSource
-                                FontFamily="MaterialRegular"
-                                Glyph="{x:Static m:MaterialRegular.Tune}"
-                                Size="40"
-                                Color="Black" />
-                        </Button.ImageSource>
-                    </Button>
                 </Grid>
+
+                <controls:GMapMobile
+                    Grid.Row="1"
+                    CenterLocation="{Binding CenterLocation}"
+                    IsSearchInProgress="{Binding IsSearchInProgress}"
+                    Lines="{Binding MapLines}"
+                    LocationLat="{Binding LocationLatitude}"
+                    LocationLng="{Binding LocationLongitude}"
+                    MarkerLatitude="{Binding MarkerLatitude}"
+                    MarkerLongitude="{Binding MarkerLongitude}"
+                    Radius="{Binding Radius}"
+                    SelectedLine="{Binding SelectedMapLine}">
+                    <controls:GMapMobile.Behaviors>
+                        <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
+                    </controls:GMapMobile.Behaviors>
+                </controls:GMapMobile>
 
                 <VerticalStackLayout
                     x:Name="FilterGrid"
-                    Grid.Row="1"
-                    HeightRequest="0">
+                    Grid.Row="2"
+                    HeightRequest="500"
+                    IsVisible="False">
                     <input:CheckBox
                         Margin="5"
                         IsChecked="{Binding ShowPublicParking}"
@@ -72,24 +73,31 @@
                         IsChecked="{Binding ShowAvailableParking}"
                         Text="Available Parking"
                         Type="Filled" />
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.15*" />
+                            <ColumnDefinition Width="0.8*" />
+                            <ColumnDefinition Width="0.12*" />
+                            <ColumnDefinition Width="0.15*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Margin="5,0,0,0">Range:</Label>
+                        <Slider
+                            x:Name="RadiusSlider"
+                            Grid.Column="1"
+                            Maximum="2000"
+                            Minimum="10"
+                            VerticalOptions="CenterAndExpand"
+                            Value="{Binding SelectedRadius}" />
+                        <Grid Grid.Column="2">
+                            <Label Text="{Binding Source={x:Reference RadiusSlider}, Path=Value, StringFormat='{0:F0}', Mode=TwoWay}" />
+                        </Grid>
+
+                        <Label Grid.Column="3">meters</Label>
+
+                    </Grid>
+
                 </VerticalStackLayout>
-
-                <controls:GMapMobile
-                    Grid.Row="2"
-                    CenterLocation="{Binding CenterLocation}"
-                    IsSearchInProgress="{Binding IsSearchInProgress}"
-                    Lines="{Binding MapLines}"
-                    LocationLat="{Binding LocationLatitude}"
-                    LocationLng="{Binding LocationLongitude}"
-                    MarkerLatitude="{Binding MarkerLatitude}"
-                    MarkerLongitude="{Binding MarkerLongitude}"
-                    Radius="{Binding Radius}"
-                    SelectedLine="{Binding SelectedMapLine}">
-                    <controls:GMapMobile.Behaviors>
-                        <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
-                    </controls:GMapMobile.Behaviors>
-                </controls:GMapMobile>
-
 
                 <Grid
                     Grid.Row="3"
@@ -100,26 +108,7 @@
                         Orientation="Horizontal"
                         Spacing="8"
                         VerticalOptions="CenterAndExpand">
-                        <Label
-                            Text="Select Range:"
-                            TextColor="Black"
-                            VerticalOptions="Center" />
-                        <Picker
-                            x:Name="RangePicker"
-                            Title="Please select"
-                            BackgroundColor="White"
-                            SelectedItem="{Binding SelectedRadius}"
-                            Style="{StaticResource MAUIDefaultPicker}"
-                            TextColor="Black"
-                            TitleColor="Black"
-                            VerticalOptions="Center"
-                            WidthRequest="150">
-                            <Picker.Items>
-                                <x:String>200 meters</x:String>
-                                <x:String>500 meters</x:String>
-                                <x:String>1000 meters</x:String>
-                            </Picker.Items>
-                        </Picker>
+
                         <StackLayout
                             HorizontalOptions="CenterAndExpand"
                             Orientation="Horizontal"
@@ -127,11 +116,24 @@
                             VerticalOptions="CenterAndExpand">
 
                             <Button
-                                Command="{Binding UpdateRangeCommand}"
-                                Text="Update Range"
-                                VerticalOptions="Center" />
+                                BackgroundColor="Transparent"
+                                Clicked="FilterExpand"
+                                HorizontalOptions="Center">
+                                <Button.ImageSource>
+                                    <FontImageSource
+                                        FontFamily="MaterialRegular"
+                                        Glyph="{x:Static m:MaterialRegular.Tune}"
+                                        Size="30"
+                                        Color="#512BD4" />
+                                </Button.ImageSource>
+                            </Button>
 
                         </StackLayout>
+
+                        <Button
+                            Command="{Binding UpdateRangeCommand}"
+                            Text="Update Range"
+                            VerticalOptions="Center" />
 
                     </StackLayout>
                 </Grid>
