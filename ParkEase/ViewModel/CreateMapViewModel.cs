@@ -51,14 +51,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private IImage imgSourceData;
 
-        //[ObservableProperty]
         private float rectWidth;
 
-        //[ObservableProperty]
         private float rectHeight;
-
-        //[ObservableProperty]
-        //private ObservableCollection<RectF> rectangles;
 
         [ObservableProperty]
         private ObservableCollection<Rectangle> listRectangle;
@@ -80,8 +75,6 @@ namespace ParkEase.ViewModel
         private string selectedCompanyName;
 
         private List<PrivateParking> userData;
-
-        //private List<Rectangle> listRectangles;
 
         private List<FloorInfo> listFloorInfos;
 
@@ -108,7 +101,6 @@ namespace ParkEase.ViewModel
             limitHour = 0;
             rectWidth = 100;
             rectHeight = 50;
-            //rectangles = new ObservableCollection<RectF>();
             ListRectangle = new ObservableCollection<Rectangle>();
             listFloorInfos = new List<FloorInfo>();
             FloorNames = new ObservableCollection<string>();
@@ -163,15 +155,6 @@ namespace ParkEase.ViewModel
                     System.Diagnostics.Debug.WriteLine("No data found.");
                     return;
                 }
-
-                /*List<PrivateParking> privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
-
-                if (privateData == null || privateData.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("No parking data found.");
-                    return;
-                }
-                userData = privateData.Where(data => data.CreatedBy == parkEaseModel.User.Email).ToList();*/
 
                 _ = GetPropertyAddress();
             }
@@ -346,11 +329,6 @@ namespace ParkEase.ViewModel
             {
                 try
                 {
-                    /*if (!addNewFloorClicked)
-                    {
-                        await dialogService.ShowAlertAsync("", "Please make sure that you entered floor name and clicked Add button before uploading image.", "OK");
-                        return;
-                    }*/
                     if (MediaPicker.Default.IsCaptureSupported)
                     {
                         FileResult myPhoto = await MediaPicker.PickPhotoAsync();
@@ -443,7 +421,7 @@ namespace ParkEase.ViewModel
                 {
                     await dialogService.ShowAlertAsync("Warning", "Something went wrong." +
                         "                               \nIf you want to edit existing map, select one floor from dropdown." +
-                        "                               \nIf you want to add new map, please enter floor name and click Add button.", "OK");
+                        "                               \nIf you want to add new map, please enter floor name, click Add button, upload image and create map.", "OK");
                 }
             }
             catch (Exception ex)

@@ -1,45 +1,42 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ParkEase.Page.PrivateStatusPage"
-             Title="PrivateStatusPage">
-    
-    
+<ContentPage
+    x:Class="ParkEase.Page.PrivateStatusPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+
     <ScrollView>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <StackLayout
-                Grid.Column="0"
-                Padding="10">
+            <StackLayout Grid.Column="0" Padding="10">
                 <Label
                     Margin="10"
-                    FontSize="25"
+                    FontSize="20"
                     HorizontalOptions="Center"
-                    Text="Private Parking Status"/>
-                <HorizontalStackLayout  Margin="10">
+                    Text="Private Parking Status" />
+                <HorizontalStackLayout Margin="10">
                     <Label
                         FontAttributes="Bold"
                         FontSize="15"
                         Text="Company Name:" />
                     <Label
-                        Margin="0 0 0 20"
+                        Margin="0,0,0,20"
                         FontSize="15"
                         Text="Place Holder" />
                 </HorizontalStackLayout>
-                
-                
-                
-                
+
+
+
+
             </StackLayout>
             <Border
                 Grid.Column="1"
                 BackgroundColor="WhiteSmoke"
                 Stroke="#512BD4">
-                <Button
-                    Text="{Binding Test}"/>
+                <Button Text="{Binding Test}" />
             </Border>
         </Grid>
     </ScrollView>
