@@ -232,6 +232,7 @@ namespace ParkEase.Controls
                         selectedLineCoordinates = null;  
 
                         // Redirect to a custom URL scheme with the marker's information
+                        //https://www.w3schools.com/js/js_window_location.asp
                         window.location.href = ""myapp://privateparkingclicked?lat="" + lat + ""&lng="" + lng + ""&title="" + title;
                     });
 
@@ -501,9 +502,7 @@ namespace ParkEase.Controls
                                 navigateToMarker(selectedMarkerCoordinates.lat, selectedMarkerCoordinates.lng);
                             } else if (selectedLineCoordinates) {
                                 navigateToLine();
-                            } else {
-                                navigateToLine();
-                            }
+                            } 
                             break;
                         case event.data.startsWith('SaveParkingLocation') && event.data:
                             var latLng = event.data.split(',').slice(1);

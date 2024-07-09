@@ -244,7 +244,7 @@ namespace ParkEase.Test.UnitTest
         }
 
         [Fact]
-        public void UpdateExistingParkingData_OnSubmit_UpdatesDatabase()
+        public void UpdateExistingParkingData()
         {
             // Arrange
             var mapLine = new MapLine(new List<MapPoint> { new MapPoint { Lat = "0", Lng = "0" }, new MapPoint { Lat = "1", Lng = "1" } });
@@ -290,7 +290,7 @@ namespace ParkEase.Test.UnitTest
         }
 
         [Fact]
-        public void DeleteCorrespondingParkingData_ClearsDataFromDatabase()
+        public void DeleteCorrespondingParkingData()
         {
             // Arrange
             var mapLine = new MapLine(new List<MapPoint> { new MapPoint { Lat = "0", Lng = "0" }, new MapPoint { Lat = "1", Lng = "1" } });
@@ -329,7 +329,7 @@ namespace ParkEase.Test.UnitTest
         }
 
         [Fact]
-        public void LoadMapData_OnPageRefresh_DisplaysCorrectData()
+        public void LoadMapData_OnPageRefresh()
         {
             // Arrange
             var mapLine = new MapLine(new List<MapPoint>

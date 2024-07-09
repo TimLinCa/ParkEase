@@ -34,7 +34,7 @@ namespace ParkEase.Test.UnitTest
         }
 
         [Fact]
-        public void ValidLogin()
+        public async Task ValidLogin()
         {
             // Arrange
             var validEmail = "test@example.com";
@@ -53,7 +53,7 @@ namespace ParkEase.Test.UnitTest
         }
 
         [Fact]
-        public void InvalidEmail()
+        public async Task InvalidEmail()
         {
             // Arrange
             var invalidEmail = "invalid-email";
@@ -118,13 +118,13 @@ namespace ParkEase.Test.UnitTest
 
             // Assert
             _dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "Check your email or password!", "OK"), Times.Once);
-        }       
-      
+        }
+
         [Fact]
         public void PasswordMasking()
         {
             // Arrange
-            var passwordField = new TextField
+            var passwordField = new UraniumUI.Material.Controls.TextField
             {
                 IsPassword = true
             };
