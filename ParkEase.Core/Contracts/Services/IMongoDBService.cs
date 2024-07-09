@@ -14,6 +14,8 @@ namespace ParkEase.Core.Contracts.Services
 
         Task<List<T>> GetData<T>(string collectionName) where T : class;
 
+        Task<List<T>> GetStatusData<T>(string collectionName) where T : class;
+
         Task<List<T>> GetDataFilter<T>(string collectionName, FilterDefinition<T> filter) where T : class;
 
         Task<DeleteDataResult> DeleteData<T>(string collectionName, FilterDefinition<T> filter) where T : class;

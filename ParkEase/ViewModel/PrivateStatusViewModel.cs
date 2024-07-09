@@ -185,7 +185,7 @@ namespace ParkEase.ViewModel
                 // Set the selected floor to the first floor
                 if (FloorItemSource.FirstOrDefault() != null)
                 {
-                    floorItemSelected = FloorItemSource.First();
+                    FloorItemSelected = FloorItemSource.First();
                 }
             }
         }
@@ -196,7 +196,7 @@ namespace ParkEase.ViewModel
             if (listFloorInfos != null)
             {
                 // Fetch PrivateStatus data from MongoDB
-                var status = await mongoDBService.GetData<PrivateStatus>(CollectionName.PrivateStatus);
+                var status = await mongoDBService.GetStatusData<PrivateStatus>(CollectionName.PrivateStatus);
                 if (status == null || status.Count == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("No private status data found.");

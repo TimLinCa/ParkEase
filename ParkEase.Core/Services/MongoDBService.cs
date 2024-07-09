@@ -89,6 +89,37 @@ namespace ParkEase.Core.Services
 
         }
 
+        public async Task<List<T>> GetStatusData<T>(string collectionName) where T : class
+        {
+            await CheckAPIKey();
+
+
+            /*if (DeviceInfo.Platform == DevicePlatform.WinUI)
+            {
+                var collection = db.GetCollection<T>(collectionName);
+                var result = await collection.FindAsync(FilterDefinition<T>.Empty);
+                return result.ToList();
+            }*/
+
+            var client = new RestClient($"{apiBase}/find");
+            var request = new RestRequest();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Access-Control-Request-Headers", "*");
+            request.AddHeader("api-key", apiKey);
+            var body = @"{" +
+            $@" ""collection"":""{collectionName}""," +
+            $@" ""database"":""{databaseName}""," +
+            $@" ""dataSource"":""{dataSourceName}""" +
+            @"}";
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.PostAsync(request);
+            Console.WriteLine(response.Content);
+            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<T>>>(response.Content);
+            if (data == null) return new List<T> { };
+            return data["documents"];
+
+        }
+
         public async Task<List<T>> GetDataFilter<T>(string collectionName, FilterDefinition<T> filter) where T : class
         {
             await CheckAPIKey();
