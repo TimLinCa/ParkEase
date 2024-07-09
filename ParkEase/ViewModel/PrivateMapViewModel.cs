@@ -64,9 +64,6 @@ namespace ParkEase.ViewModel
         private ParkEaseModel parkEaseModel;
 
         [ObservableProperty]
-        private string barcodeResult;
-
-        [ObservableProperty]
         private bool enableScanner;
 
         [ObservableProperty]
@@ -106,7 +103,6 @@ namespace ParkEase.ViewModel
             ListRectangleFill = new ObservableCollection<Rectangle>();
             privateStatusData = new List<PrivateStatus>();
 
-            BarcodeResult = string.Empty;
             EnableScanner = true;
             GridVisible = false;
             ScannerText = "";

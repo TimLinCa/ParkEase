@@ -113,6 +113,12 @@ namespace ParkEase
             {
                 BindingContext = provider.GetRequiredService<AnalysisViewModel>()
             });
+
+            builder.Services.AddSingleton<PrivateStatusViewModel>();
+            builder.Services.AddSingleton(provider => new PrivateStatusPage()
+            {
+                BindingContext = provider.GetRequiredService<PrivateStatusViewModel>()
+            });
             #endregion
 
             builder.Services.AddSingleton(provider => new ParkEaseModel(developerMode));
