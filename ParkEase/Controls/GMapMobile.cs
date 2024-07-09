@@ -748,6 +748,20 @@ namespace ParkEase.Controls
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
                 LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
 
+                // Retrieve the saved location from SecureStorage
+                string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+                string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+                if (!string.IsNullOrEmpty(savedLat) && !string.IsNullOrEmpty(savedLng))
+                {
+                    // Add the saved marker to the map
+                    string saveJsCommand = $"window.postMessage('SaveParkingLocation,{savedLat},{savedLng}');";
+                    await EvaluateJavaScriptAsync(saveJsCommand);
+
+                    // Update the saved marker location
+                    savedMarker = (savedLat, savedLng);
+                }
+
                 // Add marker after the map is initialized
                 if (cancellationTokenSource != null)
                 {
@@ -852,6 +866,11 @@ namespace ParkEase.Controls
 
             // Update the saved marker location
             savedMarker = (lat, lng);
+
+            //https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-8.0&tabs=android
+            // Save the location to SecureStorage
+            await SecureStorage.Default.SetAsync("SavedParkingLat", lat);
+            await SecureStorage.Default.SetAsync("SavedParkingLng", lng);
         }
 
         private async void RemoveParkingLocation(string lat, string lng)
@@ -861,6 +880,11 @@ namespace ParkEase.Controls
 
             // Clear the saved marker location
             savedMarker = null;
+
+            //https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-8.0&tabs=android
+            // Remove the location from SecureStorage
+            SecureStorage.Default.Remove("SavedParkingLat");
+            SecureStorage.Default.Remove("SavedParkingLng");
         }
     }
 }
