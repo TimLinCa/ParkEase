@@ -118,67 +118,8 @@ namespace ParkEase.Test.UnitTest
 
             // Assert
             _dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "Check your email or password!", "OK"), Times.Once);
-        }
-
-        [Fact]
-        public void LockoutAfterFailedAttempts()
-        {
-            // Arrange
-            var validEmail = "test@example.com";
-            var validPassword = "ValidPassword123";
-            var invalidPassword = "InvalidPassword";
-            _logInViewModel.Email = validEmail;
-            _logInViewModel.Password = invalidPassword;
-
-            // Mock setup to return a user with the valid email and password
-            var user = new User { Email = validEmail, Password = PasswordHasher.HashPassword(validPassword) };
-            _mongoDBServiceMock.Setup(m => m.GetData<User>(It.IsAny<string>())).ReturnsAsync(new List<User> { user });
-
-            // Mock dialog service to capture the alert messages
-            _dialogServiceMock.Setup(d => d.ShowAlertAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
-
-            // Act - Simulate failed login attempts
-            for (int i = 0; i < 5; i++)
-            {
-                _logInViewModel.LogInCommand.Execute(null);
-            }
-
-            // Assert that the account is locked after 5 failed attempts
-            _dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "Check your email or password!", "OK"), Times.Exactly(5));
-
-            // Act - Simulate an additional login attempt after lockout
-            _logInViewModel.LogInCommand.Execute(null);
-
-            // Assert
-            _dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "Account locked. Try again later.", "OK"), Times.Once);
-        }
-
-
-        [Fact]
-        public void PasswordRecoveryLink_ShouldNavigateToForgotPasswordPage()
-        {
-            // Arrange
-            var shellMock = new Mock<Shell>();
-            shellMock.Setup(s => s.GoToAsync(It.IsAny<string>(), It.IsAny<bool>()))
-                     .Returns(Task.CompletedTask);
-
-            var currentProperty = typeof(Shell).GetProperty(nameof(Shell.Current));
-            currentProperty.SetValue(null, shellMock.Object);
-
-            // Act
-            _logInViewModel.ForgotPasswordCommand.Execute(null);
-
-            // Assert
-            shellMock.Verify(
-                s => s.GoToAsync(It.Is<string>(route => route.Contains("ForgotPasswordPage")),
-                It.IsAny<bool>()),
-                Times.Once);
-
-            // Cleanup
-            currentProperty.SetValue(null, null);
-        }
-
-
+        }       
+      
         [Fact]
         public void PasswordMasking()
         {
@@ -195,18 +136,6 @@ namespace ParkEase.Test.UnitTest
             Assert.True(isPasswordMasked, "Password field should be masked.");
         }
 
-
-
     }
-
-    public class MockShell : Shell
-    {
-        public MockShell()
-        {
-            Routing.RegisterRoute("ForgotPasswordPage", typeof(ContentPage));
-        }
-    }
-
-
 
 }

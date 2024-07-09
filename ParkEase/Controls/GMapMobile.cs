@@ -535,6 +535,7 @@ namespace ParkEase.Controls
                     }
                 }
                 
+                //https://pineco.de/cross-origin-communication-postmessage/
                 // listen for the message event
                 window.addEventListener('message', receiveMessage, false);
          
@@ -841,6 +842,7 @@ namespace ParkEase.Controls
             // Remove the existing saved marker if it exists
             if (savedMarker.HasValue)
             {
+                //https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
                 string removeJsCommand = $"window.postMessage('RemoveParkingLocation,{savedMarker.Value.Lat},{savedMarker.Value.Lng}');";
                 await EvaluateJavaScriptAsync(removeJsCommand);
             }
