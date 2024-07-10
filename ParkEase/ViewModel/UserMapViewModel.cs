@@ -42,7 +42,7 @@ namespace ParkEase.ViewModel
 		private MapLine selectedMapLine;
 
 		[ObservableProperty]
-		private string selectedRadius;
+		private double selectedRadius;
 
 		[ObservableProperty]
 		private double radius;
@@ -81,6 +81,7 @@ namespace ParkEase.ViewModel
 		private readonly IMongoDBService mongoDBService;
 		private readonly IDialogService dialogService;
 		private readonly IGeocodingService geocodingService;
+		private bool isRangeUpdated = false;
 
 		private CancellationTokenSource cts;
 		//private readonly object lockObj = new object();
@@ -90,9 +91,9 @@ namespace ParkEase.ViewModel
 			this.mongoDBService = mongoDBService;
 			this.dialogService = dialogService;
 			this.geocodingService = geocodingService;
-
-			// Subscribe to property changed events
-			PropertyChanged += (sender, args) =>
+		
+            // Subscribe to property changed events
+            PropertyChanged += (sender, args) =>
 			{
 				if (args.PropertyName == nameof(ShowPublicParking) ||
 					args.PropertyName == nameof(ShowPrivateParking) ||
@@ -178,7 +179,8 @@ namespace ParkEase.ViewModel
 			isMapLoaded = true;
 		});
 
-		partial void OnSelectedMapLineChanged(MapLine? value)
+
+        partial void OnSelectedMapLineChanged(MapLine? value)
 		{
 			if (value == null)
 			{
@@ -348,25 +350,14 @@ namespace ParkEase.ViewModel
 		//A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
 		public ICommand UpdateRangeCommand => new RelayCommand(async () =>
 		{
-			if (string.IsNullOrEmpty(SelectedRadius))
-			{
-				System.Diagnostics.Debug.WriteLine("SelectedRadius is null or empty");
-				return;
-			}
-
-			// Parse selected radius to double (meters to kilometers)
-			if (!double.TryParse(SelectedRadius.Split(' ')[0], out double radius_out))
-			{
-				System.Diagnostics.Debug.WriteLine("Failed to parse SelectedRadius");
-				return;
-			}
-
-			radius_out /= 1000.0;
+            double radius_out = SelectedRadius / 1000.0;
 
 			// LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
 			List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out)).ToList();
 			Radius = radius_out;
-		});
+			isRangeUpdated = true;
+
+        });
 
 		//From chatGPT 
 		private bool isPointInCircle(List<MapPoint> points, double centerLat, double centerLng, double radius)
@@ -419,7 +410,13 @@ namespace ParkEase.ViewModel
 						filteredLines = filteredLines.Where(line => line.Color == "green").ToList();
 					}
 
-
+					if(isRangeUpdated)
+					{
+                        MapLines = new ObservableCollection<MapLine>(filteredLines);
+						SelectedMapLine = null;
+						isRangeUpdated = false;
+                        return;
+                    }
 					List<MapLine> filteredLinesToAdd = new List<MapLine>();
 					List<MapLine> filteredLinesToUpdate = new List<MapLine>();
 					List<MapLine> filteredLinesToDelete = new List<MapLine>();

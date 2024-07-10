@@ -76,26 +76,5 @@
         </ListView>
 
 
-        <Grid
-            HorizontalOptions="Fill"
-            IsVisible="{Binding GridVisible}"
-            VerticalOptions="Fill">
-            <cv:CameraView
-                x:Name="cameraView"
-                BarCodeDetectionEnabled="True"
-                BarCodeDetectionFrameRate="10"
-                CamerasLoaded="CameraLoaded"
-                HeightRequest="300"
-                VerticalOptions="Start"
-                WidthRequest="300">
-                <cv:CameraView.Behaviors>
-                    <toolkit:EventToCommandBehavior
-                        Command="{Binding BarcodeDetectEventCommand}"
-                        EventArgsConverter="{StaticResource BarcodeConverter}"
-                        EventName="BarcodeDetected" />
-                </cv:CameraView.Behaviors>
-            </cv:CameraView>
-        </Grid>
-
     </VerticalStackLayout>
 </ContentPage>

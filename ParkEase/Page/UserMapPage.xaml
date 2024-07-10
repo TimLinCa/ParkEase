@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:ParkEase.Controls"
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
@@ -21,16 +22,20 @@
         <AbsoluteLayout>
             <Grid AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="50" />
                     <RowDefinition />
-                    <RowDefinition Height="0.1*" />
-                    <RowDefinition Height="0.05*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="50" />
                 </Grid.RowDefinitions>
-                <SearchBar
-                    Grid.Row="0"
-                    Placeholder="Enter address"
-                    SearchCommand="{Binding SearchCommand}"
-                    Text="{Binding SearchText}" />
+
+                <Grid>
+
+                    <SearchBar
+                        HorizontalOptions="StartAndExpand"
+                        Placeholder="Enter address"
+                        SearchCommand="{Binding SearchCommand}"
+                        Text="{Binding SearchText}" />
+                </Grid>
 
                 <controls:GMapMobile
                     Grid.Row="1"
@@ -48,9 +53,54 @@
                     </controls:GMapMobile.Behaviors>
                 </controls:GMapMobile>
 
+                <VerticalStackLayout
+                    x:Name="FilterGrid"
+                    Grid.Row="2"
+                    HeightRequest="500"
+                    IsVisible="False">
+                    <input:CheckBox
+                        Margin="5"
+                        IsChecked="{Binding ShowPublicParking}"
+                        Text="Public Parking"
+                        Type="Filled" />
+                    <input:CheckBox
+                        Margin="5"
+                        IsChecked="{Binding ShowPrivateParking}"
+                        Text="Private Parking"
+                        Type="Filled" />
+                    <input:CheckBox
+                        Margin="5"
+                        IsChecked="{Binding ShowAvailableParking}"
+                        Text="Available Parking"
+                        Type="Filled" />
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.15*" />
+                            <ColumnDefinition Width="0.8*" />
+                            <ColumnDefinition Width="0.12*" />
+                            <ColumnDefinition Width="0.15*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Margin="5,0,0,0">Range:</Label>
+                        <Slider
+                            x:Name="RadiusSlider"
+                            Grid.Column="1"
+                            Maximum="2000"
+                            Minimum="10"
+                            VerticalOptions="CenterAndExpand"
+                            Value="{Binding SelectedRadius}" />
+                        <Grid Grid.Column="2">
+                            <Label Text="{Binding Source={x:Reference RadiusSlider}, Path=Value, StringFormat='{0:F0}', Mode=TwoWay}" />
+                        </Grid>
+
+                        <Label Grid.Column="3">meters</Label>
+
+                    </Grid>
+
+                </VerticalStackLayout>
 
                 <Grid
-                    Grid.Row="2"
+                    Grid.Row="3"
                     HorizontalOptions="Center"
                     VerticalOptions="Center">
                     <StackLayout
@@ -58,26 +108,7 @@
                         Orientation="Horizontal"
                         Spacing="8"
                         VerticalOptions="CenterAndExpand">
-                        <Label
-                            Text="Select Range:"
-                            TextColor="Black"
-                            VerticalOptions="Center" />
-                        <Picker
-                            x:Name="RangePicker"
-                            Title="Please select"
-                            BackgroundColor="White"
-                            SelectedItem="{Binding SelectedRadius}"
-                            Style="{StaticResource MAUIDefaultPicker}"
-                            TextColor="Black"
-                            TitleColor="Black"
-                            VerticalOptions="Center"
-                            WidthRequest="150">
-                            <Picker.Items>
-                                <x:String>200 meters</x:String>
-                                <x:String>500 meters</x:String>
-                                <x:String>1000 meters</x:String>
-                            </Picker.Items>
-                        </Picker>
+
                         <StackLayout
                             HorizontalOptions="CenterAndExpand"
                             Orientation="Horizontal"
@@ -85,11 +116,24 @@
                             VerticalOptions="CenterAndExpand">
 
                             <Button
-                                Command="{Binding UpdateRangeCommand}"
-                                Text="Update Range"
-                                VerticalOptions="Center" />
+                                BackgroundColor="Transparent"
+                                Clicked="FilterExpand"
+                                HorizontalOptions="Center">
+                                <Button.ImageSource>
+                                    <FontImageSource
+                                        FontFamily="MaterialRegular"
+                                        Glyph="{x:Static m:MaterialRegular.Tune}"
+                                        Size="30"
+                                        Color="#512BD4" />
+                                </Button.ImageSource>
+                            </Button>
 
                         </StackLayout>
+
+                        <Button
+                            Command="{Binding UpdateRangeCommand}"
+                            Text="Update Range"
+                            VerticalOptions="Center" />
 
                     </StackLayout>
                 </Grid>
@@ -113,32 +157,5 @@
         </AbsoluteLayout>
 
     </Grid>
-
-    <uranium:UraniumContentPage.Attachments>
-        <material:BackdropView
-            x:Name="backdrop"
-            Title="Filter"
-            BackgroundColor="LightBlue"
-            IconImageSource="Image/filter.png">
-            <VerticalStackLayout>
-                <input:CheckBox
-                    Margin="5"
-                    IsChecked="{Binding ShowPublicParking}"
-                    Text="Public Parking"
-                    Type="Filled" />
-                <input:CheckBox
-                    Margin="5"
-                    IsChecked="{Binding ShowPrivateParking}"
-                    Text="Private Parking"
-                    Type="Filled" />
-                <input:CheckBox
-                    Margin="5"
-                    IsChecked="{Binding ShowAvailableParking}"
-                    Text="Available Parking"
-                    Type="Filled" />
-
-            </VerticalStackLayout>
-        </material:BackdropView>
-    </uranium:UraniumContentPage.Attachments>
 
 </uranium:UraniumContentPage>

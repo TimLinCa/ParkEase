@@ -1,9 +1,13 @@
 ﻿using Camera.MAUI;
 using Camera.MAUI.ZXing;
+using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MongoDB.Driver;
 using ParkEase.Contracts.Services;
+using ParkEase.Controls;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Model;
@@ -84,10 +88,12 @@ namespace ParkEase.ViewModel
 
         private bool isDetecting = false;
 
+        private IPopupService popupService1;
 
-        public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
+
+        public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model, IPopupService popupService)
         {
-
+            popupService1 = popupService;
             userLocation = DataService.GetLocation();
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
@@ -99,6 +105,38 @@ namespace ParkEase.ViewModel
             ScannerText = "";
             addressDistanceList = new ObservableCollection<AddressDistance>();
         }
+
+        public ICommand SimplePopupClickedCommand => new RelayCommand(async () =>
+        {
+            var page = new ScannerPopUp();
+            await Application.Current.MainPage.ShowPopupAsync(page);
+        });
+
+        /*[RelayCommand]
+        public async Task SimplePopupClicked()
+        {
+            try
+            {
+                if (isDetecting)
+                {
+                    StopCamera();
+                }
+                else
+                {
+                    OpenCamera();
+                    var viewModel = new PrivateSearchViewModel(mongoDBService, dialogService, parkEaseModel, popupService1);
+                    var popup = new CameraPopUp(viewModel);
+                    await popupService1.ShowPopupAsync(popup);
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+            
+        }*/
 
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
@@ -194,7 +232,8 @@ namespace ParkEase.ViewModel
                 isNavigating = true;
               
                 idResult = parkingLotData.FirstOrDefault(data => data.Address == SelectedAddress.Address)?.Id;
-                parkEaseModel.PrivateMapId = idResult;
+                DataService.SetId(idResult);
+                //parkEaseModel.PrivateMapId = idResult;
                 SelectedAddress = null;
                 isNavigating = false;
                 await Shell.Current.GoToAsync(nameof(PrivateMapPage));
@@ -212,7 +251,9 @@ namespace ParkEase.ViewModel
                 idResult = qrCode;
                 StopCameraAsyncEvent?.Invoke();
                 GridVisible = !GridVisible;
-                parkEaseModel.PrivateMapId = idResult;
+                DataService.SetId(idResult);
+
+                //parkEaseModel.PrivateMapId = idResult;
                 MainThread.BeginInvokeOnMainThread(MyMainThreadCode);
             }
             catch (Exception ex)
@@ -245,15 +286,17 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (isDetecting)
+                var page = new ScannerPopUp();
+                await Application.Current.MainPage.ShowPopupAsync(page);
+                /*if (isDetecting)
                 {
                     StopCamera();
                 }
                 else
                 {
                     OpenCamera();
-                }
-              
+                }*/
+
             }
             catch (Exception ex)
             {

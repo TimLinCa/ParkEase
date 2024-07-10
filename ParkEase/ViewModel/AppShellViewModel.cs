@@ -22,11 +22,15 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private bool analysisVisible;
 
+        [ObservableProperty]
+        private bool privateStatusVisible;
+
         public AppShellViewModel()
         {
             mapVisible = true;
             createMapVisible = true;
             analysisVisible = true;
+            privateStatusVisible = true;
             WeakReferenceMessenger.Default.Register<UserChangedMessage>(this,(o, e) =>
             {
                 UserChanged(e.Value);

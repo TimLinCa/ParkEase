@@ -39,6 +39,13 @@
         IsVisible="{Binding AnalysisVisible}"
         Route="AnalysisPage" />
 
+    <ShellContent
+        Title="Private Parking Status"
+        Shell.NavBarIsVisible="False"
+        ContentTemplate="{DataTemplate page:PrivateStatusPage}"
+        IsVisible="{Binding PrivateStatusVisible}"
+        Route="PrivateStatusPage" />
+
     <Shell.FlyoutHeader>
         <Image
             Aspect="AspectFit"

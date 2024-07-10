@@ -25,6 +25,7 @@ namespace ParkEase.Controls
         private IGeolocatorService geolocation;
         private CancellationTokenSource cancellationTokenSource;
         private List<string> markerIds = new List<string>(); // Track all marker IDs
+        private (string Lat, string Lng)? savedMarker = null; // Track the currently saved marker
         public ObservableCollection<MapLine> Lines
         {
             get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
@@ -133,6 +134,7 @@ namespace ParkEase.Controls
                     let currentLng;
                     let markers = []; // Track all markers
                     let previousSelectedMarker = null;
+                    let savedLocationMarker = null; // Variable to keep track of the saved location marker
 
                 // Initializes the Google Map 
                 function initMap() {
@@ -147,7 +149,35 @@ namespace ParkEase.Controls
                 }
 
                 // Add a marker to the map  
-                function addMarker(lat, lng, title, icon) {
+                function addMarker(lat, lng, title, icon, isSavedLocation = false) {
+
+                    // Check if it's a saved location marker and update it separately
+                    if (isSavedLocation) {
+
+                        // Remove the existing saved location marker if it exists
+                        if (savedLocationMarker) {
+                            savedLocationMarker.setMap(null);
+                        }
+
+                        // Create a new marker for the saved location   
+                        savedLocationMarker = new google.maps.Marker({
+                            position: { lat: lat, lng: lng },
+                            map: map,
+                            title: title,
+                            icon: {
+                                url: icon,
+                                scaledSize: new google.maps.Size(24, 24)
+                            }
+                        });
+
+                        // Store the original icon of the saved location marker
+                        savedLocationMarker.originalIcon = icon; 
+
+                        // Exit the function after handling the saved location marker
+                        return; 
+                    }
+
+                    // Create a new marker for private markers
                     const marker = new google.maps.Marker({
                         position: { lat: lat, lng: lng },
                         map: map,
@@ -158,14 +188,15 @@ namespace ParkEase.Controls
                         }
                     });
 
-                    // Store the original color in the marker object
+                    // Store the original color in the private marker object
                     marker.originalIcon = icon;  
 
-                    // Add marker to the list
+                    // Add private marker to the list
                     markers.push(marker); 
 
-                    // Add a click event listener to the marker 
+                    // Add a click event listener to the private marker 
                     marker.addListener('click', function() {
+
                         // Reset the color of the previously selected marker, if any
                         if (previousSelectedMarker) {
                             previousSelectedMarker.setIcon({
@@ -197,20 +228,34 @@ namespace ParkEase.Controls
                          // Store the selected marker's coordinates
                         selectedMarkerCoordinates = { lat: lat, lng: lng };
 
-                        selectedLineCoordinates = null; // Clear line coordinates 
+                        // Clear line coordinates 
+                        selectedLineCoordinates = null;  
 
+                        // Redirect to a custom URL scheme with the marker's information
+                        //https://www.w3schools.com/js/js_window_location.asp
                         window.location.href = ""myapp://privateparkingclicked?lat="" + lat + ""&lng="" + lng + ""&title="" + title;
                     });
 
                 }  
 
                 // Clear all markers
-                function clearMarkers() {{
-                    for (let i = 0; i < markers.length; i++) {{
+                function clearMarkers() {
+
+                    // Loop through all markers and remove them from the map
+                    for (let i = 0; i < markers.length; i++) {
                         markers[i].setMap(null);
-                    }}
+                    }
+
+                    // Clear the markers array
                     markers = [];
-                }}
+
+                    // Remove the saved location marker if it exists
+                    if (savedLocationMarker) {
+                            savedLocationMarker.setMap(null);
+                            savedLocationMarker = null;
+                        }
+                }
+
 
                 // Clear all lines from the map
                 function clearLines() {
@@ -457,14 +502,39 @@ namespace ParkEase.Controls
                                 navigateToMarker(selectedMarkerCoordinates.lat, selectedMarkerCoordinates.lng);
                             } else if (selectedLineCoordinates) {
                                 navigateToLine();
-                            }
+                            } 
+                            break;
+                        case event.data.startsWith('SaveParkingLocation') && event.data:
+                            var latLng = event.data.split(',').slice(1);
+                            addMarker(parseFloat(latLng[0]), parseFloat(latLng[1]), 'Saved Parking Location', 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', true);
+                            break;
+                        case event.data.startsWith('RemoveParkingLocation') && event.data:
+                            var latLng = event.data.split(',').slice(1);
+                            removeMarker(parseFloat(latLng[0]), parseFloat(latLng[1]), true);
                             break;
                         default:
                             console.warn('Unknown event data:', event.data);
                             break;
                     }
                 }
+
+                function removeMarker(lat, lng, isSavedLocation = false) {
+                    if (isSavedLocation && savedLocationMarker) {
+                        savedLocationMarker.setMap(null);
+                        savedLocationMarker = null;
+                        return;
+                    }
+
+                    for (let i = 0; i < markers.length; i++) {
+                        if (markers[i].getPosition().lat() === lat && markers[i].getPosition().lng() === lng) {
+                            markers[i].setMap(null);
+                            markers.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
                 
+                //https://pineco.de/cross-origin-communication-postmessage/
                 // listen for the message event
                 window.addEventListener('message', receiveMessage, false);
          
@@ -500,6 +570,18 @@ namespace ParkEase.Controls
             MessagingCenter.Subscribe<UserMapViewModel>(this, "ClearMarkers", async (sender) =>
             {
                 await ClearMarkersAsync();
+            });
+
+            // Subscribe to "SaveParkingLocation" message
+            MessagingCenter.Subscribe<MyBottomSheet, (string lat, string lng)>(this, "SaveParkingLocation", (sender, args) =>
+            {
+                SaveParkingLocation(args.lat, args.lng);
+            });
+
+            // Subscribe to "RemoveParkingLocation" message
+            MessagingCenter.Subscribe<MyBottomSheet, (string lat, string lng)>(this, "RemoveParkingLocation", (sender, args) =>
+            {
+                RemoveParkingLocation(args.lat, args.lng);
             });
         }
 
@@ -666,6 +748,20 @@ namespace ParkEase.Controls
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
                 LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
 
+                // Retrieve the saved location from SecureStorage
+                string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+                string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+                if (!string.IsNullOrEmpty(savedLat) && !string.IsNullOrEmpty(savedLng))
+                {
+                    // Add the saved marker to the map
+                    string saveJsCommand = $"window.postMessage('SaveParkingLocation,{savedLat},{savedLng}');";
+                    await EvaluateJavaScriptAsync(saveJsCommand);
+
+                    // Update the saved marker location
+                    savedMarker = (savedLat, savedLng);
+                }
+
                 // Add marker after the map is initialized
                 if (cancellationTokenSource != null)
                 {
@@ -691,16 +787,16 @@ namespace ParkEase.Controls
         {
             // SVG data URL for the circle "P" logo with color
             var markerIconPath = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes($@"
-        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
-          <circle cx='12' cy='12' r='10' fill='{color}'/>
-          <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
-         </svg>
-    "))}";
+                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                  <circle cx='12' cy='12' r='10' fill='{color}'/>
+                  <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
+                 </svg>
+            "))}";
 
             // JavaScript command to add the marker with the specified icon
             string jsCommand = $@"
-        addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
-    ";
+                addMarker({lat}, {lng}, '{title}', '{markerIconPath}');
+            ";
             System.Diagnostics.Debug.WriteLine($"Adding marker: {lat}, {lng}, {title}");
 
             await EvaluateJavaScriptAsync(jsCommand);
@@ -752,6 +848,43 @@ namespace ParkEase.Controls
                 // Find the line that matches the selected line based on the points
                 SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
             }
+        }
+
+        private async void SaveParkingLocation(string lat, string lng)
+        {
+            // Remove the existing saved marker if it exists
+            if (savedMarker.HasValue)
+            {
+                //https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+                string removeJsCommand = $"window.postMessage('RemoveParkingLocation,{savedMarker.Value.Lat},{savedMarker.Value.Lng}');";
+                await EvaluateJavaScriptAsync(removeJsCommand);
+            }
+
+            // Add the new marker
+            string saveJsCommand = $"window.postMessage('SaveParkingLocation,{lat},{lng}');";
+            await EvaluateJavaScriptAsync(saveJsCommand);
+
+            // Update the saved marker location
+            savedMarker = (lat, lng);
+
+            //https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-8.0&tabs=android
+            // Save the location to SecureStorage
+            await SecureStorage.Default.SetAsync("SavedParkingLat", lat);
+            await SecureStorage.Default.SetAsync("SavedParkingLng", lng);
+        }
+
+        private async void RemoveParkingLocation(string lat, string lng)
+        {
+            string jsCommand = $"window.postMessage('RemoveParkingLocation,{lat},{lng}');";
+            await EvaluateJavaScriptAsync(jsCommand);
+
+            // Clear the saved marker location
+            savedMarker = null;
+
+            //https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-8.0&tabs=android
+            // Remove the location from SecureStorage
+            SecureStorage.Default.Remove("SavedParkingLat");
+            SecureStorage.Default.Remove("SavedParkingLng");
         }
     }
 }

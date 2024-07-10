@@ -24,6 +24,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using ParkEase.Page;
 using ParkEase.Controls;
+using CommunityToolkit.Maui.Storage;
+
 
 namespace ParkEase.ViewModel
 {
@@ -52,7 +54,6 @@ namespace ParkEase.ViewModel
         private List<PrivateStatus> privateStatusData;
 
         private string address;
-        private string city;
         private double fee;
         private string limitHour;
         private List<FloorInfo> listFloorInfos;
@@ -62,9 +63,6 @@ namespace ParkEase.ViewModel
         private readonly IDialogService dialogService;
 
         private ParkEaseModel parkEaseModel;
-
-        [ObservableProperty]
-        private string barcodeResult;
 
         [ObservableProperty]
         private bool enableScanner;
@@ -95,26 +93,86 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ImageSource mapImageData;
 
-        public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
+        IFileSaver fileSaver;
+        CancellationTokenSource cls = new CancellationTokenSource();
+
+        public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model, IFileSaver _fileSaver)
         {
 
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.parkEaseModel = model;
+            this.fileSaver = _fileSaver;
             selectedFloorName = string.Empty;
             FloorNames = new ObservableCollection<string>();
             ListRectangleFill = new ObservableCollection<Rectangle>();
             privateStatusData = new List<PrivateStatus>();
 
-            BarcodeResult = string.Empty;
             EnableScanner = true;
             GridVisible = false;
             ScannerText = "";
         }
 
+        /*public async Task SaveImageToLocal(ImageSource imageSource)
+        {
+            try
+            {
+                //using var stream = new MemoryStream()
+                if (imageSource is StreamImageSource streamImageSource)
+                {
+                    await dialogService.ShowAlertAsync("image data", "Private Map image: " + imageSource, "OK");
+                    var stream = await streamImageSource.Stream(CancellationToken.None);
+                    if (stream != null)
+                    {
+                        string fileName = $"CapturedImage_{DateTime.Now:yyyyMMddHHmmss}.jpg";
+
+                        // Convert stream to byte array
+                        using var memoryStream = new MemoryStream();
+                        await stream.CopyToAsync(memoryStream);
+                        byte[] imageData = memoryStream.ToArray();
+
+                        //https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/image?view=net-maui-8.0#load-an-image-from-a-stream
+
+                        // Save file using FileSaver
+                        var result = await fileSaver.SaveAsync(fileName, new MemoryStream(imageData), cts.Token);
+                        cts.Cancel();
+
+                        //https://www.youtube.com/watch?v=Q9T-dRYq3Ps&t=417s
+                        // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/essentials/file-saver?tabs=android
+
+                        if (result.IsSuccessful)
+                        {
+                            await Application.Current.MainPage.DisplayAlert("Success", $"Image saved successfully", "OK");
+                        }
+                        else
+                        {
+                            await Application.Current.MainPage.DisplayAlert("Error", "Failed to save image", "OK");
+                        }
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Error", "Failed to get image stream", "OK");
+                    }
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", "Unsupported image source type", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors
+                await Application.Current.MainPage.DisplayAlert("Error", $"Failed to save image: {ex.Message}", "OK");
+            }
+        }
+        
+
+         */
+
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
-            privateParkingId = parkEaseModel.PrivateMapId;
+            privateParkingId = DataService.GetId();
+            //privateParkingId = parkEaseModel.PrivateMapId;
             await LoadParkingData();
 
             cts = new CancellationTokenSource();
@@ -180,6 +238,8 @@ namespace ParkEase.ViewModel
                 {
                     SelectedFloorName = FloorNames.First();
                 }
+                
+                await dialogService.ShowBottomSheet($"{address}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: ? available lots", false, "", "");
             }
             catch (Exception ex)
             {
@@ -191,6 +251,8 @@ namespace ParkEase.ViewModel
         {
             _ = ShowSelectedMap();
         }*/
+
+        
 
         private async Task Run(CancellationToken token)
         {
@@ -211,20 +273,6 @@ namespace ParkEase.ViewModel
                 }
             }, token);
         }
-
-
-        /*        [RelayCommand]
-                public async Task GoSeachPage()
-                {
-                    try
-                    {
-                        await Shell.Current.GoToAsync(nameof(PrivateSearchPage));
-                    }
-                    catch (Exception ex)
-                    {
-                        await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-                    }
-                }*/
 
         private async Task ShowSelectedMap()
         {
@@ -287,7 +335,7 @@ namespace ParkEase.ViewModel
 
 
                 ListRectangleFill = rectangles;
-                //await dialogService.ShowBottomSheet($"{address} {city}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
+                //await dialogService.ShowBottomSheet($"{address}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
             }
             catch (Exception)
             {

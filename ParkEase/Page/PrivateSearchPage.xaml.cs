@@ -5,24 +5,39 @@ using ParkEase.ViewModel;
 using ZXing.Net.Maui;
 using ZXing.Net.Maui.Controls;
 using BarcodeFormat = Camera.MAUI.BarcodeFormat;
+using CommunityToolkit.Maui.Views;
+using ParkEase.Core.Contracts.Services;
+using ParkEase.Core.Model;
+using MongoDB.Driver;
+using ParkEase.Contracts.Services;
+
 
 namespace ParkEase.Page;
 
 public partial class PrivateSearchPage : ContentPage
 {
-    private object cameraLock = new object();
 
-	public PrivateSearchPage(PrivateSearchViewModel viewmodel)
+/*    private object cameraLock = new object();
+    private readonly IMongoDBService mongoDBService;
+
+    private readonly IDialogService dialogService;
+
+    private readonly ParkEaseModel parkEaseModel;*/
+
+    public PrivateSearchPage()
 	{
 		InitializeComponent();
-        BindingContext = viewmodel;
+/*        BindingContext = viewmodel;
         viewmodel.StopCameraAsyncEvent += stopCameraAsyncEvent;
-        viewmodel.StartCameraAsyncEvent += startCameraAsyncEvent;
+        viewmodel.StartCameraAsyncEvent += startCameraAsyncEvent;*/
     }
+
+    
+
 
     //https://www.nuget.org/packages/Camera.MAUI.ZXing
     //https://learn.microsoft.com/en-us/answers/questions/468404/(xamarin-community-toolkit)-how-i-can-use-cameravi
-    private void CameraLoaded(object sender, EventArgs e)
+   /* private void CameraLoaded(object sender, EventArgs e)
     {
         cameraView.Camera = cameraView.Cameras.First();
         cameraView.BarCodeDecoder = new ZXingBarcodeDecoder();
@@ -62,5 +77,5 @@ public partial class PrivateSearchPage : ContentPage
             });
         }
        
-    }
+    }*/
 }

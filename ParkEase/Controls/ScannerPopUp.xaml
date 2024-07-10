@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:converter="clr-namespace:ParkEase.Converters"
+             xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
+             x:Class="ParkEase.Controls.ScannerPopUp"
+             Closed="OnPopupClosed"
+             Opened="OnPopupOpened"
+             >
+
+    <toolkit:Popup.Resources>
+        <converter:BarcodeDetectionEventConverter x:Key="BarcodeConverter" />
+    </toolkit:Popup.Resources>
+
+
+    <VerticalStackLayout>
+        <cv:CameraView
+            x:Name="cameraView"
+            BarCodeDetectionEnabled="True"
+            BarCodeDetectionFrameRate="10"
+            CamerasLoaded="CameraLoaded"
+            HeightRequest="250"
+            WidthRequest="250"
+            VerticalOptions="Start"
+            BarcodeDetected="BarcodeDetectEventCommand">
+        </cv:CameraView>
+    </VerticalStackLayout>
+</toolkit:Popup>

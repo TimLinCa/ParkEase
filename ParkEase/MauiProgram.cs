@@ -16,6 +16,7 @@ using The49.Maui.BottomSheet;
 using UraniumUI;
 using ZXing.Net.Maui.Controls;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using CommunityToolkit.Maui.Storage;
 
 namespace ParkEase
 {
@@ -55,6 +56,9 @@ namespace ParkEase
                     essentials.UseMapServiceToken(config["BingAPIKey"].ToString());
                 })
                 .UseBarcodeReader();
+
+            builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
+            builder.Services.AddTransient<PrivateMapViewModel>();
 
             #region page
 
@@ -102,12 +106,22 @@ namespace ParkEase
             });
 
             builder.Services.AddSingleton<PrivateSearchViewModel>();
-            builder.Services.AddSingleton(provider => new PrivateSearchPage(provider.GetRequiredService<PrivateSearchViewModel>()));
+            builder.Services.AddSingleton(provider => new PrivateSearchPage
+            {
+                BindingContext = provider.GetRequiredService<PrivateSearchViewModel>()
+            });
+
 
             builder.Services.AddSingleton<AnalysisViewModel>();
             builder.Services.AddSingleton(provider => new AnalysisPage()
             {
                 BindingContext = provider.GetRequiredService<AnalysisViewModel>()
+            });
+
+            builder.Services.AddSingleton<PrivateStatusViewModel>();
+            builder.Services.AddSingleton(provider => new PrivateStatusPage()
+            {
+                BindingContext = provider.GetRequiredService<PrivateStatusViewModel>()
             });
             #endregion
 
