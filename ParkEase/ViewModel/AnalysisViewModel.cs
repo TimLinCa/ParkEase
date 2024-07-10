@@ -119,6 +119,9 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private string areaNameText;
+
+        [ObservableProperty]
+        private IAsyncRelayCommand applyCommand;
         #endregion
 
         #region OnPropertyChangedEvent
@@ -130,7 +133,7 @@ namespace ParkEase.ViewModel
                 AreaNameSelected = null;
                 IsFloowSelectedVisible = false;
             }
-            UpdateAreaNameItemSource();
+            loadDataTask = UpdateAreaNameItemSource();
         }
 
         partial void OnIsAllFloorCheckChanged(bool value)
@@ -165,17 +168,22 @@ namespace ParkEase.ViewModel
         }
         #endregion
 
+        #region public properties
+
+        #endregion
+
         #region private variables
+        private List<ParkingLog> parkingLogs;
         private ParkEaseModel model;
         private IMongoDBService mongoDBService;
         private IDialogService dialogService;
         private List<ParkingData> parkingDatas;
         private List<PrivateParking> privateParkings;
-        private List<ParkingLog> parkingLogs;
         DateOnly currentStartDate;
         DateOnly currentEndDate;
         TimeOnly currentStartTime;
         TimeOnly currentEndTime;
+        private Task loadDataTask;
         #endregion
         public AnalysisViewModel(ParkEaseModel model, IMongoDBService mongoDBService, IDialogService dialogService)
         {
@@ -208,6 +216,8 @@ namespace ParkEase.ViewModel
                     NamePadding = new LiveChartsCore.Drawing.Padding(0, 15),
                 }
             };
+
+            ApplyCommand = new AsyncRelayCommand(ExecuteApplyCommandAsync);
 
             IsUsageHourlyChecked = true;
         }
@@ -245,31 +255,38 @@ namespace ParkEase.ViewModel
             }
         });
 
-        public ICommand ApplyCommand => new RelayCommand(async () =>
+        private async Task ExecuteApplyCommandAsync()
         {
-            if (EndTime < StartTime)
+            try
             {
-                await dialogService.ShowAlertAsync("Error", "End time should be greater than start time", "OK");
-                return;
-            }
-
-            if (!IsCurrentDayCheck)
-            {
-                if (SelectedDateRange == null)
+                if (EndTime < StartTime)
                 {
-                    await dialogService.ShowAlertAsync("Error", "Please select a date range", "OK");
+                    await dialogService.ShowAlertAsync("Error", "End time should be greater than start time", "OK");
                     return;
                 }
-            }
 
-            await UpdateUsageData();
-            UpdateUsageGraph();
-            UpdateParkingTimeGraph();
-        });
+                if (!IsCurrentDayCheck)
+                {
+                    if (SelectedDateRange == null)
+                    {
+                        await dialogService.ShowAlertAsync("Error", "Please select a date range", "OK");
+                        return;
+                    }
+                }
+
+                await UpdateUsageData();
+                UpdateUsageGraph();
+                UpdateParkingTimeGraph();
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", $"Load data error, please contact developer team. Reason:{ex}", "OK");
+            }
+        }
         #endregion
 
         #region Private method
-        private async Task UpdateAreaNameItemSource()
+        public async Task UpdateAreaNameItemSource()
         {
             if (AreaTypeSelected == AreaType.Public.ToString())
             {
@@ -328,6 +345,10 @@ namespace ParkEase.ViewModel
         {
             try
             {
+                if(loadDataTask.IsCompleted == false)
+                {
+                    await loadDataTask;
+                }
                 currentStartDate = IsCurrentDayCheck ? DateOnly.FromDateTime(DateTime.Now) : DateOnly.FromDateTime(SelectedDateRange.StartDate.Value);
                 currentEndDate = IsCurrentDayCheck ? DateOnly.FromDateTime(DateTime.Now) : DateOnly.FromDateTime(SelectedDateRange.EndDate.Value);
                 currentStartTime = IsAllDayCheck ? TimeOnly.MinValue : new TimeOnly(StartTime.Hours, StartTime.Minutes, 0);
@@ -362,7 +383,7 @@ namespace ParkEase.ViewModel
             }
             catch (Exception ex)
             {
-                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+                throw ex;
             }
 
         }
@@ -371,7 +392,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (parkingLogs != null)
+                if (parkingLogs != null && parkingLogs.Count != 0)
                 {
                     TimeInterval timeInterval = TimeInterval.Hourly;
 
@@ -403,6 +424,7 @@ namespace ParkEase.ViewModel
                             Labels = usageData.Select(ud=>ud.Key.ToString()).ToArray()
                         }
                     };
+                    
                     double AverageUsageNum = Math.Round(usageData.Values.Average(), 2);
                     if (AverageUsageNum < 50)
                     {
@@ -421,7 +443,7 @@ namespace ParkEase.ViewModel
             }
             catch (Exception ex)
             {
-                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+                throw ex;
             }
 
         }
@@ -430,7 +452,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (parkingLogs != null)
+                if (parkingLogs != null && parkingLogs.Count != 0)
                 {
                     TimeInterval timeInterval = TimeInterval.Daily;
 
@@ -464,7 +486,7 @@ namespace ParkEase.ViewModel
             }
             catch (Exception ex)
             {
-                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+                throw ex;
             }
         }
         #endregion

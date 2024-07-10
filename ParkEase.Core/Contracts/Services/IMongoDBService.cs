@@ -22,6 +22,8 @@ namespace ParkEase.Core.Contracts.Services
 
         Task UpdateData<T>(string collectionName, FilterDefinition<T> filter, UpdateDefinition<T> update);
 
+        Task DropCollection(string collectionName);
+
     }
 
     public class DeleteDataResult
