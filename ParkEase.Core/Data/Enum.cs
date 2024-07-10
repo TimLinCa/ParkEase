@@ -20,4 +20,11 @@ namespace ParkEase.Core.Data
         Public,
 		Private
 	}   
+
+    public enum TimeInterval
+    {
+        Hourly,
+        Daily,
+        Monthly,
+    }
 }

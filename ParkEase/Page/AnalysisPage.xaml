@@ -6,6 +6,7 @@
     xmlns:calendar="clr-namespace:Syncfusion.Maui.Calendar;assembly=Syncfusion.Maui.Calendar"
     xmlns:controls="clr-namespace:ParkEase.Controls"
     xmlns:converters="clr-namespace:ParkEase.Converters"
+    xmlns:editors="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
@@ -58,6 +59,7 @@
                             ItemsSource="{Binding AreaTypeItemSource, Mode=TwoWay}"
                             MinimumWidthRequest="150"
                             SelectedItem="{Binding AreaTypeSelected}" />
+
                         <material:AutoCompleteTextField
                             Title="Area Name"
                             Grid.Column="1"
@@ -65,27 +67,30 @@
                             ItemsSource="{Binding AreaNameItemSource, Mode=TwoWay}"
                             MinimumWidthRequest="150"
                             SelectedText="{Binding AreaNameSelected}"
-                            Text="{Binding AreaName}">
+                            Text="{Binding AreaNameText}">
                             <material:AutoCompleteTextField.Behaviors>
                                 <toolkit:EventToCommandBehavior Command="{Binding AreaNameUnfocusedCommand}" EventName="Unfocused" />
                             </material:AutoCompleteTextField.Behaviors>
                         </material:AutoCompleteTextField>
-                        <HorizontalStackLayout>
-                            <material:CheckBox
-                                Margin="5"
-                                IsChecked="{Binding IsAllFloorCheck}"
-                                IsEnabled="{Binding IsAllFloorCheckEnabled}"
-                                MaximumHeightRequest="50"
-                                Text="All Floors" />
-                        </HorizontalStackLayout>
 
-                        <material:PickerField
-                            Title="Floor"
-                            Grid.Column="0"
-                            Margin="5"
-                            IsEnabled="{Binding IsFloorEnabled}"
-                            ItemsSource="{Binding FloorItemSource, Mode=TwoWay}"
-                            SelectedItem="{Binding FloorSelected}" />
+                        <VerticalStackLayout IsVisible="{Binding IsFloowSelectedVisible}">
+                            <HorizontalStackLayout>
+                                <material:CheckBox
+                                    Margin="5,10,5,5"
+                                    IsChecked="{Binding IsAllFloorCheck}"
+                                    MaximumHeightRequest="50"
+                                    Text="All Floors" />
+                            </HorizontalStackLayout>
+
+                            <material:PickerField
+                                Title="Floor"
+                                Grid.Column="0"
+                                Margin="5"
+                                IsEnabled="{Binding IsFloorEnabled}"
+                                ItemsSource="{Binding FloorItemSource, Mode=TwoWay}"
+                                SelectedItem="{Binding FloorSelected}" />
+                        </VerticalStackLayout>
+
 
                         <BoxView
                             StyleClass="Divider"
@@ -106,9 +111,12 @@
                         </HorizontalStackLayout>
 
                         <calendar:SfCalendar
+                            x:Name="SfCalendar"
                             BackgroundColor="Transparent"
                             IsVisible="{Binding IsCurrentDayCheck, Converter={StaticResource InverseBoolConverter}}"
+                            MaximumDate="{Binding CurrentDate}"
                             RangeSelectionDirection="Both"
+                            SelectedDateRange="{Binding SelectedDateRange, Mode=TwoWay}"
                             SelectionMode="Range" />
                         <BoxView
                             StyleClass="Divider"
@@ -136,6 +144,7 @@
                             Icon="{FontImageSource FontFamily=MaterialRegular,
                                                    Glyph={x:Static m:MaterialRegular.Alarm}}"
                             IsVisible="{Binding IsAllDayCheck, Converter={StaticResource InverseBoolConverter}}"
+                            TextColor="Black"
                             Time="{Binding StartTime}" />
 
                         <material:TimePickerField
@@ -146,6 +155,7 @@
                             Icon="{FontImageSource FontFamily=MaterialRegular,
                                                    Glyph={x:Static m:MaterialRegular.Alarm}}"
                             IsVisible="{Binding IsAllDayCheck, Converter={StaticResource InverseBoolConverter}}"
+                            TextColor="Black"
                             Time="{Binding EndTime}" />
 
                     </StackLayout>
@@ -165,7 +175,7 @@
             Grid.Column="0"
             Clicked="ToggleExpander"
             HorizontalOptions="End"
-            MaximumHeightRequest="20"
+            MaximumHeightRequest="15"
             Style="{StaticResource MAUIDefaultButton}"
             Text="&lt;"
             TranslationX="20"
@@ -199,10 +209,10 @@
 
                     <Label
                         FontAttributes="Bold"
-                        FontSize="120"
+                        FontSize="80"
                         HorizontalOptions="Center"
-                        Text="50%"
-                        TextColor="Green"
+                        Text="{Binding AverageUsage}"
+                        TextColor="{Binding AverageUsageColor}"
                         VerticalOptions="Center" />
                 </Grid>
 
@@ -211,15 +221,17 @@
                     Margin="60,15,0,0"
                     VerticalOptions="Start">
                     <HorizontalStackLayout Spacing="40">
-                        <material:RadioButton Text="Montly" />
-                        <material:RadioButton Text="Daily" />
-                        <material:RadioButton Text="Hourly" />
+                        <material:RadioButton IsChecked="{Binding IsUsageMonthlyChecked}" Text="Montly" />
+                        <material:RadioButton IsChecked="{Binding IsUsageDailyChecked}" Text="Daily" />
+                        <material:RadioButton IsChecked="{Binding IsUsageHourlyChecked}" Text="Hourly" />
                     </HorizontalStackLayout>
                 </material:RadioButtonGroupView>
                 <lvc:CartesianChart
                     Grid.Column="1"
                     Margin="50"
-                    Series="{Binding SeriesCollection}"
+                    Series="{Binding UsageSeriesCollection}"
+                    XAxes="{Binding UsageXAxes}"
+                    YAxes="{Binding UsageYAxes}"
                     ZoomMode="X" />
             </Grid>
 
@@ -238,9 +250,9 @@
 
                     <Label
                         FontAttributes="Bold"
-                        FontSize="120"
+                        FontSize="80"
                         HorizontalOptions="Center"
-                        Text="12h20m"
+                        Text="{Binding AverageParkingTime}"
                         TextColor="Green"
                         VerticalOptions="Center" />
                 </Grid>
@@ -249,14 +261,16 @@
                     Margin="60,15,0,0"
                     VerticalOptions="Start">
                     <HorizontalStackLayout Spacing="40">
-                        <material:RadioButton Text="Daily" />
-                        <material:RadioButton Text="Hourly" />
+                        <material:RadioButton IsChecked="{Binding IsParkingTimeMonthlyChecked}" Text="Monthly" />
+                        <material:RadioButton IsChecked="{Binding IsParkingTimeDailyChecked}" Text="Daily" />
                     </HorizontalStackLayout>
                 </material:RadioButtonGroupView>
                 <lvc:CartesianChart
                     Grid.Column="1"
                     Margin="50"
-                    Series="{Binding SeriesCollection}"
+                    Series="{Binding ParkingTimeSeriesCollection}"
+                    XAxes="{Binding ParkingTimeXAxes}"
+                    YAxes="{Binding ParkingTimeYAxes}"
                     ZoomMode="X" />
             </Grid>
 

@@ -254,6 +254,8 @@ namespace ParkEase.Core.Services
         public static string PrivateParking = "PrivateParking";
         public static string PrivateStatus = "PrivateStatus";
         public static string PublicStatus = "PublicStatus";
+        public static string PublicLogs = "PublicLogs";
+        public static string PrivateLogs = "PrivateLogs";
     }
 
     public class UpdateDataResult

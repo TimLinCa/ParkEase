@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace ParkEase.Core.Model
 {
-    public class ParkEaseModel
-    {
+    public partial class ParkEaseModel
+    { 
         public readonly bool developerMode;
         
         public User User { get; set; }

@@ -35,4 +35,8 @@
 		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Contracts\Interface\" />
+	</ItemGroup>
+
 </Project>

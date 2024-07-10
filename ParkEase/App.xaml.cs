@@ -15,6 +15,8 @@ namespace ParkEase
         {
             InitializeComponent();
 
+            Application.Current.UserAppTheme = AppTheme.Light;
+
             // Configure services
             ConfigureServices();
 
