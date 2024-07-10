@@ -197,7 +197,6 @@ namespace ParkEase.ViewModel
                         FloorNames.Add(item.Floor);
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -415,6 +414,10 @@ namespace ParkEase.ViewModel
 
                             ResetFloorInfo();
                         }
+                    }
+                    else
+                    {
+                        await dialogService.ShowAlertAsync("", "You may forget clicking Add button.", "OK");
                     }
                 }
                 else
