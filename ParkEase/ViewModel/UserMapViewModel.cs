@@ -60,13 +60,13 @@ namespace ParkEase.ViewModel
 		private double locationLongitude;
 
 		[ObservableProperty]
-		private bool showPublicParking;
+		private bool showPublicParking= true;
 
 		[ObservableProperty]
 		private bool showPrivateParking;
 
 		[ObservableProperty]
-		private bool showAvailableParking;
+		private bool showAvailableParking = true;
 
 		[ObservableProperty]
 		private string searchText;
