@@ -364,7 +364,7 @@ namespace ParkEase.ViewModel
                         pl.Timestamp <= currentEndDate.ToDateTime(TimeOnly.MaxValue)).ToList();
                         break;
                     case "Private":
-                        string[] strings = AreaNameSelected.Split('(');
+                        string[] strings = AreaNameText.Split('(');
                         string areaName = strings[0];
                         string address = strings[1].Replace(")", "");
                         PrivateParking privateParking = privateParkings.FirstOrDefault(pp => pp.CompanyName == areaName && pp.Address == address);
