@@ -270,7 +270,7 @@ namespace ParkEase.Controls
                 return;
             }
             ObservableCollection<Rectangle> listRectangleFill = (ObservableCollection<Rectangle>)newValue;
-            listRectangleFill.CollectionChanged += ListRectangle_CollectionChanged;
+            listRectangleFill.CollectionChanged += ListRectangleFill_CollectionChanged;
             drawable.ListRectangleFill = listRectangleFill;
             _currentInstance = view;
             reRender(view);

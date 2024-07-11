@@ -43,36 +43,11 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ObservableCollection<string> propertyAddressList;
 
-        //private List<string> propertyAddressFullList;
-
         [ObservableProperty]
         private string addressSelected;
 
-        /*        [ObservableProperty]
-                private string searchText;
-
-                [ObservableProperty]
-                private string propertyAddressMessage = "No matching addresses found";
-
-                [ObservableProperty]
-                private bool errorMessageVisable;*/
-
-
-
         [ObservableProperty]
         private PrivateParking propertySelected;
-
-/*        [ObservableProperty]
-        private string companyName;
-
-        [ObservableProperty]
-        private string address;
-
-        [ObservableProperty]
-        private double fee;
-
-        [ObservableProperty]
-        private int limitedHour;*/
 
         [ObservableProperty]
         private ObservableCollection<string> floorItemSource;
@@ -100,10 +75,14 @@ namespace ParkEase.ViewModel
         private List<FloorInfo> listFloorInfos;
         private string privateParkingId;
 
+        private CancellationTokenSource cts;
+        readonly bool stopping = false;
+        CancellationTokenSource cls = new CancellationTokenSource();
+
         #region OnPropertyChangedEvent
         partial void OnAddressSelectedChanged(string value)
         {
-            LoadPropertyInfo();
+            _ = LoadPropertyInfo();
         }
 
         partial void OnFloorItemSelectedChanged(string value)
@@ -124,10 +103,15 @@ namespace ParkEase.ViewModel
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
             await LoadPropertyAddressList();
+
+            cts = new CancellationTokenSource();
+            var token = cts.Token;
+            //_ = Run(token); // Start the real-time update loop
         });
 
         public ICommand UnLoadedCommand => new RelayCommand(() =>
         {
+            cts?.Cancel(); // Cancel the real-time update loop
             PropertyAddressList = new ObservableCollection<string>();
             AddressSelected = string.Empty;
             PropertySelected = null;
@@ -188,6 +172,33 @@ namespace ParkEase.ViewModel
                     FloorItemSelected = FloorItemSource.First();
                 }
             }
+        }
+
+        private async Task Run(CancellationToken token)
+        {
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    while (!stopping)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        try
+                        {
+                            await LoadFloorInfo();
+                            await Task.Delay(2000, token);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }
+                    }
+                }, token);
+            } catch (Exception ex) 
+            { 
+               await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+            
         }
 
         // Load the selected floor information

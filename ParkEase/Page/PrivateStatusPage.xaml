@@ -104,17 +104,17 @@
                 BackgroundColor="WhiteSmoke"
                 Stroke="#512BD4">
 
-                <controls:RecGraphicsView
+                <controls:RecGraphicsViewWinStatus
                     x:Name="GraphicsViewStatusPage"
                     HorizontalOptions="FillAndExpand"
                     ImageSource="{Binding ImgSourceData}"
                     ListRectangleFill="{Binding ListRectangleFill}"
                     VerticalOptions="FillAndExpand"
                     ZIndex="0">
-                    <controls:RecGraphicsView.Drawable>
+                    <controls:RecGraphicsViewWinStatus.Drawable>
                         <controls:RectDrawable />
-                    </controls:RecGraphicsView.Drawable>
-                </controls:RecGraphicsView>
+                    </controls:RecGraphicsViewWinStatus.Drawable>
+                </controls:RecGraphicsViewWinStatus>
             </Border>
         </Grid>
     </ScrollView>

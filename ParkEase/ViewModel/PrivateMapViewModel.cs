@@ -89,12 +89,12 @@ namespace ParkEase.ViewModel
 
         private CancellationTokenSource cts; 
         readonly bool stopping = false;
+        CancellationTokenSource cls = new CancellationTokenSource();
 
         [ObservableProperty]
         private ImageSource mapImageData;
 
         IFileSaver fileSaver;
-        CancellationTokenSource cls = new CancellationTokenSource();
 
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model, IFileSaver _fileSaver)
         {
