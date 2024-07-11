@@ -28,7 +28,7 @@ namespace ParkEase.ViewModel
     {
         private List<PrivateParking> parkingLotData;
 
-        private List<AddressDistance> addressDistanceFullList;
+        public List<AddressDistance> addressDistanceFullList { get; set; }
 
         private readonly Location userLocation;
 
@@ -88,12 +88,9 @@ namespace ParkEase.ViewModel
 
         private bool isDetecting = false;
 
-        private IPopupService popupService1;
 
-
-        public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model, IPopupService popupService)
+        public PrivateSearchViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
-            popupService1 = popupService;
             userLocation = DataService.GetLocation();
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;

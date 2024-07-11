@@ -1,87 +1,52 @@
 using Camera.MAUI.ZXing;
 using Camera.MAUI;
 using CommunityToolkit.Maui.Views;
-using Syncfusion.Maui.Core.Carousel;
-using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
-using ParkEase.Messages;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Xaml;
 using ParkEase.Core.Model;
 using ParkEase.Page;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ParkEase.Messages;
 
-
-namespace ParkEase.Controls;
-
-public partial class ScannerPopUp : Popup
+namespace ParkEase.Controls
 {
-    private object cameraLock = new object();
-    private bool isDetecting = false;
-    public event StartCameraAsyncHandler StartCameraAsyncEvent;
-    public event StopCameraAsyncHandler StopCameraAsyncEvent;
-    private bool isPopupClosed = false;
-    private CancellationTokenSource cancellationTokenSource;
-
-
-    public ScannerPopUp()
-	{
-		InitializeComponent();
-        cancellationTokenSource = new CancellationTokenSource();
-
-
-    }
-
-    private void OnPopupOpened(object sender, EventArgs e)
+    public partial class ScannerPopUp : Popup
     {
-        isPopupClosed = false;
-        MainThread.BeginInvokeOnMainThread(ThisThreadCode);
-        StartCameraAsyncEvent?.Invoke();
-    }
+        private CancellationTokenSource cancellationTokenSource;
 
-    private void OnPopupClosed(object sender, EventArgs e)
-    {
-        PrivateSearchThreadCode();
-        stopCameraAsyncEvent();
-        StopCameraAsyncEvent?.Invoke();
-    }
+        public event StartCameraAsyncHandler StartCameraAsyncEvent;
+        public event StopCameraAsyncHandler StopCameraAsyncEvent;
 
-    private void CameraLoaded(object sender, EventArgs e)
-    {
-        /*cameraView.Camera = cameraView.Cameras.First();
-        startCameraAsyncEvent();*/
-        /*if(cameraView.Cameras.Count > 0)
+        public ScannerPopUp()
         {
-            cameraView.Camera = cameraView.Cameras.First();
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                await cameraView.StopCameraAsync();
-                await cameraView.StartCameraAsync();
-            });
-        }*/
-        cameraView.BarCodeDecoder = new ZXingBarcodeDecoder();
-        cameraView.BarCodeOptions = new BarcodeDecodeOptions
-        {
-            AutoRotate = true,
-            PossibleFormats = { BarcodeFormat.QR_CODE },
-            ReadMultipleCodes = false,
-            TryHarder = true,
-            TryInverted = true
-        };
-
-        cameraView.BarCodeDetectionFrameRate = 10;
-        cameraView.BarCodeDetectionMaxThreads = 5;
-        cameraView.BarCodeDetectionEnabled = true;
-        if (cameraView.Cameras.Count > 0)
-        {
-            cameraView.Camera = cameraView.Cameras.First();
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                await cameraView.StopCameraAsync();
-                await cameraView.StartCameraAsync();
-            });
+            InitializeComponent();
+            cancellationTokenSource = new CancellationTokenSource();
+            this.Opened += OnPopupOpened;
+            this.Closed += OnPopupClosed;
         }
 
-            /*cameraView.BarCodeDecoder = new ZXingBarcodeDecoder();
+        private void OnPopupOpened(object sender, EventArgs e)
+        {
+            cancellationTokenSource?.Dispose();
+            cancellationTokenSource = new CancellationTokenSource();
+            StartCameraAsyncEvent?.Invoke();
+            Console.WriteLine("Popup Opened");
+        }
+        // https://www.youtube.com/watch?v=FuvFrIS9wm0&t=433s
+
+        private void OnPopupClosed(object sender, CommunityToolkit.Maui.Core.PopupClosedEventArgs e)
+        {
+            cancellationTokenSource.Cancel();
+            StopCameraAsyncEvent?.Invoke();
+            Console.WriteLine("Popup Closed");
+        }
+
+        private void CameraLoaded(object sender, EventArgs e)
+        {
+            cameraView.BarCodeDecoder = new ZXingBarcodeDecoder();
             cameraView.BarCodeOptions = new BarcodeDecodeOptions
             {
                 AutoRotate = true,
@@ -93,78 +58,92 @@ public partial class ScannerPopUp : Popup
 
             cameraView.BarCodeDetectionFrameRate = 10;
             cameraView.BarCodeDetectionMaxThreads = 5;
-            cameraView.BarCodeDetectionEnabled = true;*/
+            cameraView.BarCodeDetectionEnabled = true;
+
+            if (cameraView.Cameras.Count > 0)
+            {
+                cameraView.Camera = cameraView.Cameras.First();
+                StartCameraAsyncTask(cancellationTokenSource.Token);
+            }
         }
 
-        private void startCameraAsyncEvent()
-    {
-        lock (cameraLock)
+        private async void StartCameraAsyncTask(CancellationToken cancellationToken)
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
+            try
             {
-                await cameraView.StartCameraAsync();
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        await cameraView.StartCameraAsync();
+                    }
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                // Handle task cancellation
+                Console.WriteLine("Camera start task was canceled.");
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                Console.WriteLine($"Error starting camera: {ex.Message}");
+            }
+        }
+
+
+        public void BarcodeDetectEventCommand(object sender, Camera.MAUI.ZXingHelper.BarcodeEventArgs args)
+        {
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                if (args.Result != null && args.Result.Any())
+                {
+                    if (!string.IsNullOrEmpty(args.Result[0].Text))
+                    {
+                        DataService.SetId(args.Result[0].Text);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: Barcode text is null or empty.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Error: Barcode result is null or empty.");
+                }
+
+                StopCameraAsyncEvent?.Invoke();
+
+                try
+                {
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error closing popup: {ex.Message}");
+                }
+
+                MyMainThreadCode();
             });
         }
 
-    }
-
-    private void stopCameraAsyncEvent()
-    {
-        lock (cameraLock)
+        private void MyMainThreadCode()
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
+            try
             {
-                await cameraView.StopCameraAsync();
-            });
+                Shell.Current.GoToAsync(nameof(PrivateMapPage));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error navigating to PrivateMapPage: {ex.Message}");
+            }
+        }
+
+        private void PrivateSearchThreadCode()
+        {
+            Shell.Current.GoToAsync(nameof(PrivateSearchPage));
         }
 
     }
-
-    public void BarcodeDetectEventCommand(object sender, Camera.MAUI.ZXingHelper.BarcodeEventArgs args)
-    {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            DataService.SetId(args.Result[0].Text);
-            //DataService.SetId(args.Result[0].Text);
-        });
-        stopCameraAsyncEvent();
-        Close();
-        MainThread.BeginInvokeOnMainThread(MyMainThreadCode);
-
-    }
-    void MyMainThreadCode()
-    {
-        Shell.Current.GoToAsync(nameof(PrivateMapPage));
-    }
-
-    void ThisThreadCode()
-    {
-        Shell.Current.GoToAsync(nameof(ScannerPopUp));
-
-    }
-
-    void PrivateSearchThreadCode()
-    {
-        Shell.Current.GoToAsync(nameof(PrivateSearchPage));
-    }
-
-    private void Popup_Closed(object sender, CommunityToolkit.Maui.Core.PopupClosedEventArgs e)
-    {
-
-    }
-    /*public ICommand BarcodeDetectEventCommand => new RelayCommand<string>(async qrCode =>
-{
-   try
-   {
-       idResult = qrCode;
-       StopCameraAsyncEvent?.Invoke();
-       GridVisible = !GridVisible;
-       parkEaseModel.PrivateMapId = idResult;
-       MainThread.BeginInvokeOnMainThread(MyMainThreadCode);
-   }
-   catch (Exception ex)
-   {
-       await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-   }
-});*/
 }
