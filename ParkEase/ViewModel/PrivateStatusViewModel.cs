@@ -106,7 +106,7 @@ namespace ParkEase.ViewModel
 
             cts = new CancellationTokenSource();
             var token = cts.Token;
-            //_ = Run(token); // Start the real-time update loop
+            _ = Run(token); // Start the real-time update loop
         });
 
         public ICommand UnLoadedCommand => new RelayCommand(() =>
@@ -195,8 +195,12 @@ namespace ParkEase.ViewModel
                     }
                 }, token);
             } catch (Exception ex) 
-            { 
-               await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+                });
+                //await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
             
         }
@@ -259,7 +263,7 @@ namespace ParkEase.ViewModel
             }
             else
             {
-                await dialogService.ShowAlertAsync("Error", "No floor information found", "OK");
+                //await dialogService.ShowAlertAsync("Error", "No floor information found", "OK");
             }
         }
     }

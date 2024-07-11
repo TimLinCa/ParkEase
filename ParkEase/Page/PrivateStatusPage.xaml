@@ -19,7 +19,7 @@
     <ScrollView>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="400" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackLayout Grid.Column="0" Padding="10">
@@ -28,23 +28,6 @@
                     FontSize="20"
                     HorizontalOptions="Center"
                     Text="Private Parking Status" />
-
-                <!--  Search bar for private parking address  -->
-                <!--<SearchBar
-                    HorizontalOptions="Start"
-                    Placeholder="Search Address"
-                    Text="{Binding SearchText}" />
-
-                <Label
-                    Margin="20,10,20,0"
-                    IsVisible="{Binding ErrorMessageVisable}"
-                    Text="{Binding PropertyAddressMessage}"
-                    TextColor="Red" />
-
-                <ListView
-                    x:Name="searchResults"
-                    ItemsSource="{Binding PropertyAddressList, Mode=TwoWay}"
-                    SelectedItem="{Binding AddressSelected, Mode=TwoWay}" />-->
 
                 <material:PickerField
                     Title="Pick a floor"

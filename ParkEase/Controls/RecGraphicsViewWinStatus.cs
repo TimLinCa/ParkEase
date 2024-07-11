@@ -64,7 +64,7 @@ namespace ParkEase.Controls
 
             drawable.ImageSource = (IImage)newValue;
             reRender(view);
-            view.getDrawingInfo(drawable.ImageSource);
+            //view.getDrawingInfo(drawable.ImageSource);
         }
 
         // Mobile Rectangle list
