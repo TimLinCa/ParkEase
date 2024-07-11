@@ -9,5 +9,7 @@ namespace ParkEase.Core.Contracts.Services
     public interface IGeocodingService
     {
         Task<Location> GetLocationAsync(string address);
+
+        async Task<List<string>> GetPredictedAddressAsync(string input);
     }
 }

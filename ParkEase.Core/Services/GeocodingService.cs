@@ -40,5 +40,32 @@ namespace ParkEase.Core.Services
                 return null;
             }
         }
+        //https://developers.google.com/maps/documentation/places/web-service/autocomplete?_gl=1*1co6bdj*_up*MQ..*_ga*MTQyMjUxMTc5Mi4xNzIwNzI3NDUx*_ga_NRWSTWS78N*MTcyMDcyNzQ1MS4xLjAuMTcyMDcyNzQ1MS4wLjAuMA..
+        public async Task<List<string>> GetPredictedAddressAsync(string input)
+        {
+            List<string> predictedAddress = new List<string>();
+            try
+            {
+                string baseUrl = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
+                string url = $"{baseUrl}?input={input}&key={apiKey}";
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    var responseStr = await response.Content.ReadAsStringAsync();
+                    var jsonObject = JObject.Parse(responseStr);
+                    var predictions = jsonObject["predictions"];
+                    predictedAddress = predictions.Select(pd => pd["description"].ToString()).ToList();
+                }
+                return predictedAddress;
+            }
+            catch (Exception)
+            {
+                return predictedAddress;
+            }
+          
+
+           
+        }
     }
 }
