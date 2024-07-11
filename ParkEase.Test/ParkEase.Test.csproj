@@ -16,9 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="appsettings.json" />
     <EmbeddedResource Include="Resources\Images\testImage.png" />
   </ItemGroup>
 
