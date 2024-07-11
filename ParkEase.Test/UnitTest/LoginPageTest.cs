@@ -16,7 +16,7 @@ using UraniumUI.Material.Controls;
 
 namespace ParkEase.Test.UnitTest
 {
-    public class LoginPage
+    public class LoginPageTest
     {
         private LogInViewModel _logInViewModel;
         private readonly Mock<IMongoDBService> _mongoDBServiceMock;
@@ -24,7 +24,7 @@ namespace ParkEase.Test.UnitTest
         private readonly Mock<IAWSService> _awsServiceMock;
         private readonly ParkEaseModel _parkEaseModel;
 
-        public LoginPage()
+        public LoginPageTest()
         {
             _mongoDBServiceMock = new Mock<IMongoDBService>();
             _dialogServiceMock = new Mock<IDialogService>();

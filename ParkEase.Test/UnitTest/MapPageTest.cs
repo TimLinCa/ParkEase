@@ -19,14 +19,14 @@ using MongoDB.Bson.Serialization;
 
 namespace ParkEase.Test.UnitTest
 {
-    public class MapPage
+    public class MapPageTest
     {
         private MapViewModel _mapviewmodel;
         private readonly Mock<IMongoDBService> _mongoDBServiceMock;
         private readonly Mock<IDialogService> _dialogServiceMock;
         private readonly GMap _gmap;
 
-        public MapPage()
+        public MapPageTest()
         {
             _mongoDBServiceMock = new Mock<IMongoDBService>();
             _dialogServiceMock = new Mock<IDialogService>();
