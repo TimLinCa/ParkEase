@@ -150,8 +150,9 @@
                 Command="{Binding WalkNavigationCommand}"
                 CornerRadius="10"
                 HeightRequest="50"
+                IsVisible="{Binding IsWalkNavigationVisible}"
                 Source="Image/walk.png"
-                WidthRequest="50" />    
+                WidthRequest="50" />
 
             <ImageButton
                 Margin="20"

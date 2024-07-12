@@ -45,6 +45,7 @@ namespace ParkEase.Controls
                 MessagingCenter.Send(this, "SaveParkingLocation", (Lat, Lng));
                 ParkingLocationIcon.Source = "removecar.png"; // Change the icon to indicate the spot is saved
                 ParkingLocationLabel.Text = "Clear Spot"; // Change the label text to indicate the spot can be cleared
+                MessagingCenter.Send(this, "UpdateWalkNavigationVisibility", true); // Show the WalkNavigation button
             }
             else
             {
@@ -52,6 +53,7 @@ namespace ParkEase.Controls
                 MessagingCenter.Send(this, "RemoveParkingLocation", (Lat, Lng));
                 ParkingLocationIcon.Source = "addcar.png"; // Change the icon back to indicate the spot can be saved
                 ParkingLocationLabel.Text = "Save Spot"; // Change the label text back to indicate the spot can be saved
+                MessagingCenter.Send(this, "UpdateWalkNavigationVisibility", false); // Hide the WalkNavigation button
             }
             isLocationSaved = !isLocationSaved;  // Flip the value of isLocationSaved: if it was true, make it false; if it was false, make it true
         }

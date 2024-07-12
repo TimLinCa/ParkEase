@@ -760,6 +760,13 @@ namespace ParkEase.Controls
 
                     // Update the saved marker location
                     savedMarker = (savedLat, savedLng);
+
+                    // Set the WalkNavigation button visibility
+                    var viewModel = BindingContext as UserMapViewModel;
+                    if (viewModel != null)
+                    {
+                        viewModel.IsWalkNavigationVisible = true;
+                    }
                 }
 
                 // Add marker after the map is initialized

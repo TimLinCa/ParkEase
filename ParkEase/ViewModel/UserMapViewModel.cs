@@ -22,6 +22,7 @@ using Microsoft.Maui.Dispatching;
 using System.Linq;
 using System.Net;
 using ParkEase.Messages;
+using Microsoft.Maui.ApplicationModel;
 
 namespace ParkEase.ViewModel
 {
@@ -77,7 +78,10 @@ namespace ParkEase.ViewModel
 		[ObservableProperty]
 		private Location centerLocation;
 
-		[ObservableProperty]
+        [ObservableProperty]
+        private bool isWalkNavigationVisible;
+
+        [ObservableProperty]
 		private IAsyncRelayCommand loadedEventCommand;
 
 
@@ -104,9 +108,29 @@ namespace ParkEase.ViewModel
 
 			LoadedEventCommand = new AsyncRelayCommand(ExecuteLoadedEventCommand);
 
+            // Check and restore saved location
+            RestoreSavedLocation();
+
+            // Subscribe to messaging center messages
+            MessagingCenter.Subscribe<MyBottomSheet, bool>(this, "UpdateWalkNavigationVisibility", (sender, isVisible) =>
+            {
+                IsWalkNavigationVisible = isVisible;
+            });
+
         }
 
-		public ICommand BackToCurrentLocationCommand => new RelayCommand(() =>
+        private async void RestoreSavedLocation()
+        {
+            string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+            string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+            if (!string.IsNullOrEmpty(savedLat) && !string.IsNullOrEmpty(savedLng))
+            {
+                IsWalkNavigationVisible = true;
+            }
+        }
+
+        public ICommand BackToCurrentLocationCommand => new RelayCommand(() =>
 		{
 			IsSearchInProgress = false;
 			CenterLocation = new Location { Latitude = LocationLatitude, Longitude = LocationLongitude };
