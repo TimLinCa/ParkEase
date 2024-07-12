@@ -26,7 +26,7 @@ using MongoDB.Driver;
 
 namespace ParkEase.Test.UnitTest
 {
-    public class UserMapPageTests
+    public class UserMapPageTest
     {
         private readonly UserMapViewModel viewModel;
         private readonly Mock<IMongoDBService> mongoDBService;
@@ -36,7 +36,7 @@ namespace ParkEase.Test.UnitTest
         private readonly ParkEaseModel parkEaseModel;
         private readonly bool addNewFloorClicked = false;
 
-        public UserMapPageTests()
+        public UserMapPageTest()
         {
             mongoDBService = new Mock<IMongoDBService>();
             dialogService = new Mock<IDialogService>();

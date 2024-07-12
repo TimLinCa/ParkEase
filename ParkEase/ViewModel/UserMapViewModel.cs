@@ -77,8 +77,12 @@ namespace ParkEase.ViewModel
 		[ObservableProperty]
 		private Location centerLocation;
 
+		[ObservableProperty]
+		private IAsyncRelayCommand loadedEventCommand;
 
-		private readonly IMongoDBService mongoDBService;
+
+
+        private readonly IMongoDBService mongoDBService;
 		private readonly IDialogService dialogService;
 		private readonly IGeocodingService geocodingService;
 		private bool isRangeUpdated = false;
@@ -91,21 +95,12 @@ namespace ParkEase.ViewModel
 			this.mongoDBService = mongoDBService;
 			this.dialogService = dialogService;
 			this.geocodingService = geocodingService;
-		
-            // Subscribe to property changed events
-            PropertyChanged += (sender, args) =>
-			{
-				if (args.PropertyName == nameof(ShowPublicParking) ||
-					args.PropertyName == nameof(ShowPrivateParking) ||
-					args.PropertyName == nameof(ShowAvailableParking))
-				{
-					//ApplyFilters();
-				}
-			};
 
-		}
+			LoadedEventCommand = new AsyncRelayCommand(ExecuteLoadedEventCommand);
 
-		public ICommand BackToCurrentLocationCommand => new RelayCommand(async () =>
+        }
+
+		public ICommand BackToCurrentLocationCommand => new RelayCommand(() =>
 		{
 			IsSearchInProgress = false;
 			CenterLocation = new Location { Latitude = LocationLatitude, Longitude = LocationLongitude };
@@ -131,12 +126,12 @@ namespace ParkEase.ViewModel
 			}
 		});
 
-		public ICommand LoadedCommand => new RelayCommand(async () =>
+		public ICommand LoadedCommand => new RelayCommand(() =>
 		{
 			StartStatusRefreshLoop();
 		});
 
-		public ICommand UnLoadedCommand => new RelayCommand(async () =>
+		public ICommand UnLoadedCommand => new RelayCommand(() =>
 		{
 			cts.Cancel();
 		});
@@ -172,12 +167,12 @@ namespace ParkEase.ViewModel
 		}
 
 
-		public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
+        private async Task ExecuteLoadedEventCommand()
 		{
 			await LoadMapDataAsync();
 			await LoadPrivateParkingDataAsync();
 			isMapLoaded = true;
-		});
+		}
 
 
         partial void OnSelectedMapLineChanged(MapLine? value)
@@ -348,7 +343,7 @@ namespace ParkEase.ViewModel
 		}
 		// Represents the command interface, used to implement the command pattern.
 		//A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
-		public ICommand UpdateRangeCommand => new RelayCommand(async () =>
+		public ICommand UpdateRangeCommand => new RelayCommand(() =>
 		{
             double radius_out = SelectedRadius / 1000.0;
 
@@ -382,6 +377,7 @@ namespace ParkEase.ViewModel
 		{
 			try
 			{
+				if (dbMapLines == null) return;
 				double lat = IsSearchInProgress ? CenterLocation.Latitude : LocationLatitude;
 				double lng = IsSearchInProgress ? CenterLocation.Longitude : LocationLongitude;
 				if (Radius == 0) return;
