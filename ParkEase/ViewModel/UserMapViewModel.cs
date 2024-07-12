@@ -166,7 +166,17 @@ namespace ParkEase.ViewModel
 			cts.Cancel();
 		});
 
-		private void StartStatusRefreshLoop()
+        public ICommand ClearSavedSpotCommand => new RelayCommand(async () =>
+        {
+            bool answer = await dialogService.ShowConfirmAsync("Clear Saved Spot", "Do you want to clear the saved spot?");
+            if (answer)
+            {
+                // Clear the saved spot
+                await ClearSavedSpotAsync();
+            }
+        });
+
+        private void StartStatusRefreshLoop()
 		{
 			cts = new CancellationTokenSource();
 			var token = cts.Token;
@@ -203,6 +213,32 @@ namespace ParkEase.ViewModel
 			await LoadPrivateParkingDataAsync();
 			isMapLoaded = true;
 		}
+
+        private async Task ClearSavedSpotAsync()
+        {
+            string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+            string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+            if (!string.IsNullOrEmpty(savedLat) && !string.IsNullOrEmpty(savedLng))
+            {
+                MessagingCenter.Send(this, "RemoveParkingLocation", (savedLat, savedLng));
+                IsWalkNavigationVisible = false;
+            }
+        }
+
+        public async Task<bool> HasSavedSpotAsync(MapLine line)
+        {
+            string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+            string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+            if (string.IsNullOrEmpty(savedLat) || string.IsNullOrEmpty(savedLng))
+            {
+                return false;
+            }
+
+            // Check if the saved spot matches any point in the line
+            return line.Points.Any(p => p.Lat == savedLat && p.Lng == savedLng);
+        }
 
 
         partial void OnSelectedMapLineChanged(MapLine? value)
@@ -246,10 +282,7 @@ namespace ParkEase.ViewModel
 
 				// Load the available spots and show the bottom sheet
 				await LoadAvailableSpotsAsync(parkingDataId);
-
-				// Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
-				//await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{AvailableSpots} Available Spots", true, lat, lng);
-
+			
 				await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
 			}
 			catch (Exception ex)
@@ -359,11 +392,6 @@ namespace ParkEase.ViewModel
 
 				// Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
 				await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
-
-				//await MainThread.InvokeOnMainThreadAsync(async () =>
-				//{
-				//	await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
-				//});
 
 			}
 			catch (Exception ex)
