@@ -142,6 +142,19 @@
 
             <ImageButton
                 Margin="20"
+                AbsoluteLayout.LayoutBounds="0.98,0.4,50,50"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                BackgroundColor="white"
+                BorderColor="white"
+                BorderWidth="1"
+                Command="{Binding WalkNavigationCommand}"
+                CornerRadius="10"
+                HeightRequest="50"
+                Source="Image/walk.png"
+                WidthRequest="50" />    
+
+            <ImageButton
+                Margin="20"
                 AbsoluteLayout.LayoutBounds="0.98,0.5,50,50"
                 AbsoluteLayout.LayoutFlags="PositionProportional"
                 BackgroundColor="white"

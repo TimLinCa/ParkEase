@@ -575,5 +575,39 @@ namespace ParkEase.ViewModel
 			var availableSpots = statuses.Count(status => status.AreaId == privateParking.Id && !status.Status);
 			return availableSpots;
 		}
-	}
+
+        public ICommand WalkNavigationCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                // Retrieve the saved coordinates from SecureStorage
+                var savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+                var savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+                if (string.IsNullOrEmpty(savedLat) || string.IsNullOrEmpty(savedLng))
+                {
+                    await dialogService.ShowAlertAsync("No saved location", "Please save a parking location first.");
+                    return;
+                }
+
+                var destinationLatitude = double.Parse(savedLat);
+                var destinationLongitude = double.Parse(savedLng);
+
+                // Assuming you have the user's current location set
+                var currentLocation = new Location(LocationLatitude, LocationLongitude);
+                var destinationLocation = new Location(destinationLatitude, destinationLongitude);
+
+                // Start walking navigation
+                var uri = $"https://www.google.com/maps/dir/?api=1&origin={currentLocation.Latitude},{currentLocation.Longitude}&destination={destinationLocation.Latitude},{destinationLocation.Longitude}&travelmode=walking";
+                await Launcher.OpenAsync(new Uri(uri));
+
+                // Optionally, display a message or update the UI as needed
+                //await dialogService.ShowAlertAsync("Navigation started", "Walking navigation has been started.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error starting walking navigation: {ex.Message}");
+            }
+        });
+    }
 }
