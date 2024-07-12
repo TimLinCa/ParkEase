@@ -15,14 +15,14 @@ using ParkEase.Utilities;
 
 namespace ParkEase.Test.UnitTest
 {
-    public class SignUpPage
+    public class SignUpPageTest
     {
         private SignUpViewModel _signUpviewmodel;
         private readonly Mock<IMongoDBService> _mongoDBServiceMock;
         private readonly Mock<IDialogService> _dialogServiceMock;
         private readonly ParkEaseModel _parkEaseModel;
 
-        public SignUpPage()
+        public SignUpPageTest()
         {
             _mongoDBServiceMock = new Mock<IMongoDBService>();
             _dialogServiceMock = new Mock<IDialogService>();

@@ -259,9 +259,9 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (EndTime < StartTime)
+                if (EndTime < StartTime || (EndTime.TotalHours - StartTime.TotalHours) < 1)
                 {
-                    await dialogService.ShowAlertAsync("Error", "End time should be greater than start time", "OK");
+                    await dialogService.ShowAlertAsync("Error", "End time should be greater than start time 1 hour", "OK");
                     return;
                 }
 

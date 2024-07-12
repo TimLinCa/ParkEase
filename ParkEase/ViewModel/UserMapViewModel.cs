@@ -88,9 +88,15 @@ namespace ParkEase.ViewModel
 		private bool isRangeUpdated = false;
 
 		private CancellationTokenSource cts;
-		//private readonly object lockObj = new object();
-		//private bool stopping = false;
-		public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, IGeocodingService geocodingService)
+
+        partial void OnSearchTextChanged(string value)
+        {
+            
+        }
+
+        //private readonly object lockObj = new object();
+        //private bool stopping = false;
+        public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, IGeocodingService geocodingService)
 		{
 			this.mongoDBService = mongoDBService;
 			this.dialogService = dialogService;
