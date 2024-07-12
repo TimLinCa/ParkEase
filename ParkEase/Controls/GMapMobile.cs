@@ -155,6 +155,10 @@ namespace ParkEase.Controls
                
                 // Add a marker to the map  
                 function addMarker(lat, lng, title, icon, isSavedLocation = false) {
+                // Do nothing if icon is null
+                    if (!icon) {
+                        return;
+                    }
 
                     // Check if it's a saved location marker and update it separately
                     if (isSavedLocation) {
@@ -519,15 +523,19 @@ namespace ParkEase.Controls
                                 navigateToMarker(selectedMarkerCoordinates.lat, selectedMarkerCoordinates.lng);
                             } else if (selectedLineCoordinates) {
                                 navigateToLine();
-                            } 
+                            }
                             break;
                         case event.data.startsWith('SaveParkingLocation') && event.data:
                             var latLng = event.data.split(',').slice(1);
-                            addMarker(parseFloat(latLng[0]), parseFloat(latLng[1]), 'Saved Parking Location', 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', true);
+                            savelocation(parseFloat(latLng[0]), parseFloat(latLng[1]));
                             break;
                         case event.data.startsWith('RemoveParkingLocation') && event.data:
                             var latLng = event.data.split(',').slice(1);
                             removeMarker(parseFloat(latLng[0]), parseFloat(latLng[1]), true);
+                            break;
+                        case event.data.startsWith('StartWalkNavigation') && event.data:
+                            var latLng = event.data.split(',').slice(1);
+                            startWalkNavigation(parseFloat(latLng[0]), parseFloat(latLng[1]));
                             break;
                         default:
                             console.warn('Unknown event data:', event.data);
