@@ -17,6 +17,7 @@ using UraniumUI;
 using ZXing.Net.Maui.Controls;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using CommunityToolkit.Maui.Storage;
+using Plugin.LocalNotification;
 
 namespace ParkEase
 {
@@ -41,6 +42,7 @@ namespace ParkEase
 				.UseSkiaSharp(true)
 				.UseUraniumUI()
                 .UseUraniumUIMaterial()
+                .UseLocalNotification()
                 .UseMauiCommunityToolkit()
                 .UseBottomSheet()
                 .UseMauiCameraView()
