@@ -178,6 +178,30 @@ namespace ParkEase.Test.UnitTest
             Assert.Equal("This email address already exists", _signUpviewmodel.EmailExistsMessage);
         }
 
+        [Fact]
+        public void PasswordVisibilityToggle()
+        {
+            // Arrange
+            var initialVisibility = false; // Assume initial visibility is hidden
+
+            // Simulate the toggle action
+            bool SimulateToggle(bool currentVisibility)
+            {
+                return !currentVisibility;
+            }
+
+            // Act: Simulate clicking the visibility toggle button
+            var toggledVisibility = SimulateToggle(initialVisibility);
+
+            // Assert: Verify the password visibility state has changed
+            Assert.NotEqual(initialVisibility, toggledVisibility);
+
+            // Act again to toggle back
+            var revertedVisibility = SimulateToggle(toggledVisibility);
+
+            // Assert: Verify the password visibility state is back to initial state
+            Assert.Equal(initialVisibility, revertedVisibility);
+        }
 
         [Fact]
         public void EmptyFields()

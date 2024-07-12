@@ -12,6 +12,10 @@ using Moq;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Utilities;
 using UraniumUI.Material.Controls;
+using ParkEase.Page;
+using Microsoft.Maui.Controls;
+using NSubstitute;
+
 
 
 namespace ParkEase.Test.UnitTest
@@ -119,6 +123,50 @@ namespace ParkEase.Test.UnitTest
             // Assert
             _dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "Check your email or password!", "OK"), Times.Once);
         }
+
+        [Fact]
+        public async Task LockoutAfterFailedAttempts()
+        {
+            // Arrange
+            var validEmail = "test@example.com";
+            var validPassword = "ValidPassword123";
+            var invalidPassword = "InvalidPassword";
+            _logInViewModel.Email = validEmail;
+            _logInViewModel.Password = invalidPassword;
+
+            // Mock setup to return a user with the valid email and password
+            var user = new User { Email = validEmail, Password = PasswordHasher.HashPassword(validPassword) };
+            _mongoDBServiceMock.Setup(m => m.GetData<User>(It.IsAny<string>())).ReturnsAsync(new List<User> { user });
+
+            // Mock dialog service to capture the alert messages
+            _dialogServiceMock.Setup(d => d.ShowAlertAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
+
+            // Act - Simulate failed login attempts
+            for (int i = 0; i < 5; i++)
+            {
+                _logInViewModel.LogInCommand.Execute(null);
+            }
+
+            // Assert that the account is locked after 5 failed attempts
+            _dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "Check your email or password!", "OK"), Times.Exactly(5));
+
+            // Act - Simulate an additional login attempt after lockout
+            _logInViewModel.LogInCommand.Execute(null);
+
+            // Assert
+            _dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "Account locked. Try again later.", "OK"), Times.Once);
+        }
+
+        [Fact]
+        public void ForgotPasswordCommand_IsNotNull()
+        {
+            // Arrange & Act
+            var forgotPasswordCommand = _logInViewModel.ForgotPasswordCommand;
+
+            // Assert
+            Assert.NotNull(forgotPasswordCommand);
+        }
+    
 
         [Fact]
         public void PasswordMasking()
