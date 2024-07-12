@@ -10,6 +10,7 @@ namespace ParkEase.Core.Contracts.Services
     {
         Task<Location> GetLocationAsync(string address);
 
-        async Task<List<string>> GetPredictedAddressAsync(string input);
+        Task<List<string>> GetPredictedAddressAsync(string input);
+
     }
 }
