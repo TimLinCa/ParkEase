@@ -89,10 +89,10 @@
 
                 <controls:RecGraphicsViewWinStatus
                     x:Name="GraphicsViewStatusPage"
-                    HorizontalOptions="FillAndExpand"
                     ImageSource="{Binding ImgSourceData}"
                     ListRectangleFill="{Binding ListRectangleFill}"
-                    VerticalOptions="FillAndExpand"
+                    MinimumHeightRequest="700"
+                    MinimumWidthRequest="700"
                     ZIndex="0">
                     <controls:RecGraphicsViewWinStatus.Drawable>
                         <controls:RectDrawable />
