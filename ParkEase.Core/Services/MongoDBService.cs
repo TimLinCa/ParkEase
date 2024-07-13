@@ -25,12 +25,14 @@ namespace ParkEase.Core.Services
         private IAWSService awsService;
         private IMongoDatabase db;
         private bool isTesting;
+        private bool isLocal;
         private DevicePlatform platform;
-        public MongoDBService(IAWSService awsService, DevicePlatform devicePlatform, bool isTesting = false)
+        public MongoDBService(IAWSService awsService, DevicePlatform devicePlatform, bool isTesting = false, bool isLocal = false)
         {
             this.isTesting = isTesting;
             this.awsService = awsService;
             this.platform = devicePlatform;
+            this.isLocal = isLocal;
         }
 
         public async Task<T> InsertData<T>(string collectionName, T data) where T : class
@@ -208,7 +210,7 @@ namespace ParkEase.Core.Services
         {
             await CheckAPIKey();
 
-            if(platform == DevicePlatform.WinUI)
+            if (platform == DevicePlatform.WinUI)
             {
                 var collection = db.GetCollection<T>(collectionName);
                 await collection.UpdateOneAsync(filter, update);
@@ -258,26 +260,43 @@ namespace ParkEase.Core.Services
             }
         }
 
-        
+        public async Task InsertMany<T>(string collectionName,List<T> data)
+        {
+            await CheckAPIKey();
+
+            if (platform == DevicePlatform.WinUI)
+            {
+                var collection = db.GetCollection<T>(collectionName);
+                await collection.InsertManyAsync(data);
+            }
+        }
 
         private async Task CheckAPIKey()
         {
-            if (platform == DevicePlatform.WinUI && db == null)
+            if (isLocal && db == null)
             {
-                string connectString = await awsService.GetParamenter("/ParkEase/Configs/ConnectionString");
+                string connectString = "mongodb://localhost:27017";
                 MongoClient mongoClient = new MongoClient(connectString);
                 databaseName = isTesting ? await awsService.GetParamenter("/ParkEase/Configs/DatabaseTestName") : await awsService.GetParamenter("/ParkEase/Configs/DatabaseName");
                 db = mongoClient.GetDatabase(databaseName);
+                return;
             }
-            else
+
+            if (platform == DevicePlatform.WinUI && db == null)
             {
-                if (apiKey == string.Empty)
-                {
-                    apiBase = await awsService.GetParamenter("/ParkEase/Configs/DatabaseAPI");
-                    apiKey = await awsService.GetParamenter("/ParkEase/APIKeys/mongoDb");
-                    databaseName = isTesting ? await awsService.GetParamenter("/ParkEase/Configs/DatabaseTestName") : await awsService.GetParamenter("/ParkEase/Configs/DatabaseName");
-                    dataSourceName = await awsService.GetParamenter("/ParkEase/Configs/DatabaseSource");
-                }
+                string connectString = isLocal ? "mongodb://localhost:27017" : await awsService.GetParamenter("/ParkEase/Configs/ConnectionString");
+                MongoClient mongoClient = new MongoClient(connectString);
+                databaseName = isTesting ? await awsService.GetParamenter("/ParkEase/Configs/DatabaseTestName") : await awsService.GetParamenter("/ParkEase/Configs/DatabaseName");
+                db = mongoClient.GetDatabase(databaseName);
+                return;
+            }
+            else if (apiKey == string.Empty)
+            {
+                apiBase = await awsService.GetParamenter("/ParkEase/Configs/DatabaseAPI");
+                apiKey = await awsService.GetParamenter("/ParkEase/APIKeys/mongoDb");
+                databaseName = isTesting ? await awsService.GetParamenter("/ParkEase/Configs/DatabaseTestName") : await awsService.GetParamenter("/ParkEase/Configs/DatabaseName");
+                dataSourceName = await awsService.GetParamenter("/ParkEase/Configs/DatabaseSource");
+                return;
             }
         }
 
@@ -285,6 +304,7 @@ namespace ParkEase.Core.Services
         {
             if (isTesting)
             {
+                await CheckAPIKey();
                 await db.DropCollectionAsync(collectionName);
             }
         }

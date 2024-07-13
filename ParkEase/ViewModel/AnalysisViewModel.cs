@@ -218,12 +218,11 @@ namespace ParkEase.ViewModel
             };
 
             ApplyCommand = new AsyncRelayCommand(ExecuteApplyCommandAsync);
-
             IsUsageHourlyChecked = true;
         }
 
         #region ICommand method
-        public ICommand LoadedCommand => new RelayCommand(async () =>
+        public ICommand LoadedCommand => new RelayCommand(() =>
         {
             AreaTypeItemSource.Clear();
             switch (model.User.Role)
@@ -259,7 +258,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (EndTime < StartTime || (EndTime.TotalHours - StartTime.TotalHours) < 1)
+                if (!IsCurrentDayCheck && ( EndTime < StartTime || (EndTime.TotalHours - StartTime.TotalHours) < 1))
                 {
                     await dialogService.ShowAlertAsync("Error", "End time should be greater than start time 1 hour", "OK");
                     return;
@@ -293,7 +292,6 @@ namespace ParkEase.ViewModel
                 parkingDatas = await mongoDBService.GetData<ParkingData>(CollectionName.ParkingData);
                 AreaNameItemSource = new ObservableCollection<string>(parkingDatas.Select(pd => pd.ParkingSpot).ToList());
                 IsFloowSelectedVisible = false;
-                AreaNameText = "";
             }
             else if (AreaTypeSelected == AreaType.Private.ToString())
             {
@@ -301,16 +299,16 @@ namespace ParkEase.ViewModel
                 privateParkings = await mongoDBService.GetDataFilter<PrivateParking>(CollectionName.PrivateParking, filter);
                 AreaNameItemSource = new ObservableCollection<string>(privateParkings.Select(pp => pp.CompanyName + $"({pp.Address})"));
                 IsFloowSelectedVisible = true;
-                AreaNameText = "";
             }
         }
 
-        private void LoadFloorInfo()
+        private async void LoadFloorInfo()
         {
             bool enableFloor = false;
 
             if (AreaNameSelected != string.Empty && AreaNameSelected != null)
             {
+                await loadDataTask;
                 string[] strings = AreaNameSelected.Split('(');
                 if (strings.Length > 1)
                 {
@@ -345,10 +343,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if(loadDataTask.IsCompleted == false)
-                {
-                    await loadDataTask;
-                }
+                await loadDataTask;
                 currentStartDate = IsCurrentDayCheck ? DateOnly.FromDateTime(DateTime.Now) : DateOnly.FromDateTime(SelectedDateRange.StartDate.Value);
                 currentEndDate = IsCurrentDayCheck ? DateOnly.FromDateTime(DateTime.Now) : DateOnly.FromDateTime(SelectedDateRange.EndDate.Value);
                 currentStartTime = IsAllDayCheck ? TimeOnly.MinValue : new TimeOnly(StartTime.Hours, StartTime.Minutes, 0);
@@ -357,7 +352,7 @@ namespace ParkEase.ViewModel
                 switch(AreaTypeSelected)
                 {
                     case "Public":
-                        ParkingData parkingData = parkingDatas.FirstOrDefault(pd => pd.ParkingSpot == AreaNameSelected);
+                        ParkingData parkingData = parkingDatas.FirstOrDefault(pd => pd.ParkingSpot == AreaNameText);
                         parkingLogs = (await mongoDBService.GetData<PublicLog>(CollectionName.PublicLogs)).Cast<ParkingLog>().ToList();
                         parkingLogs = parkingLogs.Where(pl => pl.AreaId.Equals(parkingData.Id) &&
                         pl.Timestamp >= currentStartDate.ToDateTime(TimeOnly.MinValue) &&

@@ -24,6 +24,8 @@ namespace ParkEase.Core.Contracts.Services
 
         Task DropCollection(string collectionName);
 
+        Task InsertMany<T>(string collectionName, List<T> data);
+
     }
 
     public class DeleteDataResult
