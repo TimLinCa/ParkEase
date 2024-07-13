@@ -19,6 +19,11 @@ namespace ParkEase.Services
             return Application.Current.MainPage.DisplayAlert(title, message, cancel);
         }
 
+        public Task<bool> ShowConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No") // Add this method
+        {
+            return Application.Current.MainPage.DisplayAlert(title, message, accept, cancel);
+        }
+
         public async Task ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng)
         {
    

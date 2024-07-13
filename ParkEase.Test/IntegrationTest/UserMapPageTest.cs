@@ -29,7 +29,7 @@ namespace ParkEase.Test.IntergartionTest
         public MongoDBService MongoDBService { get; private set; }
         public ParkEaseModel Model { get; private set; }
         public IAWSService AWSService { get; private set; }
-        public DialogService DialogService { get; private set; }
+        public IDialogService DialogService { get; private set; }
         public GeocodingService GeocodingService { get; private set; }
 
         public async Task InitializeAsync()
@@ -46,7 +46,7 @@ namespace ParkEase.Test.IntergartionTest
             Environment.SetEnvironmentVariable("GoogleAKYKey", await AWSService.GetParamenter("/ParkEase/APIKeys/google"));
 
             MongoDBService = new MongoDBService(AWSService, DevicePlatform.WinUI, true);
-            DialogService = new DialogService();
+            DialogService = new FakeDialogService();
             GeocodingService = new GeocodingService();
             Model = new ParkEaseModel(true);
             Model.User = new User();
@@ -211,6 +211,7 @@ namespace ParkEase.Test.IntergartionTest
         private readonly UserMapViewModel _viewModel;
         private readonly FakeDialogService _dialogService;
         private readonly GeocodingService _geocodingService;
+        private int allowedRefreshTime = 2000;
 
         public UserMapPageTests(UserMapPageTestsFixture fixture)
         {
@@ -234,17 +235,15 @@ namespace ParkEase.Test.IntergartionTest
             _viewModel.ShowPublicParking = true;
             _viewModel.LocationLatitude = locationLatitude;
             _viewModel.LocationLongitude = locationLongitude;
-
+            _viewModel.ShowAvailableParking = false;
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
+            _viewModel.LoadedCommand.Execute(null);
 
-            await Task.Delay(2000);
+            await _viewModel.LoadedEventCommand.ExecuteAsync(null);
 
             _viewModel.UpdateRangeCommand.Execute(null);
 
-            _viewModel.LoadedCommand.Execute(null);
-
-            await Task.Delay(5000);
+            await Task.Delay(allowedRefreshTime);
 
             // Assert
             Assert.Equal(selectedRadius / 1000.0, _viewModel.Radius);
@@ -267,15 +266,13 @@ namespace ParkEase.Test.IntergartionTest
             _viewModel.LocationLongitude = locationLongitude;
 
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
+            _viewModel.LoadedCommand.Execute(null);
 
-            await Task.Delay(2000);
+            await _viewModel.LoadedEventCommand.ExecuteAsync(null);
 
             _viewModel.UpdateRangeCommand.Execute(null);
 
-            _viewModel.LoadedCommand.Execute(null);
-
-            await Task.Delay(5000);
+            await Task.Delay(allowedRefreshTime);
 
             // Assert
             Assert.Equal(selectedRadius / 1000.0, _viewModel.Radius);
@@ -362,17 +359,15 @@ namespace ParkEase.Test.IntergartionTest
             _viewModel.ShowPublicParking = true;
             _viewModel.LocationLatitude = locationLatitude;
             _viewModel.LocationLongitude = locationLongitude;
-
+            _viewModel.ShowAvailableParking = false;
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
+            _viewModel.LoadedCommand.Execute(null);
 
-            await Task.Delay(2000);
+            await _viewModel.LoadedEventCommand.ExecuteAsync(null);
 
             _viewModel.UpdateRangeCommand.Execute(null);
 
-            _viewModel.LoadedCommand.Execute(null);
-
-            await Task.Delay(5000);
+            await Task.Delay(allowedRefreshTime);
 
             // Assert
             Assert.Single(_viewModel.MapLines);
@@ -382,15 +377,9 @@ namespace ParkEase.Test.IntergartionTest
             _viewModel.SelectedRadius = newSelectedRadius;
 
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
-
-            await Task.Delay(2000);
-
             _viewModel.UpdateRangeCommand.Execute(null);
 
-            _viewModel.LoadedCommand.Execute(null);
-
-            await Task.Delay(5000);
+            await Task.Delay(allowedRefreshTime);
 
             // Assert
             Assert.True(_viewModel.MapLines.Count == 2);
@@ -411,15 +400,13 @@ namespace ParkEase.Test.IntergartionTest
             _viewModel.LocationLongitude = locationLongitude;
 
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
+            _viewModel.LoadedCommand.Execute(null);
 
-            await Task.Delay(2000);
+            await _viewModel.LoadedEventCommand.ExecuteAsync(null);
 
             _viewModel.UpdateRangeCommand.Execute(null);
 
-            _viewModel.LoadedCommand.Execute(null);
-
-            await Task.Delay(5000);
+            await Task.Delay(1000);
 
             _viewModel.SelectedMapLine = _viewModel.MapLines[0];  // Select one of the lines
 
@@ -448,14 +435,13 @@ namespace ParkEase.Test.IntergartionTest
             _viewModel.LocationLongitude = locationLongitude;
 
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
-
-            await Task.Delay(2000);
-
-            _viewModel.UpdateRangeCommand.Execute(null);
             _viewModel.LoadedCommand.Execute(null);
 
-            await Task.Delay(3000);
+            await _viewModel.LoadedEventCommand.ExecuteAsync(null);
+
+            _viewModel.UpdateRangeCommand.Execute(null);
+
+            await Task.Delay(1000);
 
             _viewModel.SelectedMapLine = mapLineOutside;
             await Task.Delay(5000);
@@ -494,12 +480,13 @@ namespace ParkEase.Test.IntergartionTest
             };
 
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
+            _viewModel.LoadedCommand.Execute(null);
 
-            await Task.Delay(2000);
+            await _viewModel.LoadedEventCommand.ExecuteAsync(null);
 
             _viewModel.UpdateRangeCommand.Execute(null);
-            _viewModel.LoadedCommand.Execute(null);
+
+            await Task.Delay(1000);
 
             await _viewModel.ShowPrivateParkingBottomSheet(privateParkingDataInside);
 
@@ -526,12 +513,13 @@ namespace ParkEase.Test.IntergartionTest
             _viewModel.LocationLongitude = locationLongitude;
 
             // Act
-            _viewModel.LoadedEventCommand.Execute(null);
+            _viewModel.LoadedCommand.Execute(null);
 
-            await Task.Delay(2000);
+            await _viewModel.LoadedEventCommand.ExecuteAsync(null);
 
             _viewModel.UpdateRangeCommand.Execute(null);
-            _viewModel.LoadedCommand.Execute(null);
+
+            await Task.Delay(1000);
 
             await _viewModel.ShowPrivateParkingBottomSheet(null);
 

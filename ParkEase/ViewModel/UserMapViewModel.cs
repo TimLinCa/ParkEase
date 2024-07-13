@@ -22,6 +22,7 @@ using Microsoft.Maui.Dispatching;
 using System.Linq;
 using System.Net;
 using ParkEase.Messages;
+using Microsoft.Maui.ApplicationModel;
 
 namespace ParkEase.ViewModel
 {
@@ -77,8 +78,15 @@ namespace ParkEase.ViewModel
 		[ObservableProperty]
 		private Location centerLocation;
 
+        [ObservableProperty]
+        private bool isWalkNavigationVisible;
 
-		private readonly IMongoDBService mongoDBService;
+        [ObservableProperty]
+		private IAsyncRelayCommand loadedEventCommand;
+
+
+
+        private readonly IMongoDBService mongoDBService;
 		private readonly IDialogService dialogService;
 		private readonly IGeocodingService geocodingService;
 		private bool isRangeUpdated = false;
@@ -97,21 +105,32 @@ namespace ParkEase.ViewModel
 			this.mongoDBService = mongoDBService;
 			this.dialogService = dialogService;
 			this.geocodingService = geocodingService;
-		
-            // Subscribe to property changed events
-            PropertyChanged += (sender, args) =>
-			{
-				if (args.PropertyName == nameof(ShowPublicParking) ||
-					args.PropertyName == nameof(ShowPrivateParking) ||
-					args.PropertyName == nameof(ShowAvailableParking))
-				{
-					//ApplyFilters();
-				}
-			};
 
-		}
+			LoadedEventCommand = new AsyncRelayCommand(ExecuteLoadedEventCommand);
 
-		public ICommand BackToCurrentLocationCommand => new RelayCommand(async () =>
+            // Check and restore saved location
+            RestoreSavedLocation();
+
+            // Subscribe to messaging center messages
+            MessagingCenter.Subscribe<MyBottomSheet, bool>(this, "UpdateWalkNavigationVisibility", (sender, isVisible) =>
+            {
+                IsWalkNavigationVisible = isVisible;
+            });
+
+        }
+
+        private async void RestoreSavedLocation()
+        {
+            string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+            string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+            if (!string.IsNullOrEmpty(savedLat) && !string.IsNullOrEmpty(savedLng))
+            {
+                IsWalkNavigationVisible = true;
+            }
+        }
+
+        public ICommand BackToCurrentLocationCommand => new RelayCommand(() =>
 		{
 			IsSearchInProgress = false;
 			CenterLocation = new Location { Latitude = LocationLatitude, Longitude = LocationLongitude };
@@ -137,17 +156,27 @@ namespace ParkEase.ViewModel
 			}
 		});
 
-		public ICommand LoadedCommand => new RelayCommand(async () =>
+		public ICommand LoadedCommand => new RelayCommand(() =>
 		{
 			StartStatusRefreshLoop();
 		});
 
-		public ICommand UnLoadedCommand => new RelayCommand(async () =>
+		public ICommand UnLoadedCommand => new RelayCommand(() =>
 		{
 			cts.Cancel();
 		});
 
-		private void StartStatusRefreshLoop()
+        public ICommand ClearSavedSpotCommand => new RelayCommand(async () =>
+        {
+            bool answer = await dialogService.ShowConfirmAsync("Clear Saved Spot", "Do you want to clear the saved spot?");
+            if (answer)
+            {
+                // Clear the saved spot
+                await ClearSavedSpotAsync();
+            }
+        });
+
+        private void StartStatusRefreshLoop()
 		{
 			cts = new CancellationTokenSource();
 			var token = cts.Token;
@@ -178,12 +207,38 @@ namespace ParkEase.ViewModel
 		}
 
 
-		public ICommand LoadedEventCommand => new RelayCommand<EventArgs>(async e =>
+        private async Task ExecuteLoadedEventCommand()
 		{
 			await LoadMapDataAsync();
 			await LoadPrivateParkingDataAsync();
 			isMapLoaded = true;
-		});
+		}
+
+        private async Task ClearSavedSpotAsync()
+        {
+            string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+            string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+            if (!string.IsNullOrEmpty(savedLat) && !string.IsNullOrEmpty(savedLng))
+            {
+                MessagingCenter.Send(this, "RemoveParkingLocation", (savedLat, savedLng));
+                IsWalkNavigationVisible = false;
+            }
+        }
+
+        public async Task<bool> HasSavedSpotAsync(MapLine line)
+        {
+            string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+            string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+            if (string.IsNullOrEmpty(savedLat) || string.IsNullOrEmpty(savedLng))
+            {
+                return false;
+            }
+
+            // Check if the saved spot matches any point in the line
+            return line.Points.Any(p => p.Lat == savedLat && p.Lng == savedLng);
+        }
 
 
         partial void OnSelectedMapLineChanged(MapLine? value)
@@ -227,10 +282,7 @@ namespace ParkEase.ViewModel
 
 				// Load the available spots and show the bottom sheet
 				await LoadAvailableSpotsAsync(parkingDataId);
-
-				// Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
-				//await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{AvailableSpots} Available Spots", true, lat, lng);
-
+			
 				await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
 			}
 			catch (Exception ex)
@@ -341,11 +393,6 @@ namespace ParkEase.ViewModel
 				// Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
 				await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
 
-				//await MainThread.InvokeOnMainThreadAsync(async () =>
-				//{
-				//	await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
-				//});
-
 			}
 			catch (Exception ex)
 			{
@@ -354,7 +401,7 @@ namespace ParkEase.ViewModel
 		}
 		// Represents the command interface, used to implement the command pattern.
 		//A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
-		public ICommand UpdateRangeCommand => new RelayCommand(async () =>
+		public ICommand UpdateRangeCommand => new RelayCommand(() =>
 		{
             double radius_out = SelectedRadius / 1000.0;
 
@@ -388,6 +435,7 @@ namespace ParkEase.ViewModel
 		{
 			try
 			{
+				if (dbMapLines == null) return;
 				double lat = IsSearchInProgress ? CenterLocation.Latitude : LocationLatitude;
 				double lng = IsSearchInProgress ? CenterLocation.Longitude : LocationLongitude;
 				if (Radius == 0) return;
@@ -579,5 +627,39 @@ namespace ParkEase.ViewModel
 			var availableSpots = statuses.Count(status => status.AreaId == privateParking.Id && !status.Status);
 			return availableSpots;
 		}
-	}
+
+        public ICommand WalkNavigationCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                // Retrieve the saved coordinates from SecureStorage
+                var savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+                var savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+                if (string.IsNullOrEmpty(savedLat) || string.IsNullOrEmpty(savedLng))
+                {
+                    await dialogService.ShowAlertAsync("No saved location", "Please save a parking location first.");
+                    return;
+                }
+
+                var destinationLatitude = double.Parse(savedLat);
+                var destinationLongitude = double.Parse(savedLng);
+
+                // Assuming you have the user's current location set
+                var currentLocation = new Location(LocationLatitude, LocationLongitude);
+                var destinationLocation = new Location(destinationLatitude, destinationLongitude);
+
+                // Start walking navigation
+                var uri = $"https://www.google.com/maps/dir/?api=1&origin={currentLocation.Latitude},{currentLocation.Longitude}&destination={destinationLocation.Latitude},{destinationLocation.Longitude}&travelmode=walking";
+                await Launcher.OpenAsync(new Uri(uri));
+
+                // Optionally, display a message or update the UI as needed
+                //await dialogService.ShowAlertAsync("Navigation started", "Walking navigation has been started.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error starting walking navigation: {ex.Message}");
+            }
+        });
+    }
 }

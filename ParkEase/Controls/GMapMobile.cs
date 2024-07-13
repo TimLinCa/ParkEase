@@ -146,10 +146,19 @@ namespace ParkEase.Controls
                     directionsService = new google.maps.DirectionsService(); // communicate with the Google Maps Directions API
                     directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true }); // taking the directions computed by DirectionsService and displaying them on the map
                     directionsRenderer.setMap(map);  // render the computed directions on the specified map                  
+                
+                    // Set up click event listeners for existing lines
+                    lines.forEach(line => {
+                        addLineClickListener(line);
+                    });
                 }
-
+               
                 // Add a marker to the map  
                 function addMarker(lat, lng, title, icon, isSavedLocation = false) {
+                // Do nothing if icon is null
+                    if (!icon) {
+                        return;
+                    }
 
                     // Check if it's a saved location marker and update it separately
                     if (isSavedLocation) {
@@ -305,34 +314,47 @@ namespace ParkEase.Controls
                         });
 
                         line.originalColor = color; // Store the original color
-
-                        line.addListener('click', function() {
-                             // If there is a previously selected line, reset its color.
-                            if (selectedLine != null) {
-                                selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
-                            }
-
-                            // Reset the color of the previously selected marker, if any
-                            if (previousSelectedMarker) {
-                                previousSelectedMarker.setIcon({
-                                    url: previousSelectedMarker.originalIcon,
-                                    scaledSize: new google.maps.Size(24, 24)
-                                });
-                                previousSelectedMarker = null;
-                            }
-
-                            selectedLine = line; // Set the clicked line as the selected line
-                            selectedLine.setOptions({ strokeColor: ""yellow"" });
-
-                            let lineInfo = getLineInfo(line);
-                            window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
-                            setSelectedLine(lineCoordinates);
-                            selectedMarkerCoordinates = null;
-                        });
-
                         line.setMap(map);
                         lines.push(line);
+
+                        // Add click event listener for the new line
+                        line.addListener('click', function() {
+                            if (selectedLine === line) {
+                                clearSavedSpot();
+                                selectedLine = null;
+                                window.location.href = ""myapp://clearspot"";
+                            } else {
+                                if (selectedLine != null) {
+                                    selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
+                                }
+
+                                if (previousSelectedMarker) {
+                                    previousSelectedMarker.setIcon({
+                                        url: previousSelectedMarker.originalIcon,
+                                        scaledSize: new google.maps.Size(24, 24)
+                                    });
+                                    previousSelectedMarker = null;
+                                }
+
+                                selectedLine = line;
+                                selectedLine.setOptions({ strokeColor: ""yellow"" });
+
+                                let lineInfo = getLineInfo(line);
+                                window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
+                                setSelectedLine(line.getPath().getArray());
+                                selectedMarkerCoordinates = null;
+                            }
+                        });
+                    }
+    
+                // Clear the saved spot
+                function clearSavedSpot() {
+                    if (savedLocationMarker) {
+                        savedLocationMarker.setMap(null);
+                        savedLocationMarker = null;
+                    }
                 }
+                    
 
                 // Returns the path of the line as a string
                 function getLineInfo(line) {
@@ -350,8 +372,7 @@ namespace ParkEase.Controls
                     return pathStr;
                 }
 
-                function SetMapCenter(lat,lng)
-                {
+                function SetMapCenter(lat,lng) {
                     map.setCenter({ lat: lat, lng: lng });
                 }   
 
@@ -502,15 +523,19 @@ namespace ParkEase.Controls
                                 navigateToMarker(selectedMarkerCoordinates.lat, selectedMarkerCoordinates.lng);
                             } else if (selectedLineCoordinates) {
                                 navigateToLine();
-                            } 
+                            }
                             break;
                         case event.data.startsWith('SaveParkingLocation') && event.data:
                             var latLng = event.data.split(',').slice(1);
-                            addMarker(parseFloat(latLng[0]), parseFloat(latLng[1]), 'Saved Parking Location', 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', true);
+                            savelocation(parseFloat(latLng[0]), parseFloat(latLng[1]));
                             break;
                         case event.data.startsWith('RemoveParkingLocation') && event.data:
                             var latLng = event.data.split(',').slice(1);
                             removeMarker(parseFloat(latLng[0]), parseFloat(latLng[1]), true);
+                            break;
+                        case event.data.startsWith('StartWalkNavigation') && event.data:
+                            var latLng = event.data.split(',').slice(1);
+                            startWalkNavigation(parseFloat(latLng[0]), parseFloat(latLng[1]));
                             break;
                         default:
                             console.warn('Unknown event data:', event.data);
@@ -609,6 +634,17 @@ namespace ParkEase.Controls
 
                 HandlePrivateParkingClicked(lat, lng, title);
             }
+            else if (e.Url.StartsWith("myapp://clearspot"))
+            {
+                e.Cancel = true; // Cancel the navigation
+                await ClearSavedSpotOnMap(); // Call the ClearSavedSpotOnMap method
+            }
+        }
+
+        private async Task ClearSavedSpotOnMap()
+        {
+            string jsCommand = "clearSavedSpot();";
+            await EvaluateJavaScriptAsync(jsCommand);
         }
 
         private async void HandlePrivateParkingClicked(double lat, double lng, string title)
@@ -760,6 +796,13 @@ namespace ParkEase.Controls
 
                     // Update the saved marker location
                     savedMarker = (savedLat, savedLng);
+
+                    // Set the WalkNavigation button visibility
+                    var viewModel = BindingContext as UserMapViewModel;
+                    if (viewModel != null)
+                    {
+                        viewModel.IsWalkNavigationVisible = true;
+                    }
                 }
 
                 // Add marker after the map is initialized
@@ -848,6 +891,13 @@ namespace ParkEase.Controls
                 // Find the line that matches the selected line based on the points
                 SelectedLine = lines.FirstOrDefault(line => line.Equals(line_temp));
             }
+
+            // Ask the user if they want to clear the saved spot if the line has a saved spot
+            var viewModel = BindingContext as UserMapViewModel;
+            if (viewModel != null && await viewModel.HasSavedSpotAsync(SelectedLine))
+            {
+                viewModel.ClearSavedSpotCommand.Execute(null);
+            }
         }
 
         private async void SaveParkingLocation(string lat, string lng)
@@ -871,6 +921,7 @@ namespace ParkEase.Controls
             // Save the location to SecureStorage
             await SecureStorage.Default.SetAsync("SavedParkingLat", lat);
             await SecureStorage.Default.SetAsync("SavedParkingLng", lng);
+
         }
 
         private async void RemoveParkingLocation(string lat, string lng)
@@ -884,7 +935,7 @@ namespace ParkEase.Controls
             //https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-8.0&tabs=android
             // Remove the location from SecureStorage
             SecureStorage.Default.Remove("SavedParkingLat");
-            SecureStorage.Default.Remove("SavedParkingLng");
+            SecureStorage.Default.Remove("SavedParkingLng");           
         }
     }
 }

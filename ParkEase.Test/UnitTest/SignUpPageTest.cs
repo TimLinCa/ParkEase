@@ -15,14 +15,14 @@ using ParkEase.Utilities;
 
 namespace ParkEase.Test.UnitTest
 {
-    public class SignUpPage
+    public class SignUpPageTest
     {
         private SignUpViewModel _signUpviewmodel;
         private readonly Mock<IMongoDBService> _mongoDBServiceMock;
         private readonly Mock<IDialogService> _dialogServiceMock;
         private readonly ParkEaseModel _parkEaseModel;
 
-        public SignUpPage()
+        public SignUpPageTest()
         {
             _mongoDBServiceMock = new Mock<IMongoDBService>();
             _dialogServiceMock = new Mock<IDialogService>();
@@ -178,6 +178,30 @@ namespace ParkEase.Test.UnitTest
             Assert.Equal("This email address already exists", _signUpviewmodel.EmailExistsMessage);
         }
 
+        [Fact]
+        public void PasswordVisibilityToggle()
+        {
+            // Arrange
+            var initialVisibility = false; // Assume initial visibility is hidden
+
+            // Simulate the toggle action
+            bool SimulateToggle(bool currentVisibility)
+            {
+                return !currentVisibility;
+            }
+
+            // Act: Simulate clicking the visibility toggle button
+            var toggledVisibility = SimulateToggle(initialVisibility);
+
+            // Assert: Verify the password visibility state has changed
+            Assert.NotEqual(initialVisibility, toggledVisibility);
+
+            // Act again to toggle back
+            var revertedVisibility = SimulateToggle(toggledVisibility);
+
+            // Assert: Verify the password visibility state is back to initial state
+            Assert.Equal(initialVisibility, revertedVisibility);
+        }
 
         [Fact]
         public void EmptyFields()

@@ -1,5 +1,8 @@
 using ParkEase.ViewModel;
 using The49.Maui.BottomSheet;
+using System.Timers;
+using Plugin.LocalNotification;
+using System.Windows.Input;
 
 namespace ParkEase.Controls
 {
@@ -10,6 +13,10 @@ namespace ParkEase.Controls
         public bool DismissedState { get; set; } = false;
 
         private bool isLocationSaved = false;
+
+        private System.Timers.Timer _timer; 
+
+        private DateTime _endTime;
         public MyBottomSheet()
         {
             InitializeComponent();
@@ -45,6 +52,7 @@ namespace ParkEase.Controls
                 MessagingCenter.Send(this, "SaveParkingLocation", (Lat, Lng));
                 ParkingLocationIcon.Source = "removecar.png"; // Change the icon to indicate the spot is saved
                 ParkingLocationLabel.Text = "Clear Spot"; // Change the label text to indicate the spot can be cleared
+                MessagingCenter.Send(this, "UpdateWalkNavigationVisibility", true); // Show the WalkNavigation button
             }
             else
             {
@@ -52,6 +60,7 @@ namespace ParkEase.Controls
                 MessagingCenter.Send(this, "RemoveParkingLocation", (Lat, Lng));
                 ParkingLocationIcon.Source = "addcar.png"; // Change the icon back to indicate the spot can be saved
                 ParkingLocationLabel.Text = "Save Spot"; // Change the label text back to indicate the spot can be saved
+                MessagingCenter.Send(this, "UpdateWalkNavigationVisibility", false); // Hide the WalkNavigation button
             }
             isLocationSaved = !isLocationSaved;  // Flip the value of isLocationSaved: if it was true, make it false; if it was false, make it true
         }
@@ -107,6 +116,52 @@ namespace ParkEase.Controls
         {
             Lng = lng;
         }
+
+        private void OnStartTimerClicked(object sender, EventArgs e)
+        {
+            var selectedTime = timePicker.Time;
+            _endTime = DateTime.Now.Add(selectedTime);
+
+            _timer = new System.Timers.Timer(1000); 
+            _timer.Elapsed += TimerElapsed;
+            _timer.Start();
+        }
+
+        private void TimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            var remainingTime = _endTime - DateTime.Now;
+            if (remainingTime <= TimeSpan.Zero)
+            {
+                _timer.Stop();
+                ShowNotification();
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    timerLabel.Text = "Time's up!";
+                });
+            }
+            else
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    timerLabel.Text = remainingTime.ToString(@"hh\:mm\:ss");
+                });
+            }
+        }
+
+        private void ShowNotification()
+        {
+            var notification = new NotificationRequest
+            {
+                BadgeNumber = 1,
+                Description = "Your parking timer has expired!",
+                Title = "Parking Reminder",
+                ReturningData = "TimerExpired",
+                NotificationId = 1337
+            };
+
+            LocalNotificationCenter.Current.Show(notification); 
+        }
+
 
     }
 }

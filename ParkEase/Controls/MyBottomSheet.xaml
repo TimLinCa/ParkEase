@@ -137,5 +137,35 @@
                 Text="Start Navigation" />
 
         </VerticalStackLayout>
+
+        <Frame
+            Margin="0,10"
+            Padding="12"
+            BackgroundColor="White"
+            CornerRadius="8"
+            HasShadow="True">
+            <VerticalStackLayout>
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    Text="Set Parking Timer"
+                    TextColor="#512BD4" />
+                <TimePicker
+                    x:Name="timePicker"
+                    Format="HH:mm"
+                    HorizontalOptions="FillAndExpand"
+                    Time="00:30:00" />
+                <Button
+                    Clicked="OnStartTimerClicked"
+                    CornerRadius="8"
+                    Text="Start Timer" />
+                <Label
+                    x:Name="timerLabel"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    TextColor="Red"
+                    VerticalOptions="Center" />
+            </VerticalStackLayout>
+        </Frame>
     </VerticalStackLayout>
 </the49:BottomSheet>

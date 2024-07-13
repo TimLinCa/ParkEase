@@ -10,6 +10,8 @@ namespace ParkEase.Contracts.Services
     {
         Task ShowAlertAsync(string title, string message, string cancel = "OK");
 
+        Task<bool> ShowConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No"); 
+
         Task ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng);
 
         Task DismissBottomSheetAsync();

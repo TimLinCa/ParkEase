@@ -31,7 +31,7 @@ namespace ParkEase.Test.IntegrationTest
 
             AWSService = new AWSService(Configuration);
             MongoDBService = new MongoDBService(AWSService, DevicePlatform.WinUI, true);
-            DialogService = new DialogService();
+            //DialogService = new DialogService();
             Model = new ParkEaseModel(true);
             Model.User = new User { Email = "testEmail@gmail.com" };
             Model.User.Role = Roles.Administrator;
@@ -116,7 +116,7 @@ namespace ParkEase.Test.IntegrationTest
     {
         private readonly CreateMapPageTestFixture _fixture;
         private readonly CreateMapViewModel _viewModel;
-        private readonly DialogService _dialogService;
+        //private readonly DialogService _dialogService;
 
         public CreateMapPageTests(CreateMapPageTestFixture fixture)
         {
