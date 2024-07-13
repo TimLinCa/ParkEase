@@ -53,9 +53,9 @@ namespace ParkEase.ViewModel
 
         private List<PrivateStatus> privateStatusData;
 
-        private string address;
-        private double fee;
-        private string limitHour;
+        public string Address;
+        public double Fee;
+        public string LimitHour;
         private List<FloorInfo> listFloorInfos;
 
         private readonly IMongoDBService mongoDBService;
@@ -94,6 +94,9 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private ImageSource mapImageData;
 
+        [ObservableProperty]
+        private IAsyncRelayCommand loadedCommand;
+
         IFileSaver fileSaver;
 
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model, IFileSaver _fileSaver)
@@ -111,6 +114,8 @@ namespace ParkEase.ViewModel
             EnableScanner = true;
             GridVisible = false;
             ScannerText = "";
+            LoadedCommand = new AsyncRelayCommand(LoadedCommandAsync);
+
         }
 
         /*public async Task SaveImageToLocal(ImageSource imageSource)
@@ -169,6 +174,17 @@ namespace ParkEase.ViewModel
 
          */
 
+        private async Task LoadedCommandAsync()
+        {
+            privateParkingId = DataService.GetId();
+            //privateParkingId = parkEaseModel.PrivateMapId;
+            await LoadParkingData();
+
+            cts = new CancellationTokenSource();
+            var token = cts.Token;
+            _ = Run(token); // Start the real-time update loop
+        }
+/*
         public ICommand LoadedCommand => new RelayCommand(async () =>
         {
             privateParkingId = DataService.GetId();
@@ -178,7 +194,7 @@ namespace ParkEase.ViewModel
             cts = new CancellationTokenSource();
             var token = cts.Token;
             _ = Run(token); // Start the real-time update loop
-        });
+        });*/
 
         public ICommand UnLoadedCommand => new RelayCommand(() =>
         {
@@ -213,9 +229,9 @@ namespace ParkEase.ViewModel
                 }
 
                 var selectedProperty = parkingLotData[0];
-                address = selectedProperty.Address;
-                fee = selectedProperty.ParkingInfo.Fee;
-                limitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
+                Address = selectedProperty.Address;
+                Fee = selectedProperty.ParkingInfo.Fee;
+                LimitHour = selectedProperty.ParkingInfo.LimitedHour.ToString();
                 listFloorInfos = selectedProperty.FloorInfo;
 
                 foreach (var floor in listFloorInfos)
@@ -239,7 +255,7 @@ namespace ParkEase.ViewModel
                     SelectedFloorName = FloorNames.First();
                 }
                 
-                await dialogService.ShowBottomSheet($"{address}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: ? available lots", false, "", "");
+                await dialogService.ShowBottomSheet($"{Address}", $"{Fee} per hour", $"{LimitHour}", $"{SelectedFloorName}: ? available lots", false, "", "");
             }
             catch (Exception ex)
             {
@@ -335,7 +351,7 @@ namespace ParkEase.ViewModel
 
 
                 ListRectangleFill = rectangles;
-                //await dialogService.ShowBottomSheet($"{address}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
+                //await dialogService.ShowBottomSheet($"{Address}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
             }
             catch (Exception)
             {

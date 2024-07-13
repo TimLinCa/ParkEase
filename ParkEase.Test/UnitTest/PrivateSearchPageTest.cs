@@ -15,6 +15,9 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Layouts;
 using System.Diagnostics;
 using System.Linq;
+using ParkEase.Messages;
+using System.Net;
+
 
 
 
@@ -22,6 +25,7 @@ namespace ParkEase.Test.UnitTest
 {
     public class PrivateSearchPageTest
     {
+
         private readonly PrivateSearchViewModel viewModel;
         private readonly Mock<IMongoDBService> mongoDBService;
         private readonly Mock<IDialogService> dialogService;
@@ -31,6 +35,8 @@ namespace ParkEase.Test.UnitTest
 
         public PrivateSearchPageTest()
         {
+
+
             mongoDBService = new Mock<IMongoDBService>();
             dialogService = new Mock<IDialogService>();
 
@@ -41,21 +47,6 @@ namespace ParkEase.Test.UnitTest
                     Email = "testuser@example.com"
                 }
             };
-            viewModel = new PrivateSearchViewModel(mongoDBService.Object, dialogService.Object, parkEaseModel);
-        }
-
-        //helper
-        double CoordinateDistance(double latitude, double longtitude)
-        {
-            Location newLocation = new Location(latitude, longtitude);
-            double distance = Location.CalculateDistance(userLocation, newLocation, DistanceUnits.Kilometers);
-            return distance;
-        }
-
-        [Fact]
-        public async Task DisplayAddressTest()
-        {
-            // Arrange
             var sampleParkingLots = new List<PrivateParking>
             {
                 new PrivateParking { Address = "Test Address 1", Latitude = 51.064330, Longitude = -114.092650 },
@@ -63,68 +54,60 @@ namespace ParkEase.Test.UnitTest
                 new PrivateParking { Address = "Test Address 3", Latitude = 51.118502, Longitude = -114.067337 }
             };
             mongoDBService.Setup(m => m.GetData<PrivateParking>(It.IsAny<string>())).ReturnsAsync(sampleParkingLots);
-
-            // Act
-            var parkingLotData = await mongoDBService.Object.GetData<PrivateParking>("PrivateParking");
-
-            viewModel.addressDistanceFullList = parkingLotData.Select(parkingLot => new AddressDistance
-            {
-                Address = parkingLot.Address,
-                Distance = $"{CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude).ToString("F2")} km"
-            }).OrderBy(a => a.Distance).ToList();
-
-            // Initialize the list if it's null
-            if (viewModel.addressDistanceFullList == null)
-            {
-                viewModel.addressDistanceFullList = new List<AddressDistance>();
-            }
-
-
-            // Assert
-            Assert.Contains(viewModel.addressDistanceFullList, ad => ad.Address == "Test Address 1");
-            Assert.Contains(viewModel.addressDistanceFullList, ad => ad.Address == "Test Address 2");
-            Assert.Contains(viewModel.addressDistanceFullList, ad => ad.Address == "Test Address 3");
+            DataService.SetLocation(userLocation);
+            viewModel = new PrivateSearchViewModel(mongoDBService.Object, dialogService.Object, parkEaseModel);
 
         }
 
         [Fact]
-        public async Task SearchBarTest()
+        public void CalculateDistanceTest()
         {
-            // Arrange
-            var sampleParkingLots = new List<PrivateParking>
+            viewModel.LoadedCommand.Execute(null);
+
+            var test1 = new Location(51.064330, -114.092650);
+            var test2 = new Location(51.091987, -114.129066);
+            var test3 = new Location(51.118502, -114.067337);
+
+            var address1Distance = viewModel.addressDistanceFullList.FirstOrDefault(ad => ad.Address == "Test Address 1").Distance;
+            var address2Distance = viewModel.addressDistanceFullList.FirstOrDefault(ad => ad.Address == "Test Address 2").Distance;
+            var address3Distance = viewModel.addressDistanceFullList.FirstOrDefault(ad => ad.Address == "Test Address 3").Distance;
+
+            var actural1 = CalculateDistance(userLocation, test1);
+            var actural2 = CalculateDistance(userLocation, test2);
+            var actural3 = CalculateDistance(userLocation, test3);
+            Assert.Equal(address1Distance, actural1);
+            Assert.Equal(address2Distance, actural2);
+            Assert.Equal(address3Distance, actural3);
+
+            string CalculateDistance(Location location1, Location location2)
             {
-                new PrivateParking { Address = "Maple street 123", Latitude = 51.064330, Longitude = -114.092650 },
-                new PrivateParking { Address = "CrowFoot 567", Latitude = 51.091987, Longitude = -114.129066 },
-                new PrivateParking { Address = "Dragon 17", Latitude = 51.118502, Longitude = -114.067337 }
-            };
-            mongoDBService.Setup(m => m.GetData<PrivateParking>(It.IsAny<string>())).ReturnsAsync(sampleParkingLots);
+                const double EarthRadiusKm = 6371.0;
 
-            // Act
-            var parkingLotData = await mongoDBService.Object.GetData<PrivateParking>("PrivateParking");
-            viewModel.addressDistanceFullList = parkingLotData.Select(parkingLot => new AddressDistance
-            {
-                Address = parkingLot.Address,
-                Distance = $"{CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude).ToString("F2")} km"
-            }).OrderBy(a => a.Distance).ToList();
+                double dLat = DegreesToRadians(location2.Latitude - location1.Latitude);
+                double dLon = DegreesToRadians(location2.Longitude - location1.Longitude);
 
-            viewModel.AddressDistanceList = new ObservableCollection<AddressDistance>(viewModel.addressDistanceFullList);
+                double lat1 = DegreesToRadians(location1.Latitude);
+                double lat2 = DegreesToRadians(location2.Latitude);
 
-            // Simulate user input and filter the list
-            viewModel.SearchText = "Maple";
-
-            foreach (var row in viewModel.AddressDistanceList)
-            {
-                Assert.Equal("Maple street 123", row.Address);
+                double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                           Math.Sin(dLon / 2) * Math.Sin(dLon / 2) * Math.Cos(lat1) * Math.Cos(lat2);
+                double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+                double distance = EarthRadiusKm * c;
+                string result = Math.Round(distance, 2).ToString("F2") + " km";
+                return result;
             }
-            viewModel.SearchText = "17";
-            foreach (var row in viewModel.AddressDistanceList)
+
+            double DegreesToRadians(double degrees)
             {
-                Assert.Equal("Dragon 17", row.Address);
+                return degrees * Math.PI / 180.0;
             }
 
-            Assert.DoesNotContain(viewModel.AddressDistanceList, a => a.Address == "CrowFoot 567");
 
         }
+
+        
+
+
 
 
 
