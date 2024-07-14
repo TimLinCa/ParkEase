@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using NSubstitute.Core;
 using ParkEase.Contracts.Services;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
@@ -252,6 +253,11 @@ namespace ParkEase.Test.IntergartionTest
             public int GetDismissBottomSheetCount()
             {
                 return _dismissBottomSheetCount;
+            }
+
+            public Task<bool> ShowConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No")
+            {
+                return Task.FromResult(true);
             }
         }
     }
