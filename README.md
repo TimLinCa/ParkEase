@@ -10,12 +10,12 @@ ParkEase offers a suite of tools for parking management, analysis, and user conv
 - **Automated Monitoring:** Camera-based system for real-time parking spot detection.
 
 # Technology Stack
-- **Programming language:** Javascript, C# and Python>
+- **Programming language:** Javascript, C# and Python
 - **Design Pattern:** MVVM
 - **Platform:** .NET Core
-- **Database** MongoDb
+- **Database** MongoDB
 - **Framework:** .NET MAUI
-- **Additional Tools** Qt designer
+- **Additional Tools:** Qt designer, AWS
 
 # Features
 ## Public Parking Area Management(Desktop)
