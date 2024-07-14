@@ -54,6 +54,7 @@ Management teams can perform data-driven analysis of parking facility usage:
 Map | Detail 
 :-------------------------:|:-------------------------:
 ![MobilePublicMap](https://github.com/TimLinCa/ParkEase/blob/master/ParkEase/Resources/Images/Readme/MobilePublicMap.png)| ![MobilePublicDetail](https://github.com/TimLinCa/ParkEase/blob/master/ParkEase/Resources/Images/Readme/MobilePublicDetail.png)
+
 Users can efficiently manage their parking experience through the app:
 <ul>
 <li>View available parking spots within their chosen area</li>
@@ -66,6 +67,7 @@ These functionalities streamline the parking process, helping users find availab
 Search | Detail
 :-------------------------:|:-------------------------:
 ![MobilePrivateSearch](https://github.com/TimLinCa/ParkEase/blob/master/ParkEase/Resources/Images/Readme/MobilePrivateSearch.png)| ![MobilePrivateInfo](https://github.com/TimLinCa/ParkEase/blob/master/ParkEase/Resources/Images/Readme/MobilePrivateInfo.png)
+
 For private parking areas, users can access detailed status information:
 <ul>
 <li>Retrieve parking lot status by searching the address or scanning a QR code</li>
@@ -79,6 +81,7 @@ This feature enhances the user experience in private parking facilities, providi
 Setting interface | Detection([Ref](https://www.youtube.com/watch?v=MyvylXVWYjY&t=3360s))
 :-------------------------:|:-------------------------:
 ![PythonCameraSetUp](https://github.com/TimLinCa/ParkEase/blob/master/ParkEase/Resources/Images/Readme/PythonCameraSetUp.png)| ![PythonCameraDetection](https://github.com/TimLinCa/ParkEase/blob/master/ParkEase/Resources/Images/Readme/PythonCameraDetection.png)
+
 Engineers and management teams can configure advanced automated parking spot monitoring:
 <ul>
 <li>Set up cameras for real-time parking spot detection</li>
