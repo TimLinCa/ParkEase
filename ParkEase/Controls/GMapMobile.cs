@@ -139,7 +139,7 @@ namespace ParkEase.Controls
                 // Initializes the Google Map 
                 function initMap() {
                     map = new google.maps.Map(document.getElementById('map'), {
-                        zoom: 16// Specify the zoom level
+                        zoom: 16 // Specify the zoom level
                     });
 
                     //https://developers.google.com/maps/documentation/javascript/reference/directions
@@ -314,8 +314,7 @@ namespace ParkEase.Controls
                         });
 
                         line.originalColor = color; // Store the original color
-                        line.setMap(map);
-                        lines.push(line);
+                        
 
                         // Add click event listener for the new line
                         line.addListener('click', function() {
@@ -345,6 +344,10 @@ namespace ParkEase.Controls
                                 selectedMarkerCoordinates = null;
                             }
                         });
+
+                        line.setMap(map);
+                        lines.push(line);
+
                     }
     
                 // Clear the saved spot
@@ -375,9 +378,7 @@ namespace ParkEase.Controls
                 function SetMapCenter(lat,lng) {
                     map.setCenter({ lat: lat, lng: lng });
                 }   
-
-                // Deletes the selected line
-
+             
                 function getLineByCoordinates(lat1, lng1, lat2, lng2) {
                     for (let i = 0; i < lines.length; i++) {
                         let path = lines[i].getPath();
@@ -478,13 +479,13 @@ namespace ParkEase.Controls
 
                 // Display the route steps in the bottom sheet
                 function navigateToLine() {
-                    if (!selectedLineCoordinates) return;  // If no line is selected, it exits the function
-                  
+                    if (!selectedLineCoordinates) return;  // If no line is selected, exit the function
+
                     const endPoint = selectedLineCoordinates[selectedLineCoordinates.length - 1];
 
                     const request = {
                         origin: { lat: currentLat, lng: currentLng }, // Start point
-                        destination: { lat: endPoint.lat, lng: endPoint.lng }, // End point
+                        destination: { lat: endPoint.lat(), lng: endPoint.lng() }, // End point
                         travelMode: google.maps.TravelMode.DRIVING
                     };
                     directionsService.route(request, function (result, status) {
@@ -578,11 +579,11 @@ namespace ParkEase.Controls
             MessagingCenter.Subscribe<MyBottomSheet>(this, "GetDirections", async (sender) =>
             {
                 // Ensure the following code runs on the main thread - update the UI
-                await Device.InvokeOnMainThreadAsync(async () =>
-                {
+                //await Device.InvokeOnMainThreadAsync(async () =>
+                //{
                     // Evaluate the JavaScript function in the web view context
                     await EvaluateJavaScriptAsync("window.postMessage('GetDirections');"); // send a message to the JavaScript function
-                });
+                //});
             });
 
             // Subscribe to MessagingCenter messages(main thread)
@@ -753,8 +754,6 @@ namespace ParkEase.Controls
                             currentInstance.SelectedLine = null;
                         }
                     }
-                    //Remove the line from map
-
                 }
             }
             else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
