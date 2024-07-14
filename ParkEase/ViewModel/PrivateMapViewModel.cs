@@ -97,15 +97,13 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private IAsyncRelayCommand loadedCommand;
 
-        IFileSaver fileSaver;
 
-        public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model, IFileSaver _fileSaver)
+        public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
 
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.parkEaseModel = model;
-            this.fileSaver = _fileSaver;
             selectedFloorName = string.Empty;
             FloorNames = new ObservableCollection<string>();
             ListRectangleFill = new ObservableCollection<Rectangle>();
@@ -180,9 +178,9 @@ namespace ParkEase.ViewModel
             //privateParkingId = parkEaseModel.PrivateMapId;
             await LoadParkingData();
 
-            cts = new CancellationTokenSource();
+           /* cts = new CancellationTokenSource();
             var token = cts.Token;
-            _ = Run(token); // Start the real-time update loop
+            _ = Run(token); // Start the real-time update loop*/
         }
 /*
         public ICommand LoadedCommand => new RelayCommand(async () =>
@@ -207,7 +205,7 @@ namespace ParkEase.ViewModel
             ImgSourceData = null;
         });
 
-        private async Task LoadParkingData()
+        public async Task LoadParkingData()
         {
             try
             {
@@ -270,7 +268,7 @@ namespace ParkEase.ViewModel
 
         
 
-        private async Task Run(CancellationToken token)
+        public async Task Run(CancellationToken token)
         {
             await Task.Run(async () =>
             {
@@ -290,7 +288,7 @@ namespace ParkEase.ViewModel
             }, token);
         }
 
-        private async Task ShowSelectedMap()
+        public async Task ShowSelectedMap()
         {
             try
             {

@@ -107,12 +107,6 @@ namespace ParkEase.ViewModel
             LoadedCommand = new AsyncRelayCommand(LoadedCommandAsync);
         }
 
-        public ICommand SimplePopupClickedCommand => new RelayCommand(async () =>
-        {
-            var page = new ScannerPopUp();
-            await Application.Current.MainPage.ShowPopupAsync(page);
-        });
-
 
         private async Task LoadedCommandAsync()
         {

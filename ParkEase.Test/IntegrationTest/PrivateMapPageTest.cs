@@ -35,7 +35,6 @@ namespace ParkEase.Test.IntergartionTest
         public List<PrivateParking> parkingLotDatas { get; private set; }
         public PrivateMapViewModel ViewModel { get; set; }
         
-        IFileSaver fileSaver;
 
 
         public async Task InitializeAsync()
@@ -55,7 +54,7 @@ namespace ParkEase.Test.IntergartionTest
                 User = new User { Role = Roles.User }
             };
 
-            ViewModel = new PrivateMapViewModel(MongoDBService, DialogService, Model, fileSaver);
+            ViewModel = new PrivateMapViewModel(MongoDBService, DialogService, Model);
             // Seed test data
             await SeedTestDataAsync();
         }
