@@ -30,10 +30,11 @@ namespace ParkEase.Controls
             DismissedState = true;
         }
 
-        private void GetDirecitonsCommand(object sender, EventArgs e)
+        private void GetDirectionsCommand(object sender, EventArgs e)
         {
             MessagingCenter.Send(this, "GetDirections");
         }
+
 
         private async void OpenInGoogleMapsCommand(object sender, EventArgs e)
         {

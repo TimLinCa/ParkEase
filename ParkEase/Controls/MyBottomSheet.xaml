@@ -127,7 +127,7 @@
 
         <VerticalStackLayout x:Name="vs_ButtonLayout" Spacing="10">
             <Button
-                Clicked="GetDirecitonsCommand"
+                Clicked="GetDirectionsCommand"
                 CornerRadius="8"
                 Text="Get Direction" />
             <Button
