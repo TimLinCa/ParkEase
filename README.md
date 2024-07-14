@@ -7,7 +7,7 @@ ParkEase offers a suite of tools for parking management, analysis, and user conv
 - **Analysis Features:** Gain insights into parking usage patterns and occupancy rates.
 - **Mobile App:** Help users find available spots and navigate to their parked vehicles.
 - **Private Parking Management:** Detailed status information for private parking facilities.
--- **Automated Monitoring:** Camera-based system for real-time parking spot detection.
+- **Automated Monitoring:** Camera-based system for real-time parking spot detection.
 
 # Technology Stack
 - **Programming language:** Javascript, C# and Python>
