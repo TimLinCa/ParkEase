@@ -62,6 +62,15 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private string selectedFloorName;
+
+        [ObservableProperty]
+        private IAsyncRelayCommand addNewFloorCommand;
+
+        [ObservableProperty]
+        private IAsyncRelayCommand saveFloorInfoCommand;
+
+        [ObservableProperty]
+        private IAsyncRelayCommand submitCommand;
         #endregion
 
         #region PrivateProperty
@@ -111,7 +120,9 @@ namespace ParkEase.ViewModel
             PropertyAddresses = new ObservableCollection<string>();
             addNewFloorClicked = false;
 
-            //_ = GetUserDataFromDatabase();
+            AddNewFloorCommand = new AsyncRelayCommand(AddNewFloorCommandAsync);
+            SaveFloorInfoCommand = new AsyncRelayCommand(SaveFloorInfoCommandAsync);
+            SubmitCommand = new AsyncRelayCommand(SubmitCommandAsync);
         }
 
         #region OnPropertyChangedEvent
@@ -388,7 +399,7 @@ namespace ParkEase.ViewModel
 
             });
 
-        public ICommand AddNewFloorCommand => new RelayCommand(async () =>
+        private async Task AddNewFloorCommandAsync()
         {
             try
             {
@@ -410,10 +421,10 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        });
+        }
 
         // Save Floor Information Command
-        public ICommand SaveFloorInfoCommand => new RelayCommand(async () =>
+        private async Task SaveFloorInfoCommandAsync()
         {
             try
             {
@@ -442,7 +453,7 @@ namespace ParkEase.ViewModel
                     }
                     else
                     {
-                        await dialogService.ShowAlertAsync("", "You may forget clicking Add button.", "OK");
+                        await dialogService.ShowAlertAsync("Warning", "You may forget clicking Add button.", "OK");
                     }
                 }
                 else
@@ -456,10 +467,10 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        });
+        }
 
         // Submit Command
-        public ICommand SubmitCommand => new RelayCommand(async () =>
+        private async Task SubmitCommandAsync()
         {
             try
             {
@@ -482,7 +493,7 @@ namespace ParkEase.ViewModel
                                         .Set(p => p.FloorInfo, listFloorInfos);
 
                         await mongoDBService.UpdateData(CollectionName.PrivateParking, filter, update);
-                        await dialogService.ShowAlertAsync("", "Your data is updated.", "OK");
+                        await dialogService.ShowAlertAsync("Success", "Your data is updated.", "OK");
 
                         ResetAfterSubmit();
                         _ = GetUserDataFromDatabase();
@@ -511,9 +522,9 @@ namespace ParkEase.ViewModel
                         var privateData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
                         var parkingInfo = privateData.Where(data => data.Address == Address).First();
 
-                        await dialogService.ShowAlertAsync("Success", "Your data is saved.\n" + 
-                                                            "Generate QR Code to use this parking lot\n" + 
-                                                            parkingInfo.Id, 
+                        await dialogService.ShowAlertAsync("Success", "Your data is saved.\n" +
+                                                            "Generate QR Code to use this parking lot\n" +
+                                                            parkingInfo.Id,
                                                             "OK");
 
                         ResetAfterSubmit();
@@ -529,7 +540,7 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        });
+        }
 
 
         // Control rectangle drawing

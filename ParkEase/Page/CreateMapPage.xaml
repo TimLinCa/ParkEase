@@ -43,6 +43,7 @@
                         <material:PickerField
                             Title="Select a property address"
                             Margin="20,8,20,20"
+                            AllowClear="True"
                             Icon="{FontImageSource FontFamily=MaterialOutlined,
                                                    Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                             ItemsSource="{Binding PropertyAddresses}"
@@ -123,6 +124,7 @@
                         <material:PickerField
                             Title="Select a floor"
                             Margin="12,15,12,20"
+                            AllowClear="True"
                             Icon="{FontImageSource FontFamily=MaterialOutlined,
                                                    Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                             ItemsSource="{Binding FloorNames}"

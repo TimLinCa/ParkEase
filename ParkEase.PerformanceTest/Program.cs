@@ -14,6 +14,7 @@ namespace ParkEase.PerformanceTest
             bool LogInPage = true;
             bool MapPage = true;
             bool PrivateMapPage = true;
+            bool createMapPage = true;
 
             if (analysispage) BenchmarkRunner.Run<AnalysisViewModelBenchmarks>();
             if (privateSearchPage) BenchmarkRunner.Run<PrivateSearchPageViewModelBenchmarks>();
@@ -21,8 +22,7 @@ namespace ParkEase.PerformanceTest
             if (LogInPage) BenchmarkRunner.Run<LogInViewModelBenchmarks>();
             if (MapPage) BenchmarkRunner.Run<MapViewModelBenchmarks>();
             //if (PrivateMapPage) BenchmarkRunner.Run<PrivateMapViewModelBenchmarks>();
-
-
+            if (createMapPage) BenchmarkRunner.Run<CreateMapViewModelBenchmarks>();
         }
     }
 }
