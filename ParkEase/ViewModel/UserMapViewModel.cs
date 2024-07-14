@@ -223,6 +223,10 @@ namespace ParkEase.ViewModel
             {
                 MessagingCenter.Send(this, "RemoveParkingLocation", (savedLat, savedLng));
                 IsWalkNavigationVisible = false;
+
+                // Remove the location from SecureStorage
+                SecureStorage.Default.Remove("SavedParkingLat");
+                SecureStorage.Default.Remove("SavedParkingLng");
             }
         }
 

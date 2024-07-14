@@ -29,15 +29,12 @@ namespace ParkEase.ViewModel
 {
     public partial class CreateMapViewModel : ObservableObject
     {
+        #region ObservableProperty
         [ObservableProperty]
         private string companyName;
 
         [ObservableProperty]
         private string address;
-
-        private double latitude;
-
-        private double longitude;
 
         [ObservableProperty]
         private double fee;
@@ -50,10 +47,6 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private IImage imgSourceData;
-
-        private float rectWidth;
-
-        private float rectHeight;
 
         [ObservableProperty]
         private ObservableCollection<Rectangle> listRectangle;
@@ -69,6 +62,16 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private string selectedFloorName;
+        #endregion
+
+        #region PrivateProperty
+        private double latitude;
+
+        private double longitude;
+
+        private float rectWidth;
+
+        private float rectHeight;
 
         private string selectedPropertyId;
 
@@ -89,6 +92,7 @@ namespace ParkEase.ViewModel
         private ParkEaseModel parkEaseModel;
 
         private bool addNewFloorClicked;
+        #endregion
 
         public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
@@ -107,7 +111,18 @@ namespace ParkEase.ViewModel
             PropertyAddresses = new ObservableCollection<string>();
             addNewFloorClicked = false;
 
-            _ = GetUserDataFromDatabase();
+            //_ = GetUserDataFromDatabase();
+        }
+
+        #region OnPropertyChangedEvent
+        partial void OnSelectedAddressChanged(string propertyName)
+        {
+            _ = LoadParkingInfo();
+        }
+
+        partial void OnSelectedFloorNameChanged(string propertyName)
+        {
+            _ = LoadFloorInfo();
         }
 
         public float RectWidth
@@ -141,6 +156,19 @@ namespace ParkEase.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangingEventArgs(propertyName));
         }
         //https://stackoverflow.com/questions/76846770/how-to-useonpropertychanged-net-maui
+        #endregion
+
+        public ICommand LoadedCommand => new RelayCommand(() =>
+        {
+            try
+            {
+                _ = GetUserDataFromDatabase();
+            }
+            catch (Exception ex)
+            {
+                dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        });
 
         // Get User's data from database
         private async Task GetUserDataFromDatabase()
@@ -236,7 +264,6 @@ namespace ParkEase.ViewModel
                     else
                     {
                         await dialogService.ShowAlertAsync("error", "Invalid Address", "OK");
-
                     }
                 }
                 else
@@ -261,7 +288,7 @@ namespace ParkEase.ViewModel
         }
 
         // Load Parking Information base on Address
-        public ICommand LoadParkingInfoCommand => new RelayCommand(async () =>
+        private async Task LoadParkingInfo()
         {
             try
             {
@@ -287,12 +314,10 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        });
-
-        
+        }
 
         // LoadFloorInfoCommand Floor Information from database
-        public ICommand LoadFloorInfoCommand => new RelayCommand(async () =>
+        private async Task LoadFloorInfo()
         {
             try
             {
@@ -321,7 +346,7 @@ namespace ParkEase.ViewModel
             {
                 await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
             }
-        });
+        }
 
         // Upload parking map
         public ICommand UploadImageClick => new RelayCommand(async () =>

@@ -9,6 +9,9 @@ using ParkEase.Core.Contracts.Services;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Configuration;
 using ParkEase.Test.IntergartionTest;
+using Microsoft.Maui.Graphics.Platform;
+using IImage = Microsoft.Maui.Graphics.IImage;
+using System.Windows.Input;
 
 namespace ParkEase.Test.IntegrationTest
 {
@@ -42,6 +45,9 @@ namespace ParkEase.Test.IntegrationTest
         public async Task DisposeAsync()
         {
             // Clean up the test database
+            await MongoDBService.DropCollection(CollectionName.PublicLogs);
+            await MongoDBService.DropCollection(CollectionName.PrivateLogs);
+            await MongoDBService.DropCollection(CollectionName.ParkingData);
             await MongoDBService.DropCollection(CollectionName.PrivateParking);
         }
 
@@ -122,6 +128,121 @@ namespace ParkEase.Test.IntegrationTest
         {
             _fixture = fixture;
             _viewModel = new CreateMapViewModel(_fixture.MongoDBService, _fixture.DialogService, _fixture.Model);
+            _ = PrepareImage();
+        }
+
+        private async Task PrepareImage()
+        {
+            var imageData = new byte[] { 0x20, 0x20 };
+            using (MemoryStream ms = new MemoryStream(imageData))
+            {
+                _viewModel.ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
+            }
+        }
+
+        [Fact]
+        public void DrawRectangleTest()
+        {
+            // Arrange
+            _viewModel.ImgSourceData = new MockImage();
+            _viewModel.RectWidth = 100;
+            _viewModel.RectHeight = 50;
+            var startPoint = new PointF(50, 50);
+
+            // Act
+            _viewModel.AddRectangle(startPoint);
+
+            // Assert
+            Assert.Single(_viewModel.ListRectangle);
+            var addedRectangle = _viewModel.ListRectangle.First();
+            Assert.Equal(1, addedRectangle.Index);
+            Assert.Equal(startPoint.X, addedRectangle.Rect.X);
+            Assert.Equal(startPoint.Y, addedRectangle.Rect.Y);
+            Assert.Equal(100, addedRectangle.Rect.Width);
+            Assert.Equal(50, addedRectangle.Rect.Height);
+        }
+
+        [Fact]
+        public void DeleteRectangle_ShouldRemoveLastRectangleFromList()
+        {
+            // Arrange
+            _viewModel.ImgSourceData = new MockImage();
+            _viewModel.RectWidth = 100;
+            _viewModel.RectHeight = 50;
+
+            // Add three rectangles
+            _viewModel.AddRectangle(new PointF(10, 10));
+            _viewModel.AddRectangle(new PointF(20, 20));
+            _viewModel.AddRectangle(new PointF(30, 30));
+
+            Assert.Equal(3, _viewModel.ListRectangle.Count);
+
+            var lastRectangleBeforeRemoval = _viewModel.ListRectangle.Last();
+
+            // Act
+            _viewModel.RemoveRectangleClick.Execute(null);
+
+            // Assert
+            Assert.Equal(2, _viewModel.ListRectangle.Count);
+            Assert.DoesNotContain(lastRectangleBeforeRemoval, _viewModel.ListRectangle);
+            Assert.Equal(2, _viewModel.ListRectangle.Last().Index);
+        }
+
+
+
+
+
+    }
+
+    public class MockImage : IImage
+    {
+        public float Width => 100;
+        public float Height => 100;
+
+        public IImage Downsize(float maxWidthOrHeight, bool disposeOriginal = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IImage Resize(float width, float height, ResizeMode resizeMode = ResizeMode.Fit)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Save(Stream stream, ImageFormat format = ImageFormat.Png, float quality = 1)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SaveAsync(Stream stream, ImageFormat format = ImageFormat.Png, float quality = 1)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            // No-op for testing
+        }
+
+        // If Draw method is still required, keep it
+        public void Draw(ICanvas canvas, RectF dirtyRect)
+        {
+            // No-op for testing
+        }
+
+        public IImage Downsize(float maxWidth, float maxHeight, bool disposeOriginal = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IImage Resize(float width, float height, ResizeMode resizeMode = ResizeMode.Fit, bool disposeOriginal = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        IImage IImage.ToPlatformImage()
+        {
+            throw new NotImplementedException();
         }
     }
 }

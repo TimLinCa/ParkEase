@@ -12,6 +12,10 @@
     xmlns:vm="clr-namespace:ParkEase.ViewModel"
     x:DataType="vm:CreateMapViewModel">
 
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
+    </ContentPage.Behaviors>
+
     <Grid BackgroundColor="#EFEFEF">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -38,24 +42,23 @@
                         <!--  Load Parking Data  -->
                         <material:PickerField
                             Title="Select a property address"
-                            Margin="20,8"
+                            Margin="20,8,20,20"
                             Icon="{FontImageSource FontFamily=MaterialOutlined,
                                                    Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                             ItemsSource="{Binding PropertyAddresses}"
                             SelectedItem="{Binding SelectedAddress}" />
-                        <Button
+                        <!--<Button
                             Margin="0,0,0,20"
                             Command="{Binding LoadParkingInfoCommand}"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Text="Load"
                             VerticalOptions="Center"
-                            WidthRequest="130" />
+                            WidthRequest="130" />-->
                         <BoxView
                             Margin="0,0"
                             BackgroundColor="LightGray"
                             HeightRequest="1"
-                            HorizontalOptions="FillAndExpand"
-                            WidthRequest="1000" />
+                            WidthRequest="280" />
 
                         <!--  Parking data form  -->
                         <material:TextField
@@ -119,23 +122,22 @@
                         <!--  Load floor data  -->
                         <material:PickerField
                             Title="Select a floor"
-                            Margin="12,15,12,8"
+                            Margin="12,15,12,20"
                             Icon="{FontImageSource FontFamily=MaterialOutlined,
                                                    Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                             ItemsSource="{Binding FloorNames}"
                             SelectedItem="{Binding SelectedFloorName}" />
-                        <Button
+                        <!--<Button
                             Margin="0,0,0,20"
                             Command="{Binding LoadFloorInfoCommand}"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Text="Load Floor"
-                            WidthRequest="130" />
+                            WidthRequest="130" />-->
                         <BoxView
                             Margin="0,0"
                             BackgroundColor="LightGray"
                             HeightRequest="1"
-                            HorizontalOptions="FillAndExpand"
-                            WidthRequest="1000" />
+                            WidthRequest="280" />
 
                         <!--  Add new floor  -->
                         <Label
@@ -222,7 +224,7 @@
                 BackgroundColor="LightGray"
                 HeightRequest="1"
                 HorizontalOptions="FillAndExpand"
-                WidthRequest="1000" />
+                WidthRequest="280" />
 
             <!--  Rectangle Width Slider  -->
             <Label
