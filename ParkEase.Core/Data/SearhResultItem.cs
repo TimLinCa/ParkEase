@@ -10,6 +10,7 @@ namespace ParkEase.Core.Data
     {
         public string AddressName { get; set; }
         public string SecondaryText { get; set; }
-        public double Distance { get; set; }
+        public double? Distance { get; set; }
+        public string PlaceId { get; set; }
     }
 }

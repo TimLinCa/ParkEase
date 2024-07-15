@@ -12,5 +12,7 @@ namespace ParkEase.Core.Contracts.Services
         Task<Location> GetLocationAsync(string address);
 
         Task<List<SearchResultItem>> GetPredictedAddressAsync(string input, double? latitude, double? longitude);
+
+        Task<Location> GetCoordinatesByPlaceId(string placeId);
     }
 }

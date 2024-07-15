@@ -21,7 +21,7 @@ namespace ParkEase.ViewModel
         private bool isMapLoaded = false;
         private List<PublicStatus> publicStatuses;
         private List<PrivateStatus> privateStatuses;
-
+        private bool isLoadingPlace = false;
 
 
         [ObservableProperty]
@@ -61,10 +61,10 @@ namespace ParkEase.ViewModel
         private string searchText;
 
         [ObservableProperty]
-        private ObservableCollection<SearchResultItemViewModel> searchAddress;
+        private ObservableCollection<SearchResultItem> searchAddress;
 
         [ObservableProperty]
-        private SearchResultItemViewModel selectedSuggestion;
+        private SearchResultItem selectedSuggestion;
 
         [ObservableProperty]
         private bool isSuggestionsVisible;
@@ -90,7 +90,7 @@ namespace ParkEase.ViewModel
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         private readonly IGeocodingService geocodingService;
-        private bool isRangeUpdated = false;
+        //private bool isRangeUpdated = false;
         private MyBottomSheet currentBottomSheet;
 
         private CancellationTokenSource cts;
@@ -109,11 +109,12 @@ namespace ParkEase.ViewModel
 
         partial void OnSearchTextChanged(string value)
         {
+            if (isLoadingPlace == true) return;
             Task.Run(async () =>
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    SearchAddress = new ObservableCollection<SearchResultItemViewModel>();
+                    SearchAddress = new ObservableCollection<SearchResultItem>();
                     IsSuggestionsVisible = false;
                     MapVisible = true;
                     return;
@@ -123,24 +124,14 @@ namespace ParkEase.ViewModel
 
                 List<SearchResultItem> searchResultItems = list;
 
-                List<SearchResultItemViewModel> SearchResultItemViewModels = new();
-                foreach (SearchResultItem item in searchResultItems)
-                {
-                    SearchResultItemViewModels.Add(new SearchResultItemViewModel()
-                    {
-                        AddressName = item.AddressName,
-                        SecondaryText = item.SecondaryText,
-                        Distance = item.Distance
-                    });
-                }
+                SearchAddress = new ObservableCollection<SearchResultItem>(searchResultItems);
 
-                SearchAddress = new ObservableCollection<SearchResultItemViewModel>(SearchResultItemViewModels);
                 IsSuggestionsVisible = SearchAddress.Count > 0;
                 MapVisible = SearchAddress.Count == 0;
             });
         }
 
-        partial void OnSelectedSuggestionChanged(SearchResultItemViewModel? value)
+        partial void OnSelectedSuggestionChanged(SearchResultItem? value)
         {
             AddressSelected();
         }
@@ -156,14 +147,15 @@ namespace ParkEase.ViewModel
                     return;
                 }
 
-                IsSearchInProgress = true;
-
-                var location = await geocodingService.GetLocationAsync(SelectedSuggestion.AddressName);
+                var location = await geocodingService.GetCoordinatesByPlaceId(SelectedSuggestion.PlaceId);
 
                 if (location != null)
                 {
+                    isLoadingPlace = true;
                     CenterLocation = location;
-                    var locationTemp = DataService.GetLocation();
+                    IsSearchInProgress = true;
+                    SearchText = SelectedSuggestion.AddressName;
+                    RedrawCircle();
                 }
                 else
                 {
@@ -177,14 +169,15 @@ namespace ParkEase.ViewModel
             }
             finally
             {
-                IsSearchInProgress = false;
-            }
+                isLoadingPlace = false;
+            }   
         }
 
         public ICommand BackToCurrentLocationCommand => new RelayCommand(() =>
         {
             IsSearchInProgress = false;
             CenterLocation = new Location { Latitude = LocationLatitude, Longitude = LocationLongitude };
+            RedrawCircle();
         });
 
         public ICommand MapVisibleCommand => new RelayCommand(() =>
@@ -194,36 +187,7 @@ namespace ParkEase.ViewModel
 
         public ICommand SearchCommand => new AsyncRelayCommand(async () =>
         {
-            try
-            {
-                if (string.IsNullOrEmpty(SearchText))
-                {
-                    await dialogService.ShowAlertAsync("Warning", "Please input search text.", "OK");
-                    return;
-                }
-
-                IsSearchInProgress = true;
-
-                var location = await geocodingService.GetLocationAsync(SearchText);
-
-                if (location != null)
-                {
-                    CenterLocation = location;
-                    var locationTemp = DataService.GetLocation();
-                }
-                else
-                {
-                    await dialogService.ShowAlertAsync("Location not found", "Unable to find the specified location.");
-                }
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-            finally
-            {
-                IsSearchInProgress = false;
-            }
+            await AddressSelected();
         });
 
         public ICommand LoadedCommand => new RelayCommand(async() =>
@@ -245,6 +209,47 @@ namespace ParkEase.ViewModel
                 // Clear the saved spot
                 await ClearSavedSpotAsync();
             }
+        });
+
+        public ICommand WalkNavigationCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                // Retrieve the saved coordinates from SecureStorage
+                var savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
+                var savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+
+                if (string.IsNullOrEmpty(savedLat) || string.IsNullOrEmpty(savedLng))
+                {
+                    await dialogService.ShowAlertAsync("No saved location", "Please save a parking location first.");
+                    return;
+                }
+
+                var destinationLatitude = double.Parse(savedLat);
+                var destinationLongitude = double.Parse(savedLng);
+
+                // Start walking navigation
+                await dialogService.OpenGoogleMap(destinationLatitude.ToString(), destinationLongitude.ToString(), TravelMode.Walking);
+
+                // Optionally, display a message or update the UI as needed
+                //await dialogService.ShowAlertAsync("Navigation started", "Walking navigation has been started.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error starting walking navigation: {ex.Message}");
+            }
+        });
+
+        // Represents the command interface, used to implement the command pattern.
+        //A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
+        public ICommand UpdateRangeCommand => new RelayCommand(() =>
+        {
+            double radius_out = SelectedRadius / 1000.0;
+
+            // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
+            List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out)).ToList();
+            Radius = radius_out;
+            //isRangeUpdated = true;
         });
 
         private void StartStatusRefreshLoop()
@@ -466,18 +471,6 @@ namespace ParkEase.ViewModel
             await ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
         }
 
-        // Represents the command interface, used to implement the command pattern.
-        //A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
-        public ICommand UpdateRangeCommand => new RelayCommand(() =>
-        {
-            double radius_out = SelectedRadius / 1000.0;
-
-            // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
-            List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out)).ToList();
-            Radius = radius_out;
-            isRangeUpdated = true;
-        });
-
         //From chatGPT 
         private bool isPointInCircle(List<MapPoint> points, double centerLat, double centerLng, double radius)
         {
@@ -505,7 +498,6 @@ namespace ParkEase.ViewModel
                 double lat = IsSearchInProgress ? CenterLocation.Latitude : LocationLatitude;
                 double lng = IsSearchInProgress ? CenterLocation.Longitude : LocationLongitude;
                 if (Radius == 0) return;
-                Radius = SelectedRadius / 1000.0;
                 List<MapLine> filteredLines = new List<MapLine>();
                 List<MapPrivateParking> filteredPrivateParkings = new List<MapPrivateParking>();
 
@@ -530,13 +522,13 @@ namespace ParkEase.ViewModel
                         filteredLines = filteredLines.Where(line => line.Color == "green").ToList();
                     }
 
-                    if (isRangeUpdated)
-                    {
-                        MapLines = new ObservableCollection<MapLine>(filteredLines);
-                        SelectedMapLine = null;
-                        isRangeUpdated = false;
-                        return;
-                    }
+                    //if (isRangeUpdated)
+                    //{
+                    //    MapLines = new ObservableCollection<MapLine>(filteredLines);
+                    //    SelectedMapLine = null;
+                    //    isRangeUpdated = false;
+                    //    return;
+                    //}
             
 
                     if (MapLines == null || MapLines.Count == 0)
@@ -772,37 +764,12 @@ namespace ParkEase.ViewModel
             return availableSpots;
         }
 
-        public ICommand WalkNavigationCommand => new RelayCommand(async () =>
+        private void RedrawCircle()
         {
-            try
-            {
-                // Retrieve the saved coordinates from SecureStorage
-                var savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
-                var savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
+            double radius_temp = Radius;
+            Radius = 0;
+            Radius = radius_temp;
+        }
 
-                if (string.IsNullOrEmpty(savedLat) || string.IsNullOrEmpty(savedLng))
-                {
-                    await dialogService.ShowAlertAsync("No saved location", "Please save a parking location first.");
-                    return;
-                }
-
-                var destinationLatitude = double.Parse(savedLat);
-                var destinationLongitude = double.Parse(savedLng);
-
-                // Start walking navigation
-                await dialogService.OpenGoogleMap(destinationLatitude.ToString(), destinationLongitude.ToString(), TravelMode.Walking);
-
-                // Optionally, display a message or update the UI as needed
-                //await dialogService.ShowAlertAsync("Navigation started", "Walking navigation has been started.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error starting walking navigation: {ex.Message}");
-            }
-        });
-    }
-
-    public class SearchResultItemViewModel : SearchResultItem
-    {
     }
 }

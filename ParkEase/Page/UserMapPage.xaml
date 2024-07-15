@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:ParkEase.Controls"
+    xmlns:data="clr-namespace:ParkEase.Core.Data;assembly=ParkEase.Core"
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
     xmlns:local="clr-namespace:ParkEase.ViewModel"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
@@ -51,7 +52,7 @@
                         SelectedItem="{Binding SelectedSuggestion, Mode=TwoWay}"
                         SelectionMode="Single">
                         <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="local:SearchResultItemViewModel">
+                            <DataTemplate x:DataType="data:SearchResultItem">
                                 <ViewCell Height="130">
                                     <Grid Padding="10" HeightRequest="80">
                                         <Grid.ColumnDefinitions>
@@ -117,7 +118,7 @@
                     LocationLat="{Binding LocationLatitude}"
                     LocationLng="{Binding LocationLongitude}"
                     PrivateMarkers="{Binding MapPrivateParkings}"
-                    Radius="{Binding Radius}"
+                    Radius="{Binding Radius, Mode=TwoWay}"
                     SelectedLine="{Binding SelectedMapLine}"
                     SelectedPrivateMarker="{Binding SelectedPrivateMarker}">
 

@@ -157,32 +157,6 @@ namespace ParkEase.Controls
                         return;
                     }
 
-                    // Check if it's a saved location marker and update it separately
-                    if (isSavedLocation) {
-
-                        // Remove the existing saved location marker if it exists
-                        if (savedLocationMarker) {
-                            savedLocationMarker.setMap(null);
-                        }
-
-                        // Create a new marker for the saved location   
-                        savedLocationMarker = new google.maps.Marker({
-                            position: { lat: lat, lng: lng },
-                            map: map,
-                            title: title,
-                            icon: {
-                                url: icon,
-                                scaledSize: new google.maps.Size(24, 24)
-                            }
-                        });
-
-                        // Store the original icon of the saved location marker
-                        savedLocationMarker.originalIcon = icon; 
-
-                        // Exit the function after handling the saved location marker
-                        return; 
-                    }
-
                     // Create a new marker for private markers
                     const marker = new google.maps.Marker({
                         position: { lat: lat, lng: lng },
@@ -191,7 +165,8 @@ namespace ParkEase.Controls
                         icon: {
                             url: icon,
                             scaledSize: new google.maps.Size(24, 24)
-                        }
+                        },
+                        zIndex: 1
                     });
 
                     // Store the original color in the private marker object
@@ -299,7 +274,8 @@ namespace ParkEase.Controls
                             geodesic: true,
                             strokeColor: color,
                             strokeOpacity: 1.0,
-                            strokeWeight: 10
+                            strokeWeight: 10,
+                            zIndex: 1
                         });
 
                         line.originalColor = color; // Store the original color
@@ -446,7 +422,9 @@ namespace ParkEase.Controls
                     if (circle) {
                         circle.setMap(null);
                     }
-
+                    if (radius == 0) {
+                        return;
+                    }
                     // Create a new circle
                     circle = new google.maps.Circle({
                         map: map,
@@ -456,7 +434,8 @@ namespace ParkEase.Controls
                         fillOpacity: 0.35,
                         strokeColor: '#AA0000',
                         strokeOpacity: 0.8,
-                        strokeWeight: 2
+                        strokeWeight: 2,
+                        zIndex: -1
                     });
 
                      // Calculate the circle's bounds
