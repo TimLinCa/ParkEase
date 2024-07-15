@@ -505,7 +505,7 @@ namespace ParkEase.ViewModel
                 double lat = IsSearchInProgress ? CenterLocation.Latitude : LocationLatitude;
                 double lng = IsSearchInProgress ? CenterLocation.Longitude : LocationLongitude;
                 if (Radius == 0) return;
-
+                Radius = SelectedRadius / 1000.0;
                 List<MapLine> filteredLines = new List<MapLine>();
                 List<MapPrivateParking> filteredPrivateParkings = new List<MapPrivateParking>();
 
@@ -537,17 +537,18 @@ namespace ParkEase.ViewModel
                         isRangeUpdated = false;
                         return;
                     }
-                    List<MapLine> filteredLinesToAdd = new List<MapLine>();
-                    List<MapLine> filteredLinesToUpdate = new List<MapLine>();
-                    List<MapLine> filteredLinesToDelete = new List<MapLine>();
+            
 
-                    if (MapLines == null)
+                    if (MapLines == null || MapLines.Count == 0)
                     {
-                        MapLines = new ObservableCollection<MapLine>();
-                        filteredLinesToAdd = filteredLines;
+                        MapLines = new ObservableCollection<MapLine>(filteredLines);
                     }
                     else
                     {
+                        List<MapLine> filteredLinesToAdd = new List<MapLine>();
+                        List<MapLine> filteredLinesToUpdate = new List<MapLine>();
+                        List<MapLine> filteredLinesToDelete = new List<MapLine>();
+
                         foreach (MapLine filteredLine in filteredLines)
                         {
                             if (!MapLines.Any(mapline => mapline.Id == filteredLine.Id)) filteredLinesToAdd.Add(filteredLine);
@@ -561,25 +562,25 @@ namespace ParkEase.ViewModel
                         {
                             if (filteredLines.Any(line => line.Id == mapline.Id) == false) filteredLinesToDelete.Add(mapline);
                         }
-                    }
 
-                    foreach (MapLine mapLine in filteredLinesToDelete)
-                    {
-                        MapLine lineToRemove = MapLines.FirstOrDefault(line => line.Id == mapLine.Id);
-                        if (lineToRemove != null) await RemoveMapLine(lineToRemove);
-                    }
+                        foreach (MapLine mapLine in filteredLinesToDelete)
+                        {
+                            MapLine lineToRemove = MapLines.FirstOrDefault(line => line.Id == mapLine.Id);
+                            if (lineToRemove != null) await RemoveMapLine(lineToRemove);
+                        }
 
-                    foreach (MapLine mapLine in filteredLinesToUpdate)
-                    {
-                        MapLine lineToRemove = MapLines.FirstOrDefault(line => line.Id == mapLine.Id);
-                        if (lineToRemove != null) await RemoveMapLine(lineToRemove);
-                        if (ShowAvailableParking && mapLine.Color == "green") await AddMapLine(mapLine);
-                        else if (!ShowAvailableParking) await AddMapLine(mapLine);
-                    }
+                        foreach (MapLine mapLine in filteredLinesToUpdate)
+                        {
+                            MapLine lineToRemove = MapLines.FirstOrDefault(line => line.Id == mapLine.Id);
+                            if (lineToRemove != null) await RemoveMapLine(lineToRemove);
+                            if (ShowAvailableParking && mapLine.Color == "green") await AddMapLine(mapLine);
+                            else if (!ShowAvailableParking) await AddMapLine(mapLine);
+                        }
 
-                    foreach (MapLine mapLine in filteredLinesToAdd)
-                    {
-                        await AddMapLine(mapLine);
+                        foreach (MapLine mapLine in filteredLinesToAdd)
+                        {
+                            await AddMapLine(mapLine);
+                        }
                     }
                 }
                 else if (MapLines != null && MapLines.Count > 0)
@@ -592,10 +593,6 @@ namespace ParkEase.ViewModel
 
                 if (ShowPrivateParking)
                 {
-                    List<MapPrivateParking> filteredPrivateParkingToAdd = new List<MapPrivateParking>();
-                    List<MapPrivateParking> filteredPrivateParkingToUpdate = new List<MapPrivateParking>();
-                    List<MapPrivateParking> filteredPrivateParkingToDelete = new List<MapPrivateParking>();
-
                     privateStatuses = await mongoDBService.GetData<PrivateStatus>(CollectionName.PrivateStatus); // Get the statuses of private parking spots
                     filteredPrivateParkings = allPrivateParkings.Where(pp => isPointInCircle(new List<MapPoint> { new MapPoint { Lat = pp.Latitude.ToString(), Lng = pp.Longitude.ToString() } }, lat, lng, Radius))
                         .Select(pp =>
@@ -617,13 +614,15 @@ namespace ParkEase.ViewModel
                         }
                     }
 
-                    if (MapPrivateParkings == null)
+                    if (MapPrivateParkings == null || MapPrivateParkings.Count == 0)
                     {
-                        MapPrivateParkings = new ObservableCollection<MapPrivateParking>();
-                        filteredPrivateParkingToAdd = filteredPrivateParkings;
+                        MapPrivateParkings = new ObservableCollection<MapPrivateParking>(filteredPrivateParkings);
                     }
                     else
                     {
+                        List<MapPrivateParking> filteredPrivateParkingToAdd = new List<MapPrivateParking>();
+                        List<MapPrivateParking> filteredPrivateParkingToUpdate = new List<MapPrivateParking>();
+                        List<MapPrivateParking> filteredPrivateParkingToDelete = new List<MapPrivateParking>();
                         foreach (MapPrivateParking filteredPrivateMarker in filteredPrivateParkings)
                         {
                             if (!MapPrivateParkings.Any(mapMarker => mapMarker.Id == filteredPrivateMarker.Id)) filteredPrivateParkingToAdd.Add(filteredPrivateMarker);
@@ -637,25 +636,25 @@ namespace ParkEase.ViewModel
                         {
                             if (filteredPrivateParkings.Any(mapMarker => mapMarker.Id == privateMarker.Id) == false) filteredPrivateParkingToDelete.Add(privateMarker);
                         }
-                    }
 
-                    foreach (MapPrivateParking mapMarker in filteredPrivateParkingToDelete)
-                    {
-                        MapPrivateParking mapMarkerToDelete = MapPrivateParkings.FirstOrDefault(marker => marker.Id == mapMarker.Id);
-                        if (mapMarkerToDelete != null) await RemovePrivateMarker(mapMarkerToDelete);
-                    }
+                        foreach (MapPrivateParking mapMarker in filteredPrivateParkingToDelete)
+                        {
+                            MapPrivateParking mapMarkerToDelete = MapPrivateParkings.FirstOrDefault(marker => marker.Id == mapMarker.Id);
+                            if (mapMarkerToDelete != null) await RemovePrivateMarker(mapMarkerToDelete);
+                        }
 
-                    foreach (MapPrivateParking mapMarker in filteredPrivateParkingToUpdate)
-                    {
-                        MapPrivateParking mapMarkerToUpdate = MapPrivateParkings.FirstOrDefault(marker => marker.Id == mapMarker.Id);
-                        if (mapMarkerToUpdate != null) await RemovePrivateMarker(mapMarkerToUpdate);
-                        if (ShowAvailableParking && mapMarkerToUpdate.Color == "green") await AddPrivateMarker(mapMarkerToUpdate);
-                        else if (!ShowAvailableParking) await AddPrivateMarker(mapMarkerToUpdate);
-                    }
+                        foreach (MapPrivateParking mapMarker in filteredPrivateParkingToUpdate)
+                        {
+                            MapPrivateParking mapMarkerToUpdate = MapPrivateParkings.FirstOrDefault(marker => marker.Id == mapMarker.Id);
+                            if (mapMarkerToUpdate != null) await RemovePrivateMarker(mapMarkerToUpdate);
+                            if (ShowAvailableParking && mapMarkerToUpdate.Color == "green") await AddPrivateMarker(mapMarkerToUpdate);
+                            else if (!ShowAvailableParking) await AddPrivateMarker(mapMarkerToUpdate);
+                        }
 
-                    foreach (MapPrivateParking mapMarker in filteredPrivateParkingToAdd)
-                    {
-                        await AddPrivateMarker(mapMarker);
+                        foreach (MapPrivateParking mapMarker in filteredPrivateParkingToAdd)
+                        {
+                            await AddPrivateMarker(mapMarker);
+                        }
                     }
                 }
                 else if (MapPrivateParkings != null && MapPrivateParkings.Count > 0)
