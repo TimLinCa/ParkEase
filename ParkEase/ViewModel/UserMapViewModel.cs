@@ -441,43 +441,31 @@ namespace ParkEase.ViewModel
         public async Task OnLineClickedAsync(MapLine selectedLine)
         {
             if (selectedLine == null) return;
+            var filter = Builders<ParkingData>.Filter.Eq(pd => pd.Points, selectedLine.Points); // Filter the parking data based on the selected line
+            var parkingDataList = await mongoDBService.GetDataFilter<ParkingData>(CollectionName.ParkingData, filter); // Get the parking data based on the filter
 
-        // Represents the command interface, used to implement the command pattern.
-        //A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
-        public ICommand UpdateRangeCommand => new RelayCommand(() =>
-        {
-            try
+            if (parkingDataList == null || !parkingDataList.Any()) // If no parking data is found, show an alert
             {
-                var filter = Builders<ParkingData>.Filter.Eq(pd => pd.Points, selectedLine.Points); // Filter the parking data based on the selected line
-                var parkingDataList = await mongoDBService.GetDataFilter<ParkingData>(CollectionName.ParkingData, filter); // Get the parking data based on the filter
-
-                if (parkingDataList == null || !parkingDataList.Any()) // If no parking data is found, show an alert
-                {
-                    await dialogService.ShowAlertAsync("No Data Found", "No parking data found for the selected line.");
-                    return;
-                }
-
-                // Get the address, parking fee, limited hour, parking data id, latitude, and longitude
-                var parkingData = parkingDataList.First();
-                var address = parkingData.ParkingSpot;
-                var parkingFee = parkingData.ParkingFee;
-                var limitedHour = parkingData.ParkingTime;
-                var parkingDataId = parkingData.Id;
-                var lat = parkingData.Points[1].Lat;
-                var lng = parkingData.Points[1].Lng;
-
-                // Load the available spots and show the bottom sheet
-                await LoadAvailableSpotsAsync(parkingDataId);
-
-                // Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
-                await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
-
+                await dialogService.ShowAlertAsync("No Data Found", "No parking data found for the selected line.");
+                return;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error retrieving parking data: {ex.Message}");
-            }
+
+            // Get the address, parking fee, limited hour, parking data id, latitude, and longitude
+            var parkingData = parkingDataList.First();
+            var address = parkingData.ParkingSpot;
+            var parkingFee = parkingData.ParkingFee;
+            var limitedHour = parkingData.ParkingTime;
+            var parkingDataId = parkingData.Id;
+            var lat = parkingData.Points[1].Lat;
+            var lng = parkingData.Points[1].Lng;
+
+            // Load the available spots and show the bottom sheet
+            await LoadAvailableSpotsAsync(parkingDataId);
+
+            // Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
+            await ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
         }
+
         // Represents the command interface, used to implement the command pattern.
         //A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
         public ICommand UpdateRangeCommand => new RelayCommand(() =>
@@ -488,7 +476,6 @@ namespace ParkEase.ViewModel
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out)).ToList();
             Radius = radius_out;
             isRangeUpdated = true;
-
         });
 
         //From chatGPT 
