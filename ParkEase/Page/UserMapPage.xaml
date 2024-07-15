@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:ParkEase.Controls"
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    xmlns:local="clr-namespace:ParkEase.ViewModel"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
@@ -35,6 +36,77 @@
                         Placeholder="Enter address"
                         SearchCommand="{Binding SearchCommand}"
                         Text="{Binding SearchText}" />
+                </Grid>
+
+                <Grid
+                    Grid.Row="1"
+                    Grid.RowSpan="3"
+                    BackgroundColor="White"
+                    Grid.ZIndex="1"
+                    IsVisible="{Binding IsSuggestionsVisible}">
+                    <ListView
+                        x:Name="SuggestionsListView"
+                        IsVisible="{Binding IsSuggestionsVisible}"
+                        ItemsSource="{Binding SearchAddress, Mode=TwoWay}"
+                        SelectedItem="{Binding SelectedSuggestion, Mode=TwoWay}"
+                        SelectionMode="Single">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:SearchResultItemViewModel">
+                                <ViewCell Height="130">
+                                    <Grid Padding="10" HeightRequest="80">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="60" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Grid
+                                            Grid.Column="0"
+                                            Margin="0,5,0,5"
+                                            HorizontalOptions="Center"
+                                            VerticalOptions="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+
+                                            <Image
+                                                HeightRequest="30"
+                                                HorizontalOptions="Center"
+                                                Source="Image/location.jpeg"
+                                                WidthRequest="30" />
+                                            <Label
+                                                Grid.Row="1"
+                                                FontSize="12"
+                                                HorizontalOptions="Center"
+                                                Text="{Binding Distance, StringFormat='{0} km'}"
+                                                TextColor="Gray" />
+                                        </Grid>
+                                        <StackLayout
+                                            Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            VerticalOptions="Center">
+                                            <Label
+                                                FontSize="12"
+                                                LineBreakMode="TailTruncation"
+                                                MaxLines="1"
+                                                Text="{Binding AddressName}" />
+                                            <Label
+                                                FontSize="12"
+                                                LineBreakMode="TailTruncation"
+                                                MaxLines="1"
+                                                Text="{Binding SecondaryText}"
+                                                TextColor="Gray" />
+                                            <BoxView
+                                                Margin="0,5,0,0"
+                                                HeightRequest="0.5"
+                                                HorizontalOptions="FillAndExpand"
+                                                Color="LightGray" />
+                                        </StackLayout>
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </Grid>
 
                 <controls:GMapMobile

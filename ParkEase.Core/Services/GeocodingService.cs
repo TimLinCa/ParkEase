@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Maui.Devices.Sensors;
+using ParkEase.Core.Data;
 
 namespace ParkEase.Core.Services
 {
@@ -41,13 +42,17 @@ namespace ParkEase.Core.Services
             }
         }
         //https://developers.google.com/maps/documentation/places/web-service/autocomplete?_gl=1*1co6bdj*_up*MQ..*_ga*MTQyMjUxMTc5Mi4xNzIwNzI3NDUx*_ga_NRWSTWS78N*MTcyMDcyNzQ1MS4xLjAuMTcyMDcyNzQ1MS4wLjAuMA..
-        public async Task<List<string>> GetPredictedAddressAsync(string input)
+        public async Task<List<SearchResultItem>> GetPredictedAddressAsync(string input, double? latitude, double? longitude)
         {
-            List<string> predictedAddress = new List<string>();
+            List<SearchResultItem> predictedAddress = new List<SearchResultItem>();
             try
             {
                 string baseUrl = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
                 string url = $"{baseUrl}?input={input}&key={apiKey}";
+                if (latitude != null && longitude != null && latitude != 0 && longitude != 0)
+                {
+                    url += $"=&origin={latitude},{longitude}";
+                }
                 using (HttpClient client = new HttpClient())
                 {
                     HttpResponseMessage response = await client.GetAsync(url);
@@ -55,17 +60,27 @@ namespace ParkEase.Core.Services
                     var responseStr = await response.Content.ReadAsStringAsync();
                     var jsonObject = JObject.Parse(responseStr);
                     var predictions = jsonObject["predictions"];
-                    predictedAddress = predictions.Select(pd => pd["description"].ToString()).ToList();
+
+                    if (predictions != null)
+                    {
+                        predictedAddress = predictions.Select(pd => new SearchResultItem()
+                        {
+                            AddressName = pd["description"]?.ToString() ?? "",
+                            SecondaryText = pd["structured_formatting"]?["secondary_text"]?.ToString() ?? "",
+                            Distance = latitude != null && longitude != null && latitude != 0 && longitude != 0 ?
+                                ((double?)pd["distance_meters"] ?? 0) / 1000 : 0
+                        }).ToList();
+                    }
                 }
+
                 return predictedAddress;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return predictedAddress;
             }
-
-
-
         }
+
     }
+    
 }
