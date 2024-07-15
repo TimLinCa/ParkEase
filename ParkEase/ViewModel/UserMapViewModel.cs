@@ -502,7 +502,7 @@ namespace ParkEase.ViewModel
             // LINQ method to filter isPointInCircle: check if any point in the line.Points collection is within the specified radius from the given location (latitude and longitude).
             List<MapLine> linesInRange = dbMapLines.Where(line => isPointInCircle(line.Points, LocationLatitude, LocationLongitude, radius_out)).ToList();
             Radius = radius_out;
-            isRangeUpdated = false;
+            isRangeUpdated = true;
 
         });
 
