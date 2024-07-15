@@ -61,5 +61,13 @@ namespace ParkEase.Services
             }
         }
 
+        public void UpdateBottomSheetAvailability(string availability)
+        {
+            if (currentBottomSheet != null && !currentBottomSheet.DismissedState)
+            {
+                currentBottomSheet.UpdateAvailability(availability);
+            }
+        }
+
     }
 }

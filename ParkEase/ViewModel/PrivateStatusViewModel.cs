@@ -167,7 +167,7 @@ namespace ParkEase.ViewModel
                     return;
                 }
                 privateParkingId = PropertySelected.Id;
-                FeeText = $"${PropertySelected.ParkingInfo.Fee} /hour";
+                FeeText = $"{PropertySelected.ParkingInfo.Fee:C}/hour";
 
                 // Get the floor information
                 listFloorInfos = PropertySelected.FloorInfo;

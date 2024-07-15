@@ -102,6 +102,14 @@ namespace ParkEase.Controls
             label_availability.Text = availability;
         }
 
+        public void UpdateAvailability(string availability)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                label_availability.Text = availability;
+            });
+        }
+
         public void SetVisibilityNavigatedButton(bool showButton)
         {
             vs_ButtonLayout.IsVisible = showButton;

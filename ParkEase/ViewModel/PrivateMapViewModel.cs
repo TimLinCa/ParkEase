@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,6 +98,19 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private IAsyncRelayCommand loadedCommand;
 
+        //public int availableLots;
+        private int _availableLots;
+        public int AvailableLots
+        {
+            get => _availableLots;
+            set
+            {
+                if (SetProperty(ref _availableLots, value))
+                {
+                    UpdateBottomSheetAvailability();
+                }
+            }
+        }
 
         public PrivateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
         {
@@ -114,6 +128,11 @@ namespace ParkEase.ViewModel
             ScannerText = "";
             LoadedCommand = new AsyncRelayCommand(LoadedCommandAsync);
 
+        }
+
+        private void UpdateBottomSheetAvailability()
+        {
+            dialogService.UpdateBottomSheetAvailability($"{SelectedFloorName}: {AvailableLots} available lots");
         }
 
         /*public async Task SaveImageToLocal(ImageSource imageSource)
@@ -175,23 +194,12 @@ namespace ParkEase.ViewModel
         private async Task LoadedCommandAsync()
         {
             privateParkingId = DataService.GetId();
-            //privateParkingId = parkEaseModel.PrivateMapId;
             await LoadParkingData();
 
             cts = new CancellationTokenSource();
             var token = cts.Token;
             _ = Run(token); // Start the real-time update loop
         }
-
-        /*public ICommand LoadedCommand => new RelayCommand(async () =>
-        {
-            privateParkingId = DataService.GetId();
-            await LoadParkingData();
-
-            cts = new CancellationTokenSource();
-            var token = cts.Token;
-            _ = Run(token); // Start the real-time update loop
-        });*/
 
         public ICommand UnLoadedCommand => new RelayCommand(() =>
         {
@@ -252,7 +260,7 @@ namespace ParkEase.ViewModel
                     SelectedFloorName = FloorNames.First();
                 }
                 
-                await dialogService.ShowBottomSheet($"{Address}", $"{Fee} per hour", $"{LimitHour}", $"{SelectedFloorName}: ? available lots", false, "", "");
+                await dialogService.ShowBottomSheet($"{Address}", $"{Fee:C}/hour", $"{LimitHour}", $"{SelectedFloorName}: {AvailableLots} available lots", false, "", "");
             }
             catch (Exception ex)
             {
@@ -346,7 +354,7 @@ namespace ParkEase.ViewModel
                     rectangles.Add(rectangle);
                 }
 
-
+                AvailableLots = availabilityCount;
                 ListRectangleFill = rectangles;
                 //await dialogService.ShowBottomSheet($"{Address}", $"{fee} per hour", $"{limitHour}", $"{SelectedFloorName}: {availabilityCount} available lots", false, "", "");
             }
