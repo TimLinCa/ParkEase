@@ -1,28 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Controls.Maps;
-using Microsoft.Maui.Maps;
-using Microsoft.Maui.Platform;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using ParkEase.Contracts.Services;
 using ParkEase.Controls;
 using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Services;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using Microsoft.Maui.Dispatching;
-using System.Linq;
-using System.Net;
 using ParkEase.Messages;
-using Microsoft.Maui.ApplicationModel;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Windows.Input;
 
 namespace ParkEase.ViewModel
 {
@@ -74,6 +61,21 @@ namespace ParkEase.ViewModel
         private string searchText;
 
         [ObservableProperty]
+        private ObservableCollection<SearchResultItemViewModel> searchAddress;
+
+        [ObservableProperty]
+        private SearchResultItemViewModel selectedSuggestion;
+
+        [ObservableProperty]
+        private bool isSuggestionsVisible;
+
+        [ObservableProperty]
+        private bool research = true;
+
+        [ObservableProperty]
+        private bool mapVisible;
+
+        [ObservableProperty]
         private bool isSearchInProgress;
 
         [ObservableProperty]
@@ -93,11 +95,6 @@ namespace ParkEase.ViewModel
 
         private CancellationTokenSource cts;
 
-        partial void OnSearchTextChanged(string value)
-        {
-
-        }
-
         //private readonly object lockObj = new object();
         //private bool stopping = false;
         public UserMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, IGeocodingService geocodingService)
@@ -107,6 +104,81 @@ namespace ParkEase.ViewModel
             this.geocodingService = geocodingService;
 
             LoadedEventCommand = new AsyncRelayCommand(ExecuteLoadedEventCommand);
+
+        }
+
+        partial void OnSearchTextChanged(string value)
+        {
+            Task.Run(async () =>
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    SearchAddress = new ObservableCollection<SearchResultItemViewModel>();
+                    IsSuggestionsVisible = false;
+                    MapVisible = true;
+                    return;
+                }
+
+                var list = await geocodingService.GetPredictedAddressAsync(value, LocationLatitude, LocationLongitude);
+
+                List<SearchResultItem> searchResultItems = list;
+
+                List<SearchResultItemViewModel> SearchResultItemViewModels = new();
+                foreach (SearchResultItem item in searchResultItems)
+                {
+                    SearchResultItemViewModels.Add(new SearchResultItemViewModel()
+                    {
+                        AddressName = item.AddressName,
+                        SecondaryText = item.SecondaryText,
+                        Distance = item.Distance
+                    });
+                }
+
+                SearchAddress = new ObservableCollection<SearchResultItemViewModel>(SearchResultItemViewModels);
+                IsSuggestionsVisible = SearchAddress.Count > 0;
+                MapVisible = SearchAddress.Count == 0;
+            });
+        }
+
+        partial void OnSelectedSuggestionChanged(SearchResultItemViewModel? value)
+        {
+            AddressSelected();
+        }
+
+        private async Task AddressSelected()
+        {
+            MapVisible = true;
+            try
+            {
+                if (string.IsNullOrEmpty(SelectedSuggestion.AddressName))
+                {
+                    await dialogService.ShowAlertAsync("Warning", "Please input search text.", "OK");
+                    return;
+                }
+
+                IsSearchInProgress = true;
+
+                var location = await geocodingService.GetLocationAsync(SelectedSuggestion.AddressName);
+
+                if (location != null)
+                {
+                    CenterLocation = location;
+                    var locationTemp = DataService.GetLocation();
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Location not found", "Unable to find the specified location.");
+                }
+                IsSuggestionsVisible = false;
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+            finally
+            {
+                IsSearchInProgress = false;
+            }
         }
 
         public ICommand BackToCurrentLocationCommand => new RelayCommand(() =>
@@ -115,23 +187,42 @@ namespace ParkEase.ViewModel
             CenterLocation = new Location { Latitude = LocationLatitude, Longitude = LocationLongitude };
         });
 
-        public ICommand SearchCommand => new RelayCommand(async () =>
+        public ICommand MapVisibleCommand => new RelayCommand(() =>
         {
-            if (!string.IsNullOrEmpty(SearchText))
+            MapVisible = !MapVisible;
+        });
+
+        public ICommand SearchCommand => new AsyncRelayCommand(async () =>
+        {
+            try
             {
+                if (string.IsNullOrEmpty(SearchText))
+                {
+                    await dialogService.ShowAlertAsync("Warning", "Please input search text.", "OK");
+                    return;
+                }
+
                 IsSearchInProgress = true;
+
                 var location = await geocodingService.GetLocationAsync(SearchText);
+
                 if (location != null)
                 {
                     CenterLocation = location;
-                    var locationtemp = DataService.GetLocation();
-                    // Optionally, refresh the map or do other necessary updates here
+                    var locationTemp = DataService.GetLocation();
                 }
                 else
                 {
                     await dialogService.ShowAlertAsync("Location not found", "Unable to find the specified location.");
                 }
-
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+            finally
+            {
+                IsSearchInProgress = false;
             }
         });
 
@@ -346,7 +437,47 @@ namespace ParkEase.ViewModel
             }
         }
 
+        // Handles the event when a line is clicked
+        public async Task OnLineClickedAsync(MapLine selectedLine)
+        {
+            if (selectedLine == null) return;
 
+        // Represents the command interface, used to implement the command pattern.
+        //A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
+        public ICommand UpdateRangeCommand => new RelayCommand(() =>
+        {
+            try
+            {
+                var filter = Builders<ParkingData>.Filter.Eq(pd => pd.Points, selectedLine.Points); // Filter the parking data based on the selected line
+                var parkingDataList = await mongoDBService.GetDataFilter<ParkingData>(CollectionName.ParkingData, filter); // Get the parking data based on the filter
+
+                if (parkingDataList == null || !parkingDataList.Any()) // If no parking data is found, show an alert
+                {
+                    await dialogService.ShowAlertAsync("No Data Found", "No parking data found for the selected line.");
+                    return;
+                }
+
+                // Get the address, parking fee, limited hour, parking data id, latitude, and longitude
+                var parkingData = parkingDataList.First();
+                var address = parkingData.ParkingSpot;
+                var parkingFee = parkingData.ParkingFee;
+                var limitedHour = parkingData.ParkingTime;
+                var parkingDataId = parkingData.Id;
+                var lat = parkingData.Points[1].Lat;
+                var lng = parkingData.Points[1].Lng;
+
+                // Load the available spots and show the bottom sheet
+                await LoadAvailableSpotsAsync(parkingDataId);
+
+                // Show the bottom sheet with the address, parking fee, limited hour, available spots, and a button to show the directions
+                await dialogService.ShowBottomSheet(address, parkingFee, limitedHour, $"{availableSpots} Available Spots", true, lat, lng);
+
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error retrieving parking data: {ex.Message}");
+            }
+        }
         // Represents the command interface, used to implement the command pattern.
         //A specific class that implements ICommand, allowing you to define the logic to run when the command is executed.
         public ICommand UpdateRangeCommand => new RelayCommand(() =>
@@ -683,5 +814,9 @@ namespace ParkEase.ViewModel
                 Debug.WriteLine($"Error starting walking navigation: {ex.Message}");
             }
         });
+    }
+
+    public class SearchResultItemViewModel : SearchResultItem
+    {
     }
 }

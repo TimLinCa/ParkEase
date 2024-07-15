@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ParkEase.Core.Data;
 
 namespace ParkEase.Core.Contracts.Services
 {
@@ -10,6 +11,6 @@ namespace ParkEase.Core.Contracts.Services
     {
         Task<Location> GetLocationAsync(string address);
 
-        Task<List<string>> GetPredictedAddressAsync(string input);
+        Task<List<SearchResultItem>> GetPredictedAddressAsync(string input, double? latitude, double? longitude);
     }
 }
