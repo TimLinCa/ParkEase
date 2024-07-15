@@ -19,7 +19,6 @@ namespace ParkEase.Controls
         private bool mapInitialised = false;
         public delegate void NavigatedEventHandler(object sender, WebNavigatedEventArgs e);
         public event NavigatedEventHandler NavigatedEvent;
-        //public event Action<WebNavigatedEventArgs> NavigatedEvent;
         private static GMap currentInstance;
         private static bool selfUpdatingLines = false;
         public bool Drawing

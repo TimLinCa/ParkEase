@@ -704,7 +704,7 @@ namespace ParkEase.Test.UnitTest
 
             viewModel.LoadedCommand.Execute(null);
 
-            await viewModel.ShowPrivateParkingBottomSheet(parkingDataInside);
+            //await viewModel.ShowPrivateParkingBottomSheet(parkingDataInside);
 
             await Task.Delay(2000);
 

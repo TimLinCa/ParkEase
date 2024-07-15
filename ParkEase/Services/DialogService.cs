@@ -1,5 +1,6 @@
 ﻿using ParkEase.Contracts.Services;
 using ParkEase.Controls;
+using ParkEase.Core.Data;
 using ParkEase.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace ParkEase.Services
             return Application.Current.MainPage.DisplayAlert(title, message, accept, cancel);
         }
 
-        public async Task ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng)
+        public async Task<MyBottomSheet> ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng, bool isLocationSaved = false)
         {
    
             if (currentBottomSheet != null)
@@ -45,8 +46,9 @@ namespace ParkEase.Services
             currentBottomSheet.SetVisibilityNavigatedButton(ShowButton);
             currentBottomSheet.SetLat(lat);
             currentBottomSheet.SetLng(lng);
-
+            currentBottomSheet.SetIsLocationSaved(isLocationSaved);
             await currentBottomSheet.ShowAsync();
+            return currentBottomSheet;
         }
 
         public async Task DismissBottomSheetAsync()
@@ -69,5 +71,13 @@ namespace ParkEase.Services
             }
         }
 
+        public async Task OpenGoogleMap(string Lat, string Lng,TravelMode trabelMode)
+        {
+            // Construct the URI for Google Maps
+            string uri = $"https://www.google.com/maps/dir/?api=1&destination={Lat},{Lng}&travelmode={trabelMode.ToString().ToLower()}"; /*https://developers.google.com/maps/documentation/urls/get-started#directions-action*/
+
+            // Open the URI
+            await Launcher.OpenAsync(new Uri(uri)); /*https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.applicationmodel.launcher.openasync?view=net-maui-8.0#microsoft-maui-applicationmodel-launcher-openasync(system-uri)*/
+        }
     }
 }

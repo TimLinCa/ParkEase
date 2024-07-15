@@ -5,7 +5,9 @@ using ParkEase.Core.Contracts.Services;
 using ParkEase.Core.Data;
 using ParkEase.Core.Model;
 using ParkEase.Core.Services;
+using ParkEase.Controls;
 using ParkEase.ViewModel;
+using The49.Maui.BottomSheet;
 using CollectionName = ParkEase.Core.Services.CollectionName;
 namespace ParkEase.Test.IntergartionTest
 {
@@ -233,10 +235,10 @@ namespace ParkEase.Test.IntergartionTest
                 return Task.CompletedTask;
             }
 
-            public Task DismissBottomSheetAsync()
+            public Task<MyBottomSheet> DismissBottomSheetAsync()
             {
                 _dismissBottomSheetCount++;
-                return Task.CompletedTask;
+                return Task.FromResult<MyBottomSheet>(null);
             }
 
             // Methods to retrieve shown messages for testing

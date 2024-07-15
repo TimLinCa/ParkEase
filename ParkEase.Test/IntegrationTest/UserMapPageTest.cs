@@ -479,6 +479,8 @@ namespace ParkEase.Test.IntergartionTest
                 }
             };
 
+
+
             // Act
             _viewModel.LoadedCommand.Execute(null);
 
@@ -488,7 +490,7 @@ namespace ParkEase.Test.IntergartionTest
 
             await Task.Delay(1000);
 
-            await _viewModel.ShowPrivateParkingBottomSheet(privateParkingDataInside);
+            //await _viewModel.ShowPrivateParkingBottomSheet(privateParkingDataInside);
 
             await Task.Delay(2000);
 

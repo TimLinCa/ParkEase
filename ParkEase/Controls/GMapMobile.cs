@@ -15,12 +15,9 @@ namespace ParkEase.Controls
 {
     public class GMapMobile : WebView
     {
-        private bool mapInitialised = false;
         public delegate void EventArgsHandler(object? sender, EventArgs e);
         public event EventArgsHandler LoadedEvent;
         private static GMapMobile currentInstance;
-        private static bool selfUpdatingLines = false;
-        private static Location location;
         private bool isLoaded = false;
         private IGeolocatorService geolocation;
         private CancellationTokenSource cancellationTokenSource;
@@ -29,6 +26,11 @@ namespace ParkEase.Controls
         public ObservableCollection<MapLine> Lines
         {
             get => (ObservableCollection<MapLine>)GetValue(LinesProperty); set { SetValue(LinesProperty, value); }
+        }
+
+        public ObservableCollection<MapPrivateParking> PrivateMarkers
+        {
+            get => (ObservableCollection<MapPrivateParking>)GetValue(PrivateMarkersProperty); set { SetValue(PrivateMarkersProperty, value); }
         }
 
         public double Radius
@@ -41,14 +43,9 @@ namespace ParkEase.Controls
             get => (MapLine)GetValue(SelectedLineProperty); set { SetValue(SelectedLineProperty, value); }
         }
 
-        public double MarkerLatitude
+        public MapPrivateParking SelectedPrivateMarker
         {
-            get => (double)GetValue(MarkerLatitudeProperty); set => SetValue(MarkerLatitudeProperty, value);
-        }
-
-        public double MarkerLongitude
-        {
-            get => (double)GetValue(MarkerLongitudeProperty); set => SetValue(MarkerLongitudeProperty, value);
+            get => (MapPrivateParking)GetValue(SelectedPrivateMarkerProperty); set { SetValue(SelectedPrivateMarkerProperty, value); }
         }
 
         public double LocationLat
@@ -73,13 +70,13 @@ namespace ParkEase.Controls
 
         public static readonly BindableProperty LinesProperty = BindableProperty.Create(nameof(Lines), typeof(ObservableCollection<MapLine>), typeof(GMapMobile), propertyChanged: LinesPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
 
+        public static readonly BindableProperty PrivateMarkersProperty = BindableProperty.Create(nameof(PrivateMarkers), typeof(ObservableCollection<MapPrivateParking>), typeof(GMapMobile), propertyChanged: PrivateMarkersPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
+
         public static readonly BindableProperty SelectedLineProperty = BindableProperty.Create(nameof(SelectedLine), typeof(MapLine), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
 
+        public static readonly BindableProperty SelectedPrivateMarkerProperty = BindableProperty.Create(nameof(SelectedPrivateMarker), typeof(MapPrivateParking), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
+
         public static readonly BindableProperty RadiusProperty = BindableProperty.Create(nameof(Radius), typeof(double), typeof(GMapMobile), propertyChanged: RadiusPropertyChanged, defaultBindingMode: BindingMode.TwoWay);
-
-        public static readonly BindableProperty MarkerLatitudeProperty = BindableProperty.Create(nameof(MarkerLatitude), typeof(double), typeof(GMapMobile), propertyChanged: OnMarkerLatitudeChanged);
-
-        public static readonly BindableProperty MarkerLongitudeProperty = BindableProperty.Create(nameof(MarkerLongitude), typeof(double), typeof(GMapMobile), propertyChanged: OnMarkerLongitudeChanged);
 
         public static readonly BindableProperty LocationLatProperty = BindableProperty.Create(nameof(LocationLat), typeof(double), typeof(GMapMobile), defaultBindingMode: BindingMode.TwoWay);
 
@@ -133,7 +130,7 @@ namespace ParkEase.Controls
                     let currentLat;
                     let currentLng;
                     let markers = []; // Track all markers
-                    let previousSelectedMarker = null;
+                    let selectedMarker = null;
                     let savedLocationMarker = null; // Variable to keep track of the saved location marker
 
                 // Initializes the Google Map 
@@ -205,20 +202,13 @@ namespace ParkEase.Controls
 
                     // Add a click event listener to the private marker 
                     marker.addListener('click', function() {
-
                         // Reset the color of the previously selected marker, if any
-                        if (previousSelectedMarker) {
-                            previousSelectedMarker.setIcon({
-                                url: previousSelectedMarker.originalIcon,
+                        if (selectedMarker) {
+                            selectedMarker.setIcon({
+                                url: selectedMarker.originalIcon,
                                 scaledSize: new google.maps.Size(24, 24)
                             });
                         }
-
-                        // Reset the color of the previously selected line, if any
-                            if (selectedLine) {
-                                selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
-                                selectedLine = null;
-                            }
 
                         // Change the marker color to yellow with black fill
                             marker.setIcon({
@@ -230,15 +220,14 @@ namespace ParkEase.Controls
                                 `),
                                 scaledSize: new google.maps.Size(24, 24)
                             });
+                        
+                        // Reset the color of the previously selected line, if any
+                            if (selectedLine) {
+                                selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
+                                selectedLine = null;
+                            }
 
-                        // Update the previous selected marker
-                        previousSelectedMarker = marker;
-
-                         // Store the selected marker's coordinates
-                        selectedMarkerCoordinates = { lat: lat, lng: lng };
-
-                        // Clear line coordinates 
-                        selectedLineCoordinates = null;  
+                        selectedMarker = marker;                      
 
                         // Redirect to a custom URL scheme with the marker's information
                         //https://www.w3schools.com/js/js_window_location.asp
@@ -327,12 +316,12 @@ namespace ParkEase.Controls
                                     selectedLine.setOptions({ strokeColor: selectedLine.originalColor });
                                 }
 
-                                if (previousSelectedMarker) {
-                                    previousSelectedMarker.setIcon({
-                                        url: previousSelectedMarker.originalIcon,
+                                if (selectedMarker) {
+                                    selectedMarker.setIcon({
+                                        url: selectedMarker.originalIcon,
                                         scaledSize: new google.maps.Size(24, 24)
                                     });
-                                    previousSelectedMarker = null;
+                                    selectedMarker = null;
                                 }
 
                                 selectedLine = line;
@@ -341,7 +330,6 @@ namespace ParkEase.Controls
                                 let lineInfo = getLineInfo(line);
                                 window.location.href = ""myapp://lineclicked?index="" + lines.indexOf(line) + ""&info="" + encodeURIComponent(lineInfo);
                                 setSelectedLine(line.getPath().getArray());
-                                selectedMarkerCoordinates = null;
                             }
                         });
 
@@ -397,6 +385,16 @@ namespace ParkEase.Controls
                     }
                     return null; // Return null if no line is found
                 }
+
+                function getMarkerByCoordinates(lat, lng) {
+                    for (let i = 0; i < markers.length; i++) {
+                        let markerPosition = markers[i].getPosition();
+                        if (isCloseEnough(markerPosition.lat(), lat) && isCloseEnough(markerPosition.lng(), lng)) {
+                            return markers[i];
+                        }
+                    }
+                    return null; // Return null if no marker is found
+                }
                 
                 // Helper function to compare floating point numbers
                 function isCloseEnough(a, b, epsilon = 0.000001) {
@@ -410,6 +408,16 @@ namespace ParkEase.Controls
                         line.setMap(null); // Removes the selected segment from the map
                         lines.splice(lines.indexOf(line), 1); // Removes the selected segment from the array
                         line = null;
+                    }
+                }
+
+                 // Deletes the selected line
+                function deleteMarker(latitude, longitude) {
+                    let marker = getMarkerByCoordinates(latitude, longitude);
+                    if (marker != null) {
+                        marker.setMap(null); // Removes the selected segment from the map
+                        markers.splice(markers.indexOf(marker), 1); // Removes the selected segment from the array
+                        marker = null;
                     }
                 }
 
@@ -581,33 +589,9 @@ namespace ParkEase.Controls
                 // Ensure the following code runs on the main thread - update the UI
                 //await Device.InvokeOnMainThreadAsync(async () =>
                 //{
-                    // Evaluate the JavaScript function in the web view context
-                    await EvaluateJavaScriptAsync("window.postMessage('GetDirections');"); // send a message to the JavaScript function
+                // Evaluate the JavaScript function in the web view context
+                await EvaluateJavaScriptAsync("window.postMessage('GetDirections');"); // send a message to the JavaScript function
                 //});
-            });
-
-            // Subscribe to MessagingCenter messages(main thread)
-            MessagingCenter.Subscribe<UserMapViewModel, (double lat, double lng, string title, string color)>(this, "AddMarker", async (sender, args) =>
-            {
-                await AddMarkerAsync(args.lat, args.lng, args.title, args.color);
-            });
-
-            // Subscribe to clear markers message
-            MessagingCenter.Subscribe<UserMapViewModel>(this, "ClearMarkers", async (sender) =>
-            {
-                await ClearMarkersAsync();
-            });
-
-            // Subscribe to "SaveParkingLocation" message
-            MessagingCenter.Subscribe<MyBottomSheet, (string lat, string lng)>(this, "SaveParkingLocation", (sender, args) =>
-            {
-                SaveParkingLocation(args.lat, args.lng);
-            });
-
-            // Subscribe to "RemoveParkingLocation" message
-            MessagingCenter.Subscribe<MyBottomSheet, (string lat, string lng)>(this, "RemoveParkingLocation", (sender, args) =>
-            {
-                RemoveParkingLocation(args.lat, args.lng);
             });
         }
 
@@ -633,7 +617,7 @@ namespace ParkEase.Controls
                 var lng = double.Parse(queryParameters["lng"]);
                 var title = queryParameters["title"];
 
-                HandlePrivateParkingClicked(lat, lng, title);
+                HandlePrivateParkingClicked(lat, lng);
             }
             else if (e.Url.StartsWith("myapp://clearspot"))
             {
@@ -647,24 +631,7 @@ namespace ParkEase.Controls
             string jsCommand = "clearSavedSpot();";
             await EvaluateJavaScriptAsync(jsCommand);
         }
-
-        private async void HandlePrivateParkingClicked(double lat, double lng, string title)
-        {
-            var viewModel = BindingContext as UserMapViewModel;
-            if (viewModel != null)
-            {
-                var privateParking = await viewModel.GetPrivateParkingAsync(lat, lng);
-                if (privateParking != null)
-                {
-                    await viewModel.ShowPrivateParkingBottomSheet(privateParking);
-                }
-                else
-                {
-                    await viewModel.ShowPrivateParkingBottomSheet(null); // Show default message or handle the error
-                }
-            }
-        }
-
+      
         private static void RadiusPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not GMapMobile view)
@@ -679,6 +646,7 @@ namespace ParkEase.Controls
             string jsCommand = $"drawCircle({lat},{lng},{newRadius});";
             view.EvaluateJavaScriptAsync(jsCommand);
         }
+
         private static void LinesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is not GMapMobile view)
@@ -701,21 +669,36 @@ namespace ParkEase.Controls
             view.SelectedLine = null;
         }
 
-        private static void OnMarkerLatitudeChanged(BindableObject bindable, object oldValue, object newValue)
+        private static void PrivateMarkersPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            if (bindable is GMapMobile view)
+
+            if (bindable is not GMapMobile view)
             {
-                view.UpdateMarker();
+                return;
             }
+
+            string jsClearCommand = $"clearMarkers();";
+            view.EvaluateJavaScriptAsync(jsClearCommand);
+
+            ObservableCollection<MapPrivateParking> privateMarkers = (ObservableCollection<MapPrivateParking>)newValue;
+            privateMarkers.CollectionChanged += PrivateMarkers_CollectionChanged;
+
+            foreach (MapPrivateParking privateParking in privateMarkers)
+            {
+                var markerIconPath = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes($@"
+                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                  <circle cx='12' cy='12' r='10' fill='{privateParking.Color}'/>
+                  <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
+                 </svg>
+            "))}";
+
+                string jsCommand = $@"addMarker({privateParking.Latitude}, {privateParking.Longitude}, '{privateParking.Title}', '{markerIconPath}');";
+                view.EvaluateJavaScriptAsync(jsCommand);
+            }
+
+            view.SelectedPrivateMarker = null;
         }
 
-        private static void OnMarkerLongitudeChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            if (bindable is GMapMobile view)
-            {
-                view.UpdateMarker();
-            }
-        }
 
         private static void OnCenterLocationChanged(BindableObject bindable, object oldValue, object newValue)
         {
@@ -725,17 +708,6 @@ namespace ParkEase.Controls
                 view.EvaluateJavaScriptAsync(jscommand);
             }
         }
-
-
-        private async void UpdateMarker()
-        {
-            Debug.WriteLine($"Updating marker: {MarkerLatitude}, {MarkerLongitude}");
-            if (MarkerLatitude != 0 && MarkerLongitude != 0)
-            {
-                await AddMarkerAsync(MarkerLatitude, MarkerLongitude, "Private Parking", "");
-            }
-        }
-
 
         private static async void Lines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -770,6 +742,44 @@ namespace ParkEase.Controls
             }
         }
 
+        private static async void PrivateMarkers_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                if (e.OldItems != null)
+                {
+                    foreach (MapPrivateParking mapPrivateMarker in e.OldItems)
+                    {
+                        string jsCommand = $"deleteMarker({mapPrivateMarker.Latitude},{mapPrivateMarker.Longitude})";
+                        await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+
+                        if (currentInstance.SelectedPrivateMarker != null && currentInstance.SelectedPrivateMarker.Equals(mapPrivateMarker))
+                        {
+                            currentInstance.SelectedPrivateMarker = null;
+                        }
+                    }
+                }
+            }
+            else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                if (e.NewItems != null)
+                {
+                    foreach (MapPrivateParking privateParking in e.NewItems)
+                    {
+                        var markerIconPath = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes($@"
+                             <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                               <circle cx='12' cy='12' r='10' fill='{privateParking.Color}'/>
+                               <text x='12' y='16' font-size='12' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>P</text>
+                              </svg>
+                         "))}";
+
+                        string jsCommand = $@"addMarker({privateParking.Latitude}, {privateParking.Longitude}, '{privateParking.Title}', '{markerIconPath}');";
+                        await currentInstance.EvaluateJavaScriptAsync(jsCommand);
+                    }
+                }
+            }
+        }
+
         // async indicates that the method contains asynchronous operations.
         private async void GMapMobile_Loaded(object? sender, EventArgs e)
         {
@@ -782,27 +792,6 @@ namespace ParkEase.Controls
                 string jsCommand = $"initMap();";
                 await currentInstance.EvaluateJavaScriptAsync(jsCommand);
                 LoadedEvent?.Invoke(sender, e); //The null-conditional operator ?. ensures that the event is only invoked if it is not null.
-
-                // Retrieve the saved location from SecureStorage
-                string savedLat = await SecureStorage.Default.GetAsync("SavedParkingLat");
-                string savedLng = await SecureStorage.Default.GetAsync("SavedParkingLng");
-
-                if (!string.IsNullOrEmpty(savedLat) && !string.IsNullOrEmpty(savedLng))
-                {
-                    // Add the saved marker to the map
-                    string saveJsCommand = $"window.postMessage('SaveParkingLocation,{savedLat},{savedLng}');";
-                    await EvaluateJavaScriptAsync(saveJsCommand);
-
-                    // Update the saved marker location
-                    savedMarker = (savedLat, savedLng);
-
-                    // Set the WalkNavigation button visibility
-                    var viewModel = BindingContext as UserMapViewModel;
-                    if (viewModel != null)
-                    {
-                        viewModel.IsWalkNavigationVisible = true;
-                    }
-                }
 
                 // Add marker after the map is initialized
                 if (cancellationTokenSource != null)
@@ -844,14 +833,6 @@ namespace ParkEase.Controls
             await EvaluateJavaScriptAsync(jsCommand);
         }
 
-        public async Task ClearMarkersAsync()
-        {
-            // JavaScript command to clear all markers
-            string jsCommand = "clearMarkers();";
-            System.Diagnostics.Debug.WriteLine("Clearing all markers");
-
-            await EvaluateJavaScriptAsync(jsCommand);
-        }
         private async void HandleLineClicked(string info)
         {
             // Split the info string into individual points using ';' as the delimiter
@@ -892,49 +873,41 @@ namespace ParkEase.Controls
             }
 
             // Ask the user if they want to clear the saved spot if the line has a saved spot
-            var viewModel = BindingContext as UserMapViewModel;
-            if (viewModel != null && await viewModel.HasSavedSpotAsync(SelectedLine))
-            {
-                viewModel.ClearSavedSpotCommand.Execute(null);
-            }
+            SelectedPrivateMarker = null;
+            //var viewModel = BindingContext as UserMapViewModel;
+            //if (viewModel != null && await viewModel.HasSavedSpotAsync(SelectedLine))
+            //{
+            //    viewModel.ClearSavedSpotCommand.Execute(null);
+            //}
         }
 
-        private async void SaveParkingLocation(string lat, string lng)
+        private void HandlePrivateParkingClicked(double lat, double lng)
         {
-            // Remove the existing saved marker if it exists
-            if (savedMarker.HasValue)
-            {
-                //https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
-                string removeJsCommand = $"window.postMessage('RemoveParkingLocation,{savedMarker.Value.Lat},{savedMarker.Value.Lng}');";
-                await EvaluateJavaScriptAsync(removeJsCommand);
-            }
-
-            // Add the new marker
-            string saveJsCommand = $"window.postMessage('SaveParkingLocation,{lat},{lng}');";
-            await EvaluateJavaScriptAsync(saveJsCommand);
-
-            // Update the saved marker location
-            savedMarker = (lat, lng);
-
-            //https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-8.0&tabs=android
-            // Save the location to SecureStorage
-            await SecureStorage.Default.SetAsync("SavedParkingLat", lat);
-            await SecureStorage.Default.SetAsync("SavedParkingLng", lng);
-
-        }
-
-        private async void RemoveParkingLocation(string lat, string lng)
-        {
-            string jsCommand = $"window.postMessage('RemoveParkingLocation,{lat},{lng}');";
-            await EvaluateJavaScriptAsync(jsCommand);
-
-            // Clear the saved marker location
-            savedMarker = null;
-
-            //https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-8.0&tabs=android
-            // Remove the location from SecureStorage
-            SecureStorage.Default.Remove("SavedParkingLat");
-            SecureStorage.Default.Remove("SavedParkingLng");           
+            SelectedPrivateMarker = PrivateMarkers.FirstOrDefault(p => p.Latitude == lat && p.Longitude == lng);
+            SelectedLine = null;
         }
     }
+
+    public class MapPrivateParking : ICloneable
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string Color { get; set; }
+
+        public object Clone()
+        {
+            return new MapPrivateParking
+            {
+                Id = this.Id,
+                Title = this.Title,
+                Latitude = this.Latitude,
+                Longitude = this.Longitude,
+                Color = this.Color
+            };
+        }
+
+    }
+
 }

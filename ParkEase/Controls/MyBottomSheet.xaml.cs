@@ -10,6 +10,12 @@ namespace ParkEase.Controls
     {
         public string Lat { get; set; }
         public string Lng { get; set; }
+
+        public delegate void EventArgsHandler(object? sender, EventArgs e);
+        public event EventArgsHandler StartNavigationEvent;
+        public event EventArgsHandler SaveLocationEvent;
+        public event EventArgsHandler ClearLocationEvent;
+
         public bool DismissedState { get; set; } = false;
 
         private bool isLocationSaved = false;
@@ -35,35 +41,16 @@ namespace ParkEase.Controls
             MessagingCenter.Send(this, "GetDirections");
         }
 
-
-        private async void OpenInGoogleMapsCommand(object sender, EventArgs e)
+        private void OpenInGoogleMapsCommand(object sender, EventArgs e)
         {
-            // Construct the URI for Google Maps
-            string uri = $"https://www.google.com/maps/dir/?api=1&destination={Lat},{Lng}&travelmode=driving"; /*https://developers.google.com/maps/documentation/urls/get-started#directions-action*/
-
-            // Open the URI
-            await Launcher.OpenAsync(new Uri(uri)); /*https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.applicationmodel.launcher.openasync?view=net-maui-8.0#microsoft-maui-applicationmodel-launcher-openasync(system-uri)*/
+            StartNavigationEvent?.Invoke(sender, e);
         }
 
         private void SaveOrRemoveParkingLocationCommand(object sender, TappedEventArgs e)
         {
-            if (!isLocationSaved)
-            {
-                // Save the location
-                MessagingCenter.Send(this, "SaveParkingLocation", (Lat, Lng));
-                ParkingLocationIcon.Source = "removecar.png"; // Change the icon to indicate the spot is saved
-                ParkingLocationLabel.Text = "Clear Spot"; // Change the label text to indicate the spot can be cleared
-                MessagingCenter.Send(this, "UpdateWalkNavigationVisibility", true); // Show the WalkNavigation button
-            }
-            else
-            {
-                // Remove the location
-                MessagingCenter.Send(this, "RemoveParkingLocation", (Lat, Lng));
-                ParkingLocationIcon.Source = "addcar.png"; // Change the icon back to indicate the spot can be saved
-                ParkingLocationLabel.Text = "Save Spot"; // Change the label text back to indicate the spot can be saved
-                MessagingCenter.Send(this, "UpdateWalkNavigationVisibility", false); // Hide the WalkNavigation button
-            }
-            isLocationSaved = !isLocationSaved;  // Flip the value of isLocationSaved: if it was true, make it false; if it was false, make it true
+            if (!isLocationSaved) SaveLocationEvent?.Invoke(sender, e);
+            else ClearLocationEvent?.Invoke(sender, e);
+            SetIsLocationSaved(!isLocationSaved);  // Flip the value of isLocationSaved: if it was true, make it false; if it was false, make it true
         }
 
         private async void ShareSpotButton_Clicked(object sender, TappedEventArgs e)
@@ -124,6 +111,22 @@ namespace ParkEase.Controls
         public void SetLng(string lng)
         {
             Lng = lng;
+        }
+
+        public void SetIsLocationSaved(bool isLocationSaved)
+        {
+            this.isLocationSaved = isLocationSaved;
+            if(isLocationSaved)
+            {
+                ParkingLocationIcon.Source = "removecar.png";
+                ParkingLocationLabel.Text = "Clear Spot";
+            }
+            else
+            {
+                ParkingLocationIcon.Source = "addcar.png";
+                ParkingLocationLabel.Text = "Save Spot";
+            }
+
         }
 
         private void OnStartTimerClicked(object sender, EventArgs e)

@@ -27,4 +27,12 @@ namespace ParkEase.Core.Data
         Daily,
         Monthly,
     }
+
+    public enum TravelMode
+    {
+        Driving,
+        Walking,
+        Bicycling,
+        Transit
+    }
 }

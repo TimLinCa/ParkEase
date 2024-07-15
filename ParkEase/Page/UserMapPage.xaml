@@ -44,10 +44,11 @@
                     Lines="{Binding MapLines}"
                     LocationLat="{Binding LocationLatitude}"
                     LocationLng="{Binding LocationLongitude}"
-                    MarkerLatitude="{Binding MarkerLatitude}"
-                    MarkerLongitude="{Binding MarkerLongitude}"
+                    PrivateMarkers="{Binding MapPrivateParkings}"
                     Radius="{Binding Radius}"
-                    SelectedLine="{Binding SelectedMapLine}">
+                    SelectedLine="{Binding SelectedMapLine}"
+                    SelectedPrivateMarker="{Binding SelectedPrivateMarker}">
+
                     <controls:GMapMobile.Behaviors>
                         <toolkit:EventToCommandBehavior Command="{Binding LoadedEventCommand}" EventName="LoadedEvent" />
                     </controls:GMapMobile.Behaviors>
