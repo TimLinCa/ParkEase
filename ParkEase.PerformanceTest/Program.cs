@@ -21,7 +21,7 @@ namespace ParkEase.PerformanceTest
             if (SignUpPage) BenchmarkRunner.Run<SignUpViewModelBenchmarks>();
             if (LogInPage) BenchmarkRunner.Run<LogInViewModelBenchmarks>();
             if (MapPage) BenchmarkRunner.Run<MapViewModelBenchmarks>();
-            //if (PrivateMapPage) BenchmarkRunner.Run<PrivateMapViewModelBenchmarks>();
+            if (PrivateMapPage) BenchmarkRunner.Run<PrivateMapViewModelBenchmarks>();
             if (createMapPage) BenchmarkRunner.Run<CreateMapViewModelBenchmarks>();
         }
     }

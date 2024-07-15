@@ -178,15 +178,14 @@ namespace ParkEase.ViewModel
             //privateParkingId = parkEaseModel.PrivateMapId;
             await LoadParkingData();
 
-           /* cts = new CancellationTokenSource();
+            cts = new CancellationTokenSource();
             var token = cts.Token;
-            _ = Run(token); // Start the real-time update loop*/
+            _ = Run(token); // Start the real-time update loop
         }
-/*
-        public ICommand LoadedCommand => new RelayCommand(async () =>
+
+        /*public ICommand LoadedCommand => new RelayCommand(async () =>
         {
             privateParkingId = DataService.GetId();
-            //privateParkingId = parkEaseModel.PrivateMapId;
             await LoadParkingData();
 
             cts = new CancellationTokenSource();

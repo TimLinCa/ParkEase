@@ -24,19 +24,10 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using ParkEase.Page;
 using ParkEase.Controls;
+using ParkEase.Core.Contracts.abstracts;
 
 namespace ParkEase.ViewModel
 {
-    /*
-     * What information are needed
-     * - Company name
-     * - Address(picker)
-     * - Fee
-     * - LimitedHour
-     * 
-     * - Floor(picker)
-     */
-
     public partial class PrivateStatusViewModel : ObservableObject
     {
         #region ObservableProperty
@@ -48,6 +39,9 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private PrivateParking propertySelected;
+
+        [ObservableProperty]
+        private string feeText;
 
         [ObservableProperty]
         private ObservableCollection<string> floorItemSource;
@@ -65,19 +59,31 @@ namespace ParkEase.ViewModel
         private IImage imgSourceData;
 
         [ObservableProperty]
-        private int availabilityCount = 0;
+        private int availabilityLot;
+
+        [ObservableProperty]
+        private string clikedLotId;
+
+        [ObservableProperty]
+        private string selectedLotIndex;
+
+        [ObservableProperty]
+        private string parkingTime;
         #endregion
 
+        #region PrivateProperty
         private ParkEaseModel model;
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
         private List<PrivateParking> privateParkings;
         private List<FloorInfo> listFloorInfos;
         private string privateParkingId;
+        private FloorInfo selectedFloor;
 
         private CancellationTokenSource cts;
         readonly bool stopping = false;
         CancellationTokenSource cls = new CancellationTokenSource();
+        #endregion
 
         #region OnPropertyChangedEvent
         partial void OnAddressSelectedChanged(string value)
@@ -87,10 +93,10 @@ namespace ParkEase.ViewModel
 
         partial void OnFloorItemSelectedChanged(string value)
         {
-            LoadFloorInfo();
+            SelectedLotIndex = "";
+            ParkingTime = "";
         }
         #endregion
-
 
 
         public PrivateStatusViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
@@ -115,12 +121,12 @@ namespace ParkEase.ViewModel
             PropertyAddressList = new ObservableCollection<string>();
             AddressSelected = string.Empty;
             PropertySelected = null;
+            selectedFloor = null;
             FloorItemSource = new ObservableCollection<string>();
             FloorItemSelected = string.Empty;
             FloorSelected = null;
             ListRectangleFill = new ObservableCollection<Rectangle>();
             ImgSourceData = null;
-            AvailabilityCount = 0;
             privateParkings = new List<PrivateParking>();
             listFloorInfos = new List<FloorInfo>();
             privateParkingId = string.Empty;
@@ -138,7 +144,7 @@ namespace ParkEase.ViewModel
 
             // Sort by company name
             var sortedPrivateParkings = privateParkings.OrderBy(pp => pp.CompanyName);
-
+            // Create a list of company name and address for UI Picker
             PropertyAddressList = new ObservableCollection<string>(sortedPrivateParkings.Select(pp => pp.CompanyName + $" ({pp.Address})"));
         }
 
@@ -161,6 +167,7 @@ namespace ParkEase.ViewModel
                     return;
                 }
                 privateParkingId = PropertySelected.Id;
+                FeeText = $"${PropertySelected.ParkingInfo.Fee} /hour";
 
                 // Get the floor information
                 listFloorInfos = PropertySelected.FloorInfo;
@@ -208,63 +215,128 @@ namespace ParkEase.ViewModel
         // Load the selected floor information
         private async Task LoadFloorInfo()
         {
-            if (listFloorInfos != null)
+            if (PropertySelected != null)
             {
-                // Fetch PrivateStatus data from MongoDB
-                var status = await mongoDBService.GetStatusData<PrivateStatus>(CollectionName.PrivateStatus);
-                if (status == null || status.Count == 0)
+                if (listFloorInfos != null)
                 {
-                    System.Diagnostics.Debug.WriteLine("No private status data found.");
-                    return;
-                }
-
-                // Filter privateStatusData based on privateParkingId
-                var privateStatusData = status.Where(item => item.AreaId == privateParkingId).ToList();
-                // Filter by selectedFloorName and Create a dictionary for quick lookup of statuses by index
-                var matchingStatus = privateStatusData
-                    .Where(item => item.Floor == FloorItemSelected)
-                    .ToDictionary(item => item.LotId, item => item.Status);
-
-                // Fetch floor information
-                FloorInfo selectedFloor = listFloorInfos.FirstOrDefault(data => data.Floor == FloorItemSelected);
-                if (selectedFloor == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("No selected floor map found.");
-                    return;
-                }
-
-                // Fetch image data
-                var imageData = selectedFloor.ImageData;
-                using (MemoryStream ms = new MemoryStream(imageData))
-                {
-                    ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
-                }
-
-                // Variable to count availability status (false means available lot)
-                ObservableCollection<Rectangle> rectangles = new ObservableCollection<Rectangle>();
-                // Update rectangle colors based on status and add them to ListRectangle
-                foreach (var rectangle in selectedFloor.Rectangles)
-                {
-                    if (matchingStatus.TryGetValue(rectangle.Index, out bool isAvailable))
+                    // Fetch PrivateStatus data from MongoDB
+                    var status = await mongoDBService.GetStatusData<PrivateStatus>(CollectionName.PrivateStatus);
+                    if (status == null || status.Count == 0)
                     {
-                        if (!isAvailable)
-                        {
-                            rectangle.Color = "green";
-                            AvailabilityCount++;
-                        }
-                        else
-                        {
-                            rectangle.Color = "red";
-                        }
+                        System.Diagnostics.Debug.WriteLine("No private status data found.");
+                        return;
                     }
-                    rectangles.Add(rectangle);
+
+                    // Filter privateStatusData based on privateParkingId
+                    var privateStatusData = status.Where(item => item.AreaId == privateParkingId).ToList();
+                    // Filter by selectedFloorName and Create a dictionary for quick lookup of statuses by index
+                    var matchingStatus = privateStatusData
+                        .Where(item => item.Floor == FloorItemSelected)
+                        .ToDictionary(item => item.LotId, item => item.Status);
+
+                    // Fetch floor information
+                    selectedFloor = listFloorInfos.FirstOrDefault(data => data.Floor == FloorItemSelected);
+                    if (selectedFloor == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("No selected floor map found.");
+                        return;
+                    }
+
+                    // Fetch image data
+                    var imageData = selectedFloor.ImageData;
+                    using (MemoryStream ms = new MemoryStream(imageData))
+                    {
+                        ImgSourceData = await Task.Run(() => PlatformImage.FromStream(ms));
+                    }
+
+                    // Variable to count availability status (false means available lot)
+                    int availabilityCount = 0;
+                    ObservableCollection<Rectangle> rectangles = new ObservableCollection<Rectangle>();
+                    // Update rectangle colors based on status and add them to ListRectangle
+                    foreach (var rectangle in selectedFloor.Rectangles)
+                    {
+                        if (matchingStatus.TryGetValue(rectangle.Index, out bool isAvailable))
+                        {
+                            if (!isAvailable)
+                            {
+                                rectangle.Color = "green";
+                                availabilityCount++;
+                            }
+                            else
+                            {
+                                rectangle.Color = "red";
+                            }
+                        }
+                        rectangles.Add(rectangle);
+                    }
+                    ListRectangleFill = rectangles;
+                    AvailabilityLot = availabilityCount;
                 }
-                ListRectangleFill = rectangles;
+                else
+                {
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await dialogService.ShowAlertAsync("Error", "No floor information found", "OK");
+                    });
+                    //await dialogService.ShowAlertAsync("Error", "No floor information found", "OK");
+                }
             }
-            else
+        }
+
+        public async Task DisplaySingleLotInfo(PointF clickedPoint)
+        {
+            ParkingTime = string.Empty;
+            SelectedLotIndex = string.Empty;
+            foreach (Rectangle rectangle in selectedFloor.Rectangles)
             {
-                //await dialogService.ShowAlertAsync("Error", "No floor information found", "OK");
+                // Check Clicked Point is in the rectangle
+                if(ContainsPoint(rectangle.Rect, clickedPoint))
+                {
+                    // Get the selected lot index
+                    SelectedLotIndex = rectangle.Index.ToString();
+
+                    // Fetch PrivateStatus data from MongoDB
+                    var status = await mongoDBService.GetStatusData<PrivateStatus>(CollectionName.PrivateStatus);
+                    if (status == null || status.Count == 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("No private status data found.");
+                        return;
+                    }
+                    // Filter privateStatusData based on privateParkingId
+                    var privateLotInfos = status.Where(ps => ps.AreaId == privateParkingId && ps.Floor == selectedFloor.Floor && ps.LotId.ToString() == SelectedLotIndex).ToList();
+
+                    if (privateLotInfos == null || privateLotInfos.Count == 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("No private status data found for this lot.");
+                        return;
+                    } 
+                    else if (privateLotInfos.Count > 1)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Error", "Multiple parking data found", "OK");
+                        return;
+                    }
+                    var privateLotInfo = privateLotInfos.First();
+                    // Only show parking time for occupied lot
+                    if (privateLotInfo.Status)
+                    {
+                        // Calculate parking time
+                        TimeSpan parkingDuration = DateTime.Now - privateLotInfo.Timestamp;
+                        ParkingTime = $"{(int)parkingDuration.TotalHours}h{parkingDuration.Minutes}m";
+                        break;
+                    }
+                    else
+                    {
+
+                       ParkingTime = "Available";
+                        break;
+                    }
+                }
             }
+        }
+
+        private bool ContainsPoint(RectF rect, PointF point)
+        {
+            return point.X >= rect.Left && point.X <= rect.Right && point.Y >= rect.Top && point.Y <= rect.Bottom;
         }
     }
 }

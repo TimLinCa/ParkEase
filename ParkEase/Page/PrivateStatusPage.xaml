@@ -58,7 +58,7 @@
                     Margin="10,3"
                     FontAttributes="Bold"
                     Text="Parking Fee:" />
-                <Label Margin="10,3" Text="{Binding PropertySelected.ParkingInfo.Fee}" />
+                <Label Margin="10,3" Text="{Binding FeeText}" />
 
                 <Label
                     Margin="10,3"
@@ -77,6 +77,25 @@
                     ItemsSource="{Binding FloorItemSource}"
                     SelectedItem="{Binding FloorItemSelected, Mode=TwoWay}"
                     VerticalOptions="Center" />
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Available parking lots:" />
+                <Label Margin="10,3" Text="{Binding AvailabilityLot}" />
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Choosen Lot ID:" />
+                <Label Margin="10,3" Text="{Binding SelectedLotIndex}" />
+
+                <Label
+                    Margin="10,3"
+                    FontAttributes="Bold"
+                    Text="Parking Time:" />
+                <Label
+                    Margin="10,3"
+                    Text="{Binding ParkingTime}"
+                    TextColor="DarkGreen" />
 
 
             </StackLayout>
@@ -97,6 +116,9 @@
                     <controls:RecGraphicsViewWinStatus.Drawable>
                         <controls:RectDrawable />
                     </controls:RecGraphicsViewWinStatus.Drawable>
+                    <GraphicsView.GestureRecognizers>
+                        <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped" />
+                    </GraphicsView.GestureRecognizers>
                 </controls:RecGraphicsViewWinStatus>
             </Border>
         </Grid>

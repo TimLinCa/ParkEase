@@ -17,5 +17,6 @@ namespace ParkEase.Core.Data
         public bool Status { get; set; }
         public string Floor { get; set; }
         public int LotId { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 }
