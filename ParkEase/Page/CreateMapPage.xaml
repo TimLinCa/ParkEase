@@ -197,21 +197,40 @@
             Grid.Row="1"
             Grid.Column="0"
             VerticalOptions="Center">
-            <Button
-                x:Name="SubmitBtn"
-                Command="{Binding SubmitCommand}"
-                FontAttributes="Bold"
-                HorizontalOptions="Center"
-                Style="{StaticResource MAUIDefaultButton}"
-                Text="Submit"
-                WidthRequest="150">
-                <Button.Shadow>
-                    <Shadow
-                        Brush="Gray"
-                        Opacity="0.8"
-                        Offset="5,5" />
-                </Button.Shadow>
-            </Button>
+            <HorizontalStackLayout
+                HorizontalOptions="Center">
+                <Button
+                    x:Name="SubmitBtn"
+                    Margin="0,0,20,0"
+                    Command="{Binding SubmitCommand}"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"
+                    Style="{StaticResource MAUIDefaultButton}"
+                    Text="Submit"
+                    WidthRequest="150">
+                    <Button.Shadow>
+                        <Shadow
+                            Brush="Gray"
+                            Opacity="0.8"
+                            Offset="5,5" />
+                    </Button.Shadow>
+                </Button>
+                <Button
+                    x:Name="RefreshBtn"
+                    Command="{Binding RefreshCommand}"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Text="Refresh"
+                    WidthRequest="130">
+                    <Button.Shadow>
+                        <Shadow
+                            Brush="Gray"
+                            Opacity="0.8"
+                            Offset="5,5" />
+                    </Button.Shadow>
+                </Button>
+            </HorizontalStackLayout>
         </StackLayout>
 
         <!--  Bottom Row  -->

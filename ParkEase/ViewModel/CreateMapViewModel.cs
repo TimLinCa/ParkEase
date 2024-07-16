@@ -71,6 +71,9 @@ namespace ParkEase.ViewModel
 
         [ObservableProperty]
         private IAsyncRelayCommand submitCommand;
+
+        [ObservableProperty]
+        private IAsyncRelayCommand refreshCommand;
         #endregion
 
         #region PrivateProperty
@@ -123,6 +126,7 @@ namespace ParkEase.ViewModel
             AddNewFloorCommand = new AsyncRelayCommand(AddNewFloorCommandAsync);
             SaveFloorInfoCommand = new AsyncRelayCommand(SaveFloorInfoCommandAsync);
             SubmitCommand = new AsyncRelayCommand(SubmitCommandAsync);
+            RefreshCommand = new AsyncRelayCommand(RefreshPage);
         }
 
         #region OnPropertyChangedEvent
@@ -174,6 +178,7 @@ namespace ParkEase.ViewModel
             try
             {
                 _ = GetUserDataFromDatabase();
+                _ = RefreshPage();
             }
             catch (Exception ex)
             {
@@ -503,7 +508,8 @@ namespace ParkEase.ViewModel
                         await mongoDBService.UpdateData(CollectionName.PrivateParking, filter, update);
                         await dialogService.ShowAlertAsync("Success", "Your data is updated.", "OK");
 
-                        ResetAfterSubmit();
+                        //ResetAfterSubmit();
+                        _ = RefreshPage();
                         _ = GetUserDataFromDatabase();
                     }
                     // if INSERT new data
@@ -535,7 +541,8 @@ namespace ParkEase.ViewModel
                                                             parkingInfo.Id,
                                                             "OK");
 
-                        ResetAfterSubmit();
+                        //ResetAfterSubmit();
+                        _ = RefreshPage();
                         _ = GetUserDataFromDatabase();
                     }
                 }
@@ -618,8 +625,11 @@ namespace ParkEase.ViewModel
                     listFloorInfos.Count() > 0;
         }
 
-        private void ResetAfterSubmit()
+
+       private async Task RefreshPage()
         {
+            SelectedAddress = null;
+
             CompanyName = "";
             Address = "";
             Fee = 0;
@@ -631,6 +641,22 @@ namespace ParkEase.ViewModel
             ImgSourceData = null;
             imageData = null;
         }
+
+        /*private void ResetAfterSubmit()
+        {
+            SelectedAddress = null;
+
+            CompanyName = "";
+            Address = "";
+            Fee = 0;
+            LimitHour = 0;
+            listFloorInfos.Clear();
+            SelectedFloorName = "";
+            FloorNames.Clear();
+            ListRectangle.Clear();
+            ImgSourceData = null;
+            imageData = null;
+        }*/
 
         private void ResetFloorInfo()
         {
