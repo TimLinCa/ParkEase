@@ -193,15 +193,11 @@
         </sfTabView:SfTabView>
 
         <!--  Middle Row - Submit button  -->
-        <StackLayout
-            Grid.Row="1"
-            Grid.Column="0"
-            VerticalOptions="Center">
-            <HorizontalStackLayout
-                HorizontalOptions="Center">
+        <StackLayout Grid.Row="1" Grid.Column="0">
+            <HorizontalStackLayout HorizontalOptions="Center">
                 <Button
                     x:Name="SubmitBtn"
-                    Margin="0,0,20,0"
+                    Margin="120,0,20,0"
                     Command="{Binding SubmitCommand}"
                     FontAttributes="Bold"
                     HorizontalOptions="Center"
@@ -221,14 +217,13 @@
                     FontAttributes="Bold"
                     HorizontalOptions="Center"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    Text="Refresh"
-                    WidthRequest="130">
-                    <Button.Shadow>
-                        <Shadow
-                            Brush="Gray"
-                            Opacity="0.8"
-                            Offset="5,5" />
-                    </Button.Shadow>
+                    WidthRequest="50">
+                    <Button.ImageSource>
+                        <FontImageSource
+                            FontFamily="MaterialRegular"
+                            Glyph="{x:Static m:MaterialRegular.Refresh}"
+                            Color="#512BD4" />
+                    </Button.ImageSource>
                 </Button>
             </HorizontalStackLayout>
         </StackLayout>
