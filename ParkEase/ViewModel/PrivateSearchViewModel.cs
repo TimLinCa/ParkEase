@@ -128,17 +128,18 @@ namespace ParkEase.ViewModel
                 parkingLotData = await mongoDBService.GetData<PrivateParking>(CollectionName.PrivateParking);
 
                 // Sort by distance
-                /*addressDistanceFullList = parkingLotData.Select(parkingLot => new AddressDistance
-                {
-                    Address = parkingLot.Address,
-                    Distance = $"{CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude).ToString("F2")} km"
-                }).OrderBy(a => a.Distance).ToList();*/
-                
                 addressDistanceFullList = parkingLotData.Select(parkingLot => new AddressDistance
                 {
                     Address = parkingLot.Address,
                     Distance = $"{CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude).ToString("F2")} km"
-                }).ToList();
+                }).OrderBy(a => a.Distance).ToList();
+
+                // Unsort
+                /*addressDistanceFullList = parkingLotData.Select(parkingLot => new AddressDistance
+                {
+                    Address = parkingLot.Address,
+                    Distance = $"{CoordinateDistance(parkingLot.Latitude, parkingLot.Longitude).ToString("F2")} km"
+                }).ToList();*/
 
                 AddressDistanceList = new ObservableCollection<AddressDistance>(addressDistanceFullList);
             }

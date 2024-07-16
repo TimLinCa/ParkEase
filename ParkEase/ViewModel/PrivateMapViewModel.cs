@@ -194,6 +194,7 @@ namespace ParkEase.ViewModel
         private async Task LoadedCommandAsync()
         {
             privateParkingId = DataService.GetId();
+            //privateParkingId = parkEaseModel.PrivateMapId;
             await LoadParkingData();
 
             cts = new CancellationTokenSource();

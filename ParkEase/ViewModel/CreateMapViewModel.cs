@@ -263,7 +263,9 @@ namespace ParkEase.ViewModel
                     // Perform reverse geocoding to verify the address
                     IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(location.Latitude, location.Longitude);
                     Placemark placemark = placemarks?.FirstOrDefault();
-                    bool test = NormalizeAddress(placemark.FeatureName).Contains(NormalizeAddress(Address));
+                    //var locationFetureName = NormalizeAddress(Address);
+                    //bool test = NormalizeAddress(placemark.FeatureName).Contains(locationFetureName);
+                    bool test = ((RoundDownToSecondDecimal(placemark.Location.Latitude) == RoundDownToSecondDecimal(location.Latitude)) && (RoundDownToSecondDecimal(placemark.Location.Longitude) == RoundDownToSecondDecimal(location.Longitude)));
 
                     if (test)
                     {
@@ -271,6 +273,7 @@ namespace ParkEase.ViewModel
 
                         latitude = location.Latitude;
                         longitude = location.Longitude;
+                        await dialogService.ShowAlertAsync("Success", "Valid Address", "OK");
                     }
                     else
                     {
@@ -287,6 +290,11 @@ namespace ParkEase.ViewModel
                 await dialogService.ShowAlertAsync("error", ex.Message, "OK");
             }
         });
+
+        double RoundDownToSecondDecimal(double value)
+        {
+            return Math.Floor(value * 100) / 100;
+        }
 
         // AddressCommand helper
         private string NormalizeAddress(string address)
