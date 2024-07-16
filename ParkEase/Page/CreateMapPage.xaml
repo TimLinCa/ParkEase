@@ -197,7 +197,7 @@
             <HorizontalStackLayout HorizontalOptions="Center">
                 <Button
                     x:Name="SubmitBtn"
-                    Margin="120,0,20,0"
+                    Margin="80,0,30,0"
                     Command="{Binding SubmitCommand}"
                     FontAttributes="Bold"
                     HorizontalOptions="Center"
