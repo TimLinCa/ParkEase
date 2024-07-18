@@ -102,7 +102,7 @@ namespace ParkEase.ViewModel
             this.mongoDBService = mongoDBService;
             this.dialogService = dialogService;
             this.geocodingService = geocodingService;
-
+            SelectedRadius = 1000;
             LoadedEventCommand = new AsyncRelayCommand(ExecuteLoadedEventCommand);
 
         }
