@@ -246,7 +246,7 @@
                         FontAttributes="Bold"
                         FontSize="Large"
                         HorizontalOptions="Center"
-                        Text="Average Parkign Time" />
+                        Text="Average Parking Time" />
 
                     <Label
                         FontAttributes="Bold"
