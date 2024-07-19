@@ -121,6 +121,7 @@ namespace ParkEase.ViewModel
             PropertyAddressList = new ObservableCollection<string>();
             AddressSelected = string.Empty;
             PropertySelected = null;
+            FeeText = string.Empty;
             selectedFloor = null;
             FloorItemSource = new ObservableCollection<string>();
             FloorItemSelected = string.Empty;
