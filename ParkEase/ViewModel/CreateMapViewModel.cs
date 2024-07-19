@@ -77,6 +77,9 @@ namespace ParkEase.ViewModel
         #endregion
 
         #region PrivateProperty
+
+        private bool validAddress;
+
         private double latitude;
 
         private double longitude;
@@ -122,6 +125,7 @@ namespace ParkEase.ViewModel
             FloorNames = new ObservableCollection<string>();
             PropertyAddresses = new ObservableCollection<string>();
             addNewFloorClicked = false;
+            validAddress = false;
 
             AddNewFloorCommand = new AsyncRelayCommand(AddNewFloorCommandAsync);
             SaveFloorInfoCommand = new AsyncRelayCommand(SaveFloorInfoCommandAsync);
@@ -275,7 +279,7 @@ namespace ParkEase.ViewModel
                     if (test)
                     {
                         // Compare the input address with the reverse geocoded address
-
+                        validAddress = true;
                         latitude = location.Latitude;
                         longitude = location.Longitude;
                         await dialogService.ShowAlertAsync("Success", "Valid Address", "OK");
@@ -330,6 +334,8 @@ namespace ParkEase.ViewModel
                         Fee = selectedProperty.ParkingInfo.Fee;
                         LimitHour = selectedProperty.ParkingInfo.LimitedHour;
                         listFloorInfos = selectedProperty.FloorInfo;
+                        latitude = selectedProperty.Latitude;
+                        longitude = selectedProperty.Longitude;
                     }
                     _ = GetFloorNames();
                 }
@@ -622,7 +628,8 @@ namespace ParkEase.ViewModel
         {
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
-                    listFloorInfos.Count() > 0;
+                    listFloorInfos.Count() > 0 &&
+                    validAddress;
         }
 
 
@@ -632,6 +639,9 @@ namespace ParkEase.ViewModel
 
             CompanyName = "";
             Address = "";
+            latitude = 0;
+            longitude = 0;
+            validAddress = false;
             Fee = 0;
             LimitHour = 0;
             listFloorInfos.Clear();
