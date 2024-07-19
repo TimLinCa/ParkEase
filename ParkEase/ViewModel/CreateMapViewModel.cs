@@ -320,7 +320,11 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                if (userData != null)
+                if (SelectedAddress == null)
+                {
+                    _ = RefreshPage();
+                }
+                else if (userData != null)
                 {
                     listFloorInfos.Clear();
                     FloorNames.Clear();
@@ -635,38 +639,30 @@ namespace ParkEase.ViewModel
 
        private async Task RefreshPage()
         {
-            SelectedAddress = null;
 
-            CompanyName = "";
-            Address = "";
-            latitude = 0;
-            longitude = 0;
-            validAddress = false;
-            Fee = 0;
-            LimitHour = 0;
-            listFloorInfos.Clear();
-            SelectedFloorName = "";
-            FloorNames.Clear();
-            ListRectangle.Clear();
-            ImgSourceData = null;
-            imageData = null;
+            try
+            {
+
+                CompanyName = "";
+                Address = "";
+                latitude = 0;
+                longitude = 0;
+                validAddress = false;
+                Fee = 0;
+                LimitHour = 0;
+                listFloorInfos.Clear();
+                SelectedFloorName = null;
+                FloorNames.Clear();
+                ListRectangle.Clear();
+                ImgSourceData = null;
+                imageData = null;
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+
         }
-
-        /*private void ResetAfterSubmit()
-        {
-            SelectedAddress = null;
-
-            CompanyName = "";
-            Address = "";
-            Fee = 0;
-            LimitHour = 0;
-            listFloorInfos.Clear();
-            SelectedFloorName = "";
-            FloorNames.Clear();
-            ListRectangle.Clear();
-            ImgSourceData = null;
-            imageData = null;
-        }*/
 
         private void ResetFloorInfo()
         {

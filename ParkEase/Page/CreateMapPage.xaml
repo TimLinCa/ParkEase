@@ -44,17 +44,12 @@
                             Title="Select a property address"
                             Margin="20,8,20,20"
                             AllowClear="True"
+                            
                             Icon="{FontImageSource FontFamily=MaterialOutlined,
                                                    Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                             ItemsSource="{Binding PropertyAddresses}"
-                            SelectedItem="{Binding SelectedAddress}" />
-                        <!--<Button
-                            Margin="0,0,0,20"
-                            Command="{Binding LoadParkingInfoCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Text="Load"
-                            VerticalOptions="Center"
-                            WidthRequest="130" />-->
+                            SelectedItem="{Binding SelectedAddress}" 
+                            />
                         <BoxView
                             Margin="0,0"
                             BackgroundColor="LightGray"
@@ -64,7 +59,7 @@
                         <!--  Parking data form  -->
                         <material:TextField
                             Title="Company Name"
-                            Margin="20,25,20,8"
+                            Margin="20,10,20,8"
                             AllowClear="True"
                             IsReadOnly="False"
                             Text="{Binding CompanyName}"
@@ -72,24 +67,22 @@
                             <validation:RequiredValidation />
                         </material:TextField>
 
-                        <HorizontalStackLayout Margin="0,8">
-                            <material:TextField
-                                Title="Address"
-                                Margin="15,0,19,0"
-                                AllowClear="True"
-                                IsReadOnly="False"
-                                Text="{Binding Address}"
-                                WidthRequest="200">
-                                <validation:RequiredValidation />
-                            </material:TextField>
+                        <material:TextField
+                            Title="Address"
+                            Margin="20,0,20,8"
+                            AllowClear="True"
+                            IsReadOnly="False"
+                            Text="{Binding Address}"
+                            WidthRequest="350">
+                            <validation:RequiredValidation />
+                        </material:TextField>
 
-                            <Button
-                                Margin="0,5,0,0"
-                                Command="{Binding AddressCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Text="Verify Address"
-                                WidthRequest="130" />
-                        </HorizontalStackLayout>
+                        <Button
+                            Margin="0,0,0,0"
+                            Command="{Binding AddressCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Text="Verify Address"
+                            WidthRequest="130" />
 
                         <HorizontalStackLayout Margin="0,8">
                             <material:TextField
@@ -197,7 +190,6 @@
             <HorizontalStackLayout HorizontalOptions="Center">
                 <Button
                     x:Name="SubmitBtn"
-                    Margin="80,0,30,0"
                     Command="{Binding SubmitCommand}"
                     FontAttributes="Bold"
                     HorizontalOptions="Center"
@@ -211,20 +203,7 @@
                             Offset="5,5" />
                     </Button.Shadow>
                 </Button>
-                <Button
-                    x:Name="RefreshBtn"
-                    Command="{Binding RefreshCommand}"
-                    FontAttributes="Bold"
-                    HorizontalOptions="Center"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    WidthRequest="50">
-                    <Button.ImageSource>
-                        <FontImageSource
-                            FontFamily="MaterialRegular"
-                            Glyph="{x:Static m:MaterialRegular.Refresh}"
-                            Color="#512BD4" />
-                    </Button.ImageSource>
-                </Button>
+                
             </HorizontalStackLayout>
         </StackLayout>
 
