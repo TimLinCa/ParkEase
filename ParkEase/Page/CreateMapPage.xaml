@@ -19,8 +19,11 @@
     <Grid BackgroundColor="#EFEFEF">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="45" />
-            <RowDefinition Height="255" />
+            <RowDefinition Height="75" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="70" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -30,6 +33,7 @@
 
         <!--  Tabs  -->
         <sfTabView:SfTabView Grid.Row="0" Grid.Column="0">
+            <!--#region Details Tab-->
             <sfTabView:SfTabItem Header="Details">
                 <ScrollView>
                     <StackLayout Padding="10">
@@ -44,12 +48,10 @@
                             Title="Select a property address"
                             Margin="20,8,20,20"
                             AllowClear="True"
-                            
                             Icon="{FontImageSource FontFamily=MaterialOutlined,
                                                    Glyph={x:Static m:MaterialRegular.Expand_circle_down}}"
                             ItemsSource="{Binding PropertyAddresses}"
-                            SelectedItem="{Binding SelectedAddress}" 
-                            />
+                            SelectedItem="{Binding SelectedAddress}" />
                         <BoxView
                             Margin="0,0"
                             BackgroundColor="LightGray"
@@ -108,7 +110,9 @@
                     </StackLayout>
                 </ScrollView>
             </sfTabView:SfTabItem>
+            <!--#endregion-->
 
+            <!--#region Floor Tab-->
             <!--  Create floor section  -->
             <sfTabView:SfTabItem Header="Floor Info">
                 <ScrollView>
@@ -183,48 +187,52 @@
                     </StackLayout>
                 </ScrollView>
             </sfTabView:SfTabItem>
+            <!--#endregion-->
         </sfTabView:SfTabView>
 
-        <!--  Middle Row - Submit button  -->
-        <StackLayout Grid.Row="1" Grid.Column="0">
-            <HorizontalStackLayout HorizontalOptions="Center">
-                <Button
-                    x:Name="SubmitBtn"
-                    Command="{Binding SubmitCommand}"
-                    FontAttributes="Bold"
-                    HorizontalOptions="Center"
-                    Style="{StaticResource MAUIDefaultButton}"
-                    Text="Submit"
-                    WidthRequest="150">
-                    <Button.Shadow>
+        <!--#region Submit button-->
+        <StackLayout
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="0,10,0,10">
+            <Button
+                x:Name="SubmitBtn"
+                Command="{Binding SubmitCommand}"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                Style="{StaticResource MAUIDefaultButton}"
+                Text="Submit"
+                WidthRequest="150">
+                <!--<Button.Shadow>
                         <Shadow
                             Brush="Gray"
                             Opacity="0.8"
                             Offset="5,5" />
-                    </Button.Shadow>
-                </Button>
-                
-            </HorizontalStackLayout>
-        </StackLayout>
-
-        <!--  Bottom Row  -->
-        <StackLayout
-            Grid.Row="2"
-            Grid.Column="0"
-            Margin="25,5,25,25"
-            HorizontalOptions="Center"
-            VerticalOptions="Center">
+                    </Button.Shadow>-->
+            </Button>
             <BoxView
-                Margin="0,10"
+                Margin="0,10,0,0"
                 BackgroundColor="LightGray"
                 HeightRequest="1"
                 HorizontalOptions="FillAndExpand"
                 WidthRequest="280" />
+        </StackLayout>
+        <!--#endregion-->
+
+        <!--#region Edit Tools-->
+        <StackLayout
+            x:Name="DrawingToolGrid"
+            Grid.Row="2"
+            Grid.Column="0"
+            Margin="25,0,25,0"
+            HorizontalOptions="Center"
+            IsVisible="False"
+            VerticalOptions="Center">
 
             <!--  Rectangle Width Slider  -->
             <Label
                 x:Name="widthLabel"
-                Margin="0,10,0,5"
+                Margin="0,0,0,5"
                 HorizontalOptions="Start"
                 Text="{Binding Source={x:Reference RectWidth}, Path=Value, StringFormat='Width value: {0:F0}', Mode=TwoWay}"
                 VerticalOptions="Center" />
@@ -269,11 +277,118 @@
             </HorizontalStackLayout>
         </StackLayout>
 
+        <Grid
+            Grid.Row="3"
+            Grid.Column="0"
+            Margin="0,0,0,0"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+            <StackLayout>
+                <Button
+                    BackgroundColor="Transparent"
+                    Clicked="EditToolExpand"
+                    HorizontalOptions="Center"
+                    Text="Edit Tools"
+                    TextColor="#512BD4">
+                    <Button.ImageSource>
+                        <FontImageSource
+                            FontFamily="MaterialRegular"
+                            Glyph="{x:Static m:MaterialRegular.Tune}"
+                            Size="25"
+                            Color="#512BD4" />
+                    </Button.ImageSource>
+                </Button>
+                <BoxView
+                    Margin="0,10,0,0"
+                    BackgroundColor="LightGray"
+                    HeightRequest="1"
+                    HorizontalOptions="FillAndExpand"
+                    WidthRequest="280" />
+            </StackLayout>
+        </Grid>
+        <!--#endregion-->
 
-        <!--  GraphicsView  -->
+        <!--#region Delete Zone-->
+        <StackLayout
+            x:Name="DeleteZoneGrid"
+            Grid.Row="4"
+            Grid.Column="0"
+            Margin="10"
+            HorizontalOptions="Center"
+            IsVisible="False"
+            VerticalOptions="Center">
+            <material:PickerField
+                Title="Delete Option"
+                Margin="20,0,20,8"
+                AllowClear="True"
+                ItemsSource="{Binding DeleteOptions}"
+                SelectedItem="{Binding DeleteOptionSelected, Mode=TwoWay}"
+                WidthRequest="350" />
+            <material:PickerField
+                Title="Select an Address"
+                Margin="20,0,20,8"
+                AllowClear="True"
+                IsVisible="{Binding IsDeleteAddressVisible}"
+                ItemsSource="{Binding PropertyAddresses}"
+                SelectedItem="{Binding AddressToDelete, Mode=TwoWay}"
+                WidthRequest="350" />
+            <material:PickerField
+                Title="Select a Floor"
+                Margin="20,0,20,8"
+                AllowClear="True"
+                IsVisible="{Binding IsDeleteFloorVisible}"
+                ItemsSource="{Binding ListFloorsToDelete}"
+                SelectedItem="{Binding FloorToDelete, Mode=TwoWay}"
+                WidthRequest="350" />
+
+            <Button
+                Margin="0,5,0,0"
+                BackgroundColor="Transparent"
+                Command="{Binding DeteleCommand}"
+                HorizontalOptions="Center"
+                Style="{StaticResource SecondaryButtonStyle}"
+                Text="Delete">
+                <Button.ImageSource>
+                    <FontImageSource
+                        FontFamily="MaterialRegular"
+                        Glyph="{x:Static m:MaterialRegular.Delete}"
+                        Size="20"
+                        Color="#512BD4" />
+                </Button.ImageSource>
+            </Button>
+
+        </StackLayout>
+
+        <Grid
+            Grid.Row="5"
+            Grid.Column="0"
+            Margin="0,0,0,10"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+            <StackLayout>
+                <Button
+                    Background="#D1DEE8"
+                    BackgroundColor="Transparent"
+                    Clicked="DeleteZoneExpand"
+                    HorizontalOptions="Center"
+                    Text="Delete Zone"
+                    TextColor="#CB041B">
+                    <Button.ImageSource>
+                        <FontImageSource
+                            FontFamily="MaterialRegular"
+                            Glyph="{x:Static m:MaterialRegular.Delete}"
+                            Size="20"
+                            Color="#CB041B" />
+                    </Button.ImageSource>
+                </Button>
+            </StackLayout>
+        </Grid>
+        <!--#endregion-->
+
+        <!--#region  GraphicsView-->
         <Border
             Grid.Row="0"
-            Grid.RowSpan="3"
+            Grid.RowSpan="6"
             Grid.Column="1"
             BackgroundColor="WhiteSmoke"
             Stroke="#512BD4">
@@ -292,5 +407,7 @@
                 </GraphicsView.GestureRecognizers>
             </controls:RecGraphicsView>
         </Border>
+        <!--#endregion-->
+
     </Grid>
 </ContentPage>

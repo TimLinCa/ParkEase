@@ -73,12 +73,28 @@ namespace ParkEase.ViewModel
         private IAsyncRelayCommand submitCommand;
 
         [ObservableProperty]
-        private IAsyncRelayCommand refreshCommand;
+        private ObservableCollection<string> deleteOptions;
+
+        [ObservableProperty]
+        private string deleteOptionSelected;
+
+        [ObservableProperty]
+        private string addressToDelete;
+
+        [ObservableProperty]
+        private ObservableCollection<string> listFloorsToDelete;
+
+        [ObservableProperty]
+        private string floorToDelete;
+
+        [ObservableProperty]
+        private bool isDeleteAddressVisible;
+
+        [ObservableProperty]
+        private bool isDeleteFloorVisible;
         #endregion
 
         #region PrivateProperty
-
-        private bool validAddress;
 
         private double latitude;
 
@@ -107,6 +123,8 @@ namespace ParkEase.ViewModel
         private ParkEaseModel parkEaseModel;
 
         private bool addNewFloorClicked;
+
+        private PrivateParking deletedFloorAddressSelected;
         #endregion
 
         public CreateMapViewModel(IMongoDBService mongoDBService, IDialogService dialogService, ParkEaseModel model)
@@ -125,12 +143,14 @@ namespace ParkEase.ViewModel
             FloorNames = new ObservableCollection<string>();
             PropertyAddresses = new ObservableCollection<string>();
             addNewFloorClicked = false;
-            validAddress = false;
+            DeleteOptions = ["Parking lot", "A Floor"];
+            ListFloorsToDelete = new ObservableCollection<string>();
+            IsDeleteAddressVisible = false;
+            IsDeleteFloorVisible = false;
 
             AddNewFloorCommand = new AsyncRelayCommand(AddNewFloorCommandAsync);
             SaveFloorInfoCommand = new AsyncRelayCommand(SaveFloorInfoCommandAsync);
             SubmitCommand = new AsyncRelayCommand(SubmitCommandAsync);
-            RefreshCommand = new AsyncRelayCommand(RefreshPage);
         }
 
         #region OnPropertyChangedEvent
@@ -175,6 +195,31 @@ namespace ParkEase.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangingEventArgs(propertyName));
         }
         //https://stackoverflow.com/questions/76846770/how-to-useonpropertychanged-net-maui
+
+        // For delete zone
+        partial void OnDeleteOptionSelectedChanged(string value)
+        {
+            DeleteOptionCommand();
+        }
+
+        // if A Floor option is selected, load list of floors to delete when address is changed
+        partial void OnAddressToDeleteChanged(string value)
+        {
+            if (DeleteOptionSelected == "A Floor" && !string.IsNullOrEmpty(value))
+            {
+                deletedFloorAddressSelected = userData.FirstOrDefault(data => data.Address == AddressToDelete);
+                if (deletedFloorAddressSelected == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("No data found.");
+                    return;
+                }
+                ListFloorsToDelete.Clear();
+                foreach (FloorInfo item in deletedFloorAddressSelected.FloorInfo)
+                {
+                    ListFloorsToDelete.Add(item.Floor);
+                }
+            }
+        }
         #endregion
 
         public ICommand LoadedCommand => new RelayCommand(() =>
@@ -182,7 +227,7 @@ namespace ParkEase.ViewModel
             try
             {
                 _ = GetUserDataFromDatabase();
-                _ = RefreshPage();
+                RefreshPage();
             }
             catch (Exception ex)
             {
@@ -272,14 +317,11 @@ namespace ParkEase.ViewModel
                     // Perform reverse geocoding to verify the address
                     IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(location.Latitude, location.Longitude);
                     Placemark placemark = placemarks?.FirstOrDefault();
-                    //var locationFetureName = NormalizeAddress(Address);
-                    //bool test = NormalizeAddress(placemark.FeatureName).Contains(locationFetureName);
                     bool test = ((RoundDownToSecondDecimal(placemark.Location.Latitude) == RoundDownToSecondDecimal(location.Latitude)) && (RoundDownToSecondDecimal(placemark.Location.Longitude) == RoundDownToSecondDecimal(location.Longitude)));
 
                     if (test)
                     {
                         // Compare the input address with the reverse geocoded address
-                        validAddress = true;
                         latitude = location.Latitude;
                         longitude = location.Longitude;
                         await dialogService.ShowAlertAsync("Success", "Valid Address", "OK");
@@ -322,7 +364,7 @@ namespace ParkEase.ViewModel
             {
                 if (SelectedAddress == null)
                 {
-                    _ = RefreshPage();
+                    RefreshPage();
                 }
                 else if (userData != null)
                 {
@@ -435,7 +477,6 @@ namespace ParkEase.ViewModel
                     }
                     else
                     {
-                        //await dialogService.ShowAlertAsync("", "Please upload parking map image.", "OK");
                         addNewFloorClicked = true;
                     }
                 }
@@ -503,7 +544,6 @@ namespace ParkEase.ViewModel
                     if (selectedPropertyId != null && (SelectedAddress != null || SelectedFloorName != null)) 
                     {
                         var builder = Builders<PrivateParking>.Filter;
-                        //var filter = builder.Eq(p => p.CompanyName, selectedCompanyName) & builder.Eq(p => p.Address, selectedAddress);
                         var filter = builder.Eq(p => p.Id, selectedPropertyId);
 
                         var update = Builders<PrivateParking>.Update
@@ -518,8 +558,7 @@ namespace ParkEase.ViewModel
                         await mongoDBService.UpdateData(CollectionName.PrivateParking, filter, update);
                         await dialogService.ShowAlertAsync("Success", "Your data is updated.", "OK");
 
-                        //ResetAfterSubmit();
-                        _ = RefreshPage();
+                        RefreshPage();
                         _ = GetUserDataFromDatabase();
                     }
                     // if INSERT new data
@@ -550,9 +589,7 @@ namespace ParkEase.ViewModel
                                                             "Generate QR Code to use this parking lot\n" +
                                                             parkingInfo.Id,
                                                             "OK");
-
-                        //ResetAfterSubmit();
-                        _ = RefreshPage();
+                        RefreshPage();
                         _ = GetUserDataFromDatabase();
                     }
                 }
@@ -568,7 +605,97 @@ namespace ParkEase.ViewModel
         }
 
 
-        // Control rectangle drawing
+
+        private void DeleteOptionCommand()
+        {
+            // Delete Parking lot
+            if (DeleteOptionSelected == "Parking lot")
+            {
+                IsDeleteAddressVisible = true;
+                IsDeleteFloorVisible = false;
+
+            }
+            // Delete a Floor
+            else if (DeleteOptionSelected == "A Floor")
+            {
+                IsDeleteAddressVisible = true;
+                IsDeleteFloorVisible = true;
+            }
+        }
+
+
+
+        // Delete Command
+        public ICommand DeteleCommand => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (DeleteOptionSelected == "Parking lot" && !string.IsNullOrEmpty(AddressToDelete))
+                {
+                    bool answer = await dialogService.ShowConfirmAsync("Delete parking lot", $"Are you sure you want to delete the parking lot at address \'{AddressToDelete}\'?", "Yes", "No");
+                    if (answer)
+                    {
+                        // Create a filter to find the data to delete based on the address
+                        var filter = Builders<PrivateParking>.Filter.Eq(p => p.Address, AddressToDelete);
+
+                        // Delete the private parking data from MongoDB
+                        var result = await mongoDBService.DeleteData(CollectionName.PrivateParking, filter);
+
+                        if (result.Success && result.DeleteCount > 0)
+                        {
+                            // Reset UI, PropertyAddresses picker after successful deletion
+                            RefreshPage();
+                            PropertyAddresses.Remove(AddressToDelete);
+                            AddressToDelete = null;
+
+                            await dialogService.ShowAlertAsync("Success", "The parking lot is deleted successfully.", "OK");
+                        }
+                    }
+                }
+                else if (DeleteOptionSelected == "A Floor" && !string.IsNullOrEmpty(AddressToDelete) && !string.IsNullOrEmpty(FloorToDelete))
+                {
+                    bool answer = await dialogService.ShowConfirmAsync("Delete floor", $"Are you sure you want to delete the floor \'{FloorToDelete}\' at address \'{AddressToDelete}\'?", "Yes", "No");
+                    if (answer)
+                    {
+                        // Search for FloorInfo to delete
+                        var floorToRemove = deletedFloorAddressSelected.FloorInfo.FirstOrDefault(f => f.Floor == FloorToDelete);
+                        if (floorToRemove != null)
+                        {
+                            // Update the PrivateParking object in MongoDB
+                            var filter = Builders<PrivateParking>.Filter.Eq(p => p.Id, deletedFloorAddressSelected.Id);
+                            var update = Builders<PrivateParking>.Update.Set(p => p.FloorInfo, deletedFloorAddressSelected.FloorInfo);
+
+                            await mongoDBService.UpdateData(CollectionName.PrivateParking, filter, update);
+
+                            // Remove the floor from selected address, listFloorInfos (if users loaded it) and ListFloorsToDelete
+                            deletedFloorAddressSelected.FloorInfo.Remove(floorToRemove);
+                            listFloorInfos.Remove(floorToRemove);
+                            ListFloorsToDelete.Remove(FloorToDelete);
+                            FloorToDelete = null;
+                            ResetFloorInfo();
+
+                            await dialogService.ShowAlertAsync("Success", $"Floor \'{FloorToDelete}\' is deleted successfully.", "OK");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Floor {FloorToDelete} not found at address {AddressToDelete}.");
+                        }
+                    }
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Warning", "Please select an option to delete.", "OK");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
+            }
+        });
+
+
+        #region Control rectangle drawing
         // Add rectangle
         public void AddRectangle(PointF point)
         {
@@ -627,41 +754,31 @@ namespace ParkEase.ViewModel
             }
 
         });
+        #endregion
 
         private bool IsValid()
         {
             return !string.IsNullOrEmpty(CompanyName) &&
                     !string.IsNullOrEmpty(Address) &&
-                    listFloorInfos.Count() > 0 &&
-                    validAddress;
+                    listFloorInfos.Count > 0 &&
+                    latitude != 0 &&
+                    longitude != 0;
         }
 
-
-       private async Task RefreshPage()
+       private void RefreshPage()
         {
-
-            try
-            {
-
-                CompanyName = "";
-                Address = "";
-                latitude = 0;
-                longitude = 0;
-                validAddress = false;
-                Fee = 0;
-                LimitHour = 0;
-                listFloorInfos.Clear();
-                SelectedFloorName = null;
-                FloorNames.Clear();
-                ListRectangle.Clear();
-                ImgSourceData = null;
-                imageData = null;
-            }
-            catch (Exception ex)
-            {
-                await dialogService.ShowAlertAsync("Error", ex.Message, "OK");
-            }
-
+            CompanyName = "";
+            Address = "";
+            latitude = 0;
+            longitude = 0;
+            Fee = 0;
+            LimitHour = 0;
+            listFloorInfos?.Clear();
+            SelectedFloorName = null;
+            FloorNames.Clear();
+            ListRectangle.Clear();
+            ImgSourceData = null;
+            imageData = null;
         }
 
         private void ResetFloorInfo()
