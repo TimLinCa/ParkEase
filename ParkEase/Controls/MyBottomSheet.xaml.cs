@@ -34,12 +34,7 @@ namespace ParkEase.Controls
         private void MyBottomSheet_Dismissed(object? sender, DismissOrigin e)
         {
             DismissedState = true;
-        }
-
-        private void GetDirectionsCommand(object sender, EventArgs e)
-        {
-            MessagingCenter.Send(this, "GetDirections");
-        }
+        }        
 
         private void OpenInGoogleMapsCommand(object sender, EventArgs e)
         {

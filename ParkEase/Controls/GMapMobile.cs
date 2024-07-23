@@ -506,13 +506,6 @@ namespace ParkEase.Controls
 
                 function receiveMessage(event) {
                     switch (event.data) {
-                        case 'GetDirections':
-                            if (selectedMarkerCoordinates) {
-                                navigateToMarker(selectedMarkerCoordinates.lat, selectedMarkerCoordinates.lng);
-                            } else if (selectedLineCoordinates) {
-                                navigateToLine();
-                            }
-                            break;
                         case event.data.startsWith('SaveParkingLocation') && event.data:
                             var latLng = event.data.split(',').slice(1);
                             savelocation(parseFloat(latLng[0]), parseFloat(latLng[1]));
@@ -530,6 +523,7 @@ namespace ParkEase.Controls
                             break;
                     }
                 }
+
 
                 function removeMarker(lat, lng, isSavedLocation = false) {
                     if (isSavedLocation && savedLocationMarker) {
@@ -560,18 +554,6 @@ namespace ParkEase.Controls
             Navigating += GMapMobile_Navigating;
             Loaded += GMapMobile_Loaded;
             Reload();
-
-            //https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/messagingcenter?view=net-maui-8.0
-            // Listen for the GetDirections message from the BottomSheetViewModel
-            MessagingCenter.Subscribe<MyBottomSheet>(this, "GetDirections", async (sender) =>
-            {
-                // Ensure the following code runs on the main thread - update the UI
-                //await Device.InvokeOnMainThreadAsync(async () =>
-                //{
-                // Evaluate the JavaScript function in the web view context
-                await EvaluateJavaScriptAsync("window.postMessage('GetDirections');"); // send a message to the JavaScript function
-                //});
-            });
         }
 
         private async void GMapMobile_Navigating(object? sender, WebNavigatingEventArgs e)
