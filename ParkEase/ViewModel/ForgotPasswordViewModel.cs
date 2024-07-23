@@ -19,6 +19,8 @@ using System.Security.Cryptography;
 using System.Net.Mail;
 using Microsoft.Maui.ApplicationModel.Communication;
 using MongoDB.Driver;
+using Microsoft.Extensions.Configuration;
+using System.Diagnostics;
 
 
 
@@ -29,28 +31,32 @@ namespace ParkEase.ViewModel
         [ObservableProperty]
         private string email;
 
-        
+        private string googleKey;
+
+        private readonly IConfiguration configuration;
 
         private readonly IMongoDBService mongoDBService;
         private readonly IDialogService dialogService;
 
-        public ForgotPasswordViewModel(IMongoDBService mongoDBService, IDialogService dialogService)
+
+        public ForgotPasswordViewModel(IMongoDBService mongoDBService, IDialogService dialogService, IConfiguration configuration)
         {
             this.dialogService = dialogService;
             this.mongoDBService = mongoDBService;
-            Email = "";
+            configuration = configuration;
+            googleKey = configuration["GoogleAppPassword"];
 
 
         }
 
-        
+
 
 
         public ICommand SentEmail => new RelayCommand(async () =>
         {
             try
             {
-                if (!string.IsNullOrEmpty(Email) || IsValidEmail(Email))
+                if (!string.IsNullOrEmpty(Email) && IsValidEmail(Email))
                 {
                     var userList = await mongoDBService.GetData<User>(CollectionName.Users);
                     var user = userList.Where(data => data.Email == Email).FirstOrDefault();
@@ -58,14 +64,14 @@ namespace ParkEase.ViewModel
                     {
                         string tempPassword = GenerateRandomPassword(8);
                         string hashedPassword = PasswordHasher.HashPassword(tempPassword);
+
                         var msg = new MailMessage
                         {
-
                             From = new MailAddress("tkdgus2233440@gmail.com"),
                             Subject = "ParkEase Temporary Password",
                             Body = $"Dear our user,<br><br>Your temporary password is <strong>{tempPassword}</strong><br><br>Thank you.<br><br>ParkEase Team",
                             Priority = MailPriority.High,
-                            IsBodyHtml = true // Set to true if your body contains HTML
+                            IsBodyHtml = true
                         };
 
                         msg.To.Add(Email);
@@ -76,18 +82,35 @@ namespace ParkEase.ViewModel
                             Port = 587,
                             EnableSsl = true,
                             UseDefaultCredentials = false,
-                            Credentials = new NetworkCredential("tkdgus2233440@gmail.com", "xupv eyon mkkk ebhc") // app password
+                            Credentials = new NetworkCredential("tkdgus2233440@gmail.com", googleKey) // app password
                         };
 
-                        await client.SendMailAsync(msg);
+                        try
+                        {
+                            Debug.WriteLine("Attempting to send email...");
+                            await Task.Delay(1000);  // Simulate network delay
+                            await client.SendMailAsync(msg);
+                            await Task.Delay(1000);  // Simulate network delay
+                            Debug.WriteLine("Email sent successfully.");
+                        }
+                        catch (SmtpException smtpEx)
+                        {
+                            Debug.WriteLine($"SMTP Exception: {smtpEx.Message}");
+                            await dialogService.ShowAlertAsync($"SMTP Error: {smtpEx.Message}", "OK");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"General Exception: {ex.Message}");
+                            await dialogService.ShowAlertAsync($"Error: {ex.Message}", "OK");
+                        }
+
                         var builder = Builders<User>.Filter;
                         var filter = builder.Eq(p => p.Email, Email);
-                        var update = Builders<User>.Update
-                                                .Set(p => p.Password, hashedPassword);
+                        var update = Builders<User>.Update.Set(p => p.Password, hashedPassword);
 
                         await mongoDBService.UpdateData(CollectionName.Users, filter, update);
-                        await dialogService.ShowAlertAsync("Email Sent", "We sent temporary password to your email address.", "OK");
-                    }   
+                        await dialogService.ShowAlertAsync("Email Sent", "We sent a temporary password to your email address.", "OK");
+                    }
                     else
                     {
                         await dialogService.ShowAlertAsync("Error", "We couldn't find your email address\nPlease check your email again.", "OK");
@@ -97,14 +120,13 @@ namespace ParkEase.ViewModel
                 {
                     await dialogService.ShowAlertAsync("Error", "Invalid email address type\nPlease check your email again.", "OK");
                 }
-                
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"Outer Exception: {ex.Message}");
                 await dialogService.ShowAlertAsync($"Error: {ex.Message}", "OK");
             }
         });
-
 
 
         public ICommand GoToLoginCommand => new RelayCommand(async () =>
