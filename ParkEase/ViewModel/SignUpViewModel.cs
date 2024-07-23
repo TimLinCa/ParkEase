@@ -103,8 +103,7 @@ namespace ParkEase.ViewModel
                     await mongoDBService.InsertData<User>(CollectionName.Users, new User { FullName = FullName, Email = Email, Password = hashedPassword }); ;
 
                     await dialogService.ShowAlertAsync("", "Your account is created. Please sign in.", "OK");
-                    await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
-                    
+                    await Shell.Current.GoToAsync(nameof(LogInPage));
                 }
                 else
                 {
@@ -149,7 +148,7 @@ namespace ParkEase.ViewModel
         {
             try
             {
-                await Shell.Current.GoToAsync($"///{nameof(LogInPage)}");
+                await Shell.Current.GoToAsync(nameof(LogInPage));
             }
             catch (Exception ex)
             {

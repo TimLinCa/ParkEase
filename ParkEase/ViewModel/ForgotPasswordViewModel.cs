@@ -16,11 +16,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Security.Cryptography;
-using System.Net.Mail;
+//using System.Net.Mail;
 using Microsoft.Maui.ApplicationModel.Communication;
 using MongoDB.Driver;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
+using ParkEase.Messages;
 
 
 
@@ -49,10 +53,83 @@ namespace ParkEase.ViewModel
 
         }
 
+        /*        public ICommand SentEmail => new RelayCommand(async () =>
+                {
+                    // Implement the logic to navigate to the Forgot Password Page
+                    await Shell.Current.GoToAsync(nameof(ResetPasswordPage));
+                });*/
 
 
-
+        // Using MailKit Library
         public ICommand SentEmail => new RelayCommand(async () =>
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(Email) && IsValidEmail(Email))
+                {
+                    var userList = await mongoDBService.GetData<User>(CollectionName.Users);
+                    var user = userList.Where(data => data.Email == Email).FirstOrDefault();
+                    if (user != null)
+                    {
+                        string code = GenerateRandomPassword(8);
+                        string hashedPassword = PasswordHasher.HashPassword(code);
+                        var message = new MimeMessage();
+                        message.From.Add(new MailboxAddress("ParkEase Team", "tkdgus2233440@gmail.com"));
+                        message.To.Add(new MailboxAddress("", Email));
+                        message.Subject = "ParkEase Password Reset Code";
+
+                        message.Body = new TextPart("html")
+                        {
+                            Text = $"Dear our user,<br><br>Your password reset code is <strong>{code}</strong><br><br>Thank you.<br><br>ParkEase Team",
+                        };
+
+                        using (var client = new SmtpClient())
+                        {
+                            try
+                            {
+                                await client.ConnectAsync("smtp.gmail.com", 465, SecureSocketOptions.SslOnConnect);
+                                await client.AuthenticateAsync("tkdgus2233440@gmail.com", googleKey);
+                                await client.SendAsync(message);
+                                await client.DisconnectAsync(true);
+                                DataService.SetCode(code);
+                                DataService.SetEmail(Email);
+
+                                Debug.WriteLine("Email sent successfully.");
+/*                                var builder = Builders<User>.Filter;
+                                var filter = builder.Eq(p => p.Email, Email);
+                                var update = Builders<User>.Update.Set(p => p.Password, hashedPassword);
+
+                                await mongoDBService.UpdateData(CollectionName.Users, filter, update);*/
+                                await dialogService.ShowAlertAsync("Email Sent", "We sent a code to your email address.", "OK");
+                                await Shell.Current.GoToAsync(nameof(ResetPasswordPage));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error sending email: {ex.Message}");
+                                Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        await dialogService.ShowAlertAsync("Error", "We couldn't find your email address\nPlease check your email again.", "OK");
+                    }
+                }
+                else
+                {
+                    await dialogService.ShowAlertAsync("Error", "Invalid email address type\nPlease check your email again.", "OK");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowAlertAsync($"Error: {ex.Message}", "OK");
+            }
+        });
+
+
+        // Using SMTP
+        /*public ICommand SentEmail => new RelayCommand(async () =>
         {
             try
             {
@@ -67,7 +144,7 @@ namespace ParkEase.ViewModel
 
                         var msg = new MailMessage
                         {
-                            From = new MailAddress("tkdgus2233440@gmail.com"),
+                            From = new MailAddress("tkdgus2233440@gmail.com", "ParkEase Team"),
                             Subject = "ParkEase Temporary Password",
                             Body = $"Dear our user,<br><br>Your temporary password is <strong>{tempPassword}</strong><br><br>Thank you.<br><br>ParkEase Team",
                             Priority = MailPriority.High,
@@ -88,9 +165,7 @@ namespace ParkEase.ViewModel
                         try
                         {
                             Debug.WriteLine("Attempting to send email...");
-                            await Task.Delay(1000);  // Simulate network delay
                             await client.SendMailAsync(msg);
-                            await Task.Delay(1000);  // Simulate network delay
                             Debug.WriteLine("Email sent successfully.");
                         }
                         catch (SmtpException smtpEx)
@@ -123,10 +198,9 @@ namespace ParkEase.ViewModel
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Outer Exception: {ex.Message}");
                 await dialogService.ShowAlertAsync($"Error: {ex.Message}", "OK");
             }
-        });
+        });*/
 
 
         public ICommand GoToLoginCommand => new RelayCommand(async () =>

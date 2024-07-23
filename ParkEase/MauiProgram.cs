@@ -76,6 +76,12 @@ namespace ParkEase
                 BindingContext = provider.GetRequiredService<ForgotPasswordViewModel>()
             });
 
+            builder.Services.AddTransient<ResetPasswordViewModel>();
+            builder.Services.AddTransient(provider => new ResetPasswordPage
+            {
+                BindingContext = provider.GetRequiredService<ResetPasswordViewModel>()
+            });
+
             builder.Services.AddSingleton<LogInViewModel>();
             builder.Services.AddSingleton(provider => new LogInPage
             {

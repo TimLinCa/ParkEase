@@ -33,6 +33,30 @@ namespace ParkEase.Messages
             sharedLocation = location;
         }
 
+        private static string code;
+
+        public static string GetCode()
+        {
+            return code;
+        }
+
+        public static void SetCode(string value)
+        {
+            code = value;
+        }
+
+        private static string email;
+
+        public static string GetEmail()
+        {
+            return email;
+        }
+
+        public static void SetEmail(string value)
+        {
+            email = value;
+        }
+
     }
 
 }
