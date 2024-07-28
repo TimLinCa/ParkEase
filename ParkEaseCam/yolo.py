@@ -160,7 +160,7 @@ def parkingLot_detect_video(video_filePath,config_file_path):
             cvzone.putTextRect(frame,f'{area_names[i]}',tuple(polyline[0]),1,1)
 
         cv2.imshow('FRAME', frame)
-        key = cv2.waitKey(50) & 0xFF
+        key = cv2.waitKey(0) & 0xFF
         if key == 27:
             break
     cap.release()
@@ -185,7 +185,7 @@ def start_detect_cam_db_test(camIndex,configName):
         start_detect_cam_private_db_test(camIndex,area_config,cam_config,floor)
 
 def start_detect_cam_public_db_test(cam_index,area_config,cam_config):
-    logDC = onlineDb.PublicLog
+    global stopSignal
     statusDC = onlineDb.PublicStatus
 
     areaId = area_config.get("areaId")
@@ -268,13 +268,14 @@ def start_detect_cam_public_db_test(cam_index,area_config,cam_config):
             local_status[i] = carInside
 
         cv2.imshow('FRAME', frame)
-        key = cv2.waitKey(50) & 0xFF
-        if key == 27:
+        cv2.waitKey(10)
+        if stopSignal == True:
             break
     cap.release()
-    cv2.destroyAllWindows()
+    stopSignal = False
 
 def start_detect_cam_private_db_test(cam_index,area_config,cam_config,floor):
+    global stopSignal
     logDC = onlineDb.PrivateLog
     statusDC = onlineDb.PrivateStatus
 
@@ -346,6 +347,7 @@ def start_detect_cam_private_db_test(cam_index,area_config,cam_config,floor):
                     "floor" : floor,
                     "timestamp": datetime.now()
                 }
+            
             if i in local_status:
                 if local_status[i] != carInside:
                     statusDC.update_one({"areaId":areaId,"index": i,"camName":cam_name,"floor" : floor}, {'$set':dir}, upsert=True)  
@@ -354,11 +356,11 @@ def start_detect_cam_private_db_test(cam_index,area_config,cam_config,floor):
             local_status[i] = carInside
 
         cv2.imshow('FRAME', frame)
-        key = cv2.waitKey(50) & 0xFF
-        if key == 27:
+        cv2.waitKey(10)
+        if stopSignal == True:
             break
     cap.release()
-    cv2.destroyAllWindows()
+    stopSignal = False
 
 def start_detect_cam(camIndex,configName):
     CamConfig = localDb.CamConfig
