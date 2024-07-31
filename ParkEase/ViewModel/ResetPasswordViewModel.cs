@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MailKit.Search;
 using Microsoft.Maui.Controls.PlatformConfiguration;
-using Microsoft.UI.Xaml.Media.Animation;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using ParkEase.Contracts.Services;
