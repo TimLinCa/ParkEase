@@ -97,7 +97,7 @@ def parkingLot_detect_cam(cam_index,config_data):
             break
     EndTesting(cap)
             
-def parkingLot_detect_video(video_filePath,config_data):
+def parkingLot_detect_video(video_filePath,config_data,analysisFrame):
     global stopSignal
     stopSignal = False
     polylines,area_names=config_data['polylines'],config_data['area_names']
@@ -120,7 +120,7 @@ def parkingLot_detect_video(video_filePath,config_data):
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
         count += 1
-        if count % 10 != 0:
+        if count % analysisFrame != 0:
             continue
 
         results=model.predict(frame,verbose=False)
@@ -361,7 +361,7 @@ def start_detect_cam_private_db_test(cam_index,area_config,cam_config,floor):
             break
     EndTesting(cap)
 
-def start_detect_video_db_test(video_filePath,configName):
+def start_detect_video_db_test(video_filePath,configName,analysisFrame):
     CamConfig = localDb.CamConfig
     ConfigGridFs = GridFS(localDb)
     area_config = CamConfig.find_one({"name":configName,"type": "video"})
@@ -373,13 +373,13 @@ def start_detect_video_db_test(video_filePath,configName):
 
     areaType = area_config.get('areaType')
     if(areaType == 'Public'):
-        start_detect_video_public_db_test(video_filePath,area_config,cam_config)
+        start_detect_video_public_db_test(video_filePath,area_config,cam_config,analysisFrame)
     else:
         # get the floor from spliting the configName by '_' in the last element
         floor = configName.split('_')[-1]
-        start_detect_video_private_db_test(video_filePath,area_config,cam_config,floor)
+        start_detect_video_private_db_test(video_filePath,area_config,cam_config,floor,analysisFrame)
 
-def start_detect_video_public_db_test(video_filePath,area_config,cam_config):
+def start_detect_video_public_db_test(video_filePath,area_config,cam_config,analysisFrame):
     global stopSignal
     statusDC = onlineDb.PublicStatus
 
@@ -409,7 +409,7 @@ def start_detect_video_public_db_test(video_filePath,area_config,cam_config):
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
         count += 1
-        if count % 10 != 0:
+        if count % analysisFrame != 0:
             continue
 
         results=model.predict(frame,verbose=False)
@@ -472,7 +472,7 @@ def start_detect_video_public_db_test(video_filePath,area_config,cam_config):
             break
     EndTesting(cap)
 
-def start_detect_video_private_db_test(video_filePath,area_config,cam_config,floor):
+def start_detect_video_private_db_test(video_filePath,area_config,cam_config,floor,analysisFrame):
     global stopSignal
     statusDC = onlineDb.PrivateStatus
 
@@ -502,7 +502,7 @@ def start_detect_video_private_db_test(video_filePath,area_config,cam_config,flo
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
         count += 1
-        if count % 10 != 0:
+        if count % analysisFrame != 0:
             continue
 
         results=model.predict(frame,verbose=False)

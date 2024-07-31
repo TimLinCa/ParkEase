@@ -651,30 +651,17 @@
          </rect>
         </property>
         <property name="text">
-         <string>ConfigPath</string>
+         <string>AnalysisFrame</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="txt_testConfigPath">
+       <widget class="QLineEdit" name="txt_analysisFrame">
         <property name="geometry">
          <rect>
           <x>90</x>
           <y>50</y>
-          <width>181</width>
+          <width>241</width>
           <height>20</height>
          </rect>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="bnt_importTestConfig">
-        <property name="geometry">
-         <rect>
-          <x>280</x>
-          <y>50</y>
-          <width>51</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Import</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_10">

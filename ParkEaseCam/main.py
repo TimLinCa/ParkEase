@@ -62,7 +62,6 @@ class MainWindow(QMainWindow):
         self.bnt_saveconfig.clicked.connect(self.saveConfig)
         self.bnt_loadconfig.clicked.connect(self.loadConfig)
         self.bnt_importVideo.clicked.connect(self.importVideo)
-        self.bnt_importTestConfig.clicked.connect(self.importTestConfig)
         self.bnt_loadArea.clicked.connect(self.loadPrivateArea)
         self.btn_bind.clicked.connect(self.bindCam)
         self.bnt_dbTest.clicked.connect(self.DbTest)
@@ -170,6 +169,7 @@ class MainWindow(QMainWindow):
                 return
             self.Worker_Test = videoTestThreadClass()
             self.Worker_Test.data = data
+            self.Worker_Test.frame = int(self.txt_analysisFrame.text())
             self.Worker_Test.start()
             
             
@@ -467,6 +467,7 @@ class MainWindow(QMainWindow):
                 return
             self.Worker_Test = videoDbTestThreadClass()
             self.Worker_Test.label_configPath = self.label_configPath
+            self.Worker_Test.frame = int(self.txt_analysisFrame.text())
             self.Worker_Test.start()
 
     def showMessageDialog(self, msg, title):
@@ -558,7 +559,7 @@ class camTestThreadClass(QThread):
 class videoTestThreadClass(QThread):
     def run(self):
         self.ThreadActive = True
-        parkingLot_detect_video(videoPath,self.data)
+        parkingLot_detect_video(videoPath,self.data,self.frame)
     def stop(self):
         self.ThreadActive = False
         stopTesting()
@@ -576,7 +577,7 @@ class cameraDbTestThreadClass(QThread):
 class videoDbTestThreadClass(QThread):
     def run(self):
         self.ThreadActive = True
-        start_detect_video_db_test(videoPath,self.label_configPath.text())
+        start_detect_video_db_test(videoPath,self.label_configPath.text(),self.frame)
     def stop(self):
         self.ThreadActive = False
         stopTesting()
