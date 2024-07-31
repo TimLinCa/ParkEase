@@ -91,6 +91,7 @@
 	  <None Remove="Resources\Images\back_to.png" />
 	  <None Remove="Resources\Images\close_icon.png" />
 	  <None Remove="Resources\Images\filter.png" />
+	  <None Remove="Resources\Images\location.jpeg" />
 	  <None Remove="Resources\Images\parkease_logo.png" />
 	  <None Remove="Resources\Images\qr_code.png" />
 	</ItemGroup>

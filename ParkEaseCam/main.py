@@ -14,7 +14,7 @@ import numpy as np
 import gridfs
 from functools import partial
 import pickle
-from yolo import parkingLot_detect_video,parkingLot_detect_cam,start_detect_video,stopTesting,start_detect_cam_db_test
+from yolo import parkingLot_detect_video,parkingLot_detect_cam,stopTesting,start_detect_cam_db_test,start_detect_video_db_test
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
@@ -62,7 +62,6 @@ class MainWindow(QMainWindow):
         self.bnt_saveconfig.clicked.connect(self.saveConfig)
         self.bnt_loadconfig.clicked.connect(self.loadConfig)
         self.bnt_importVideo.clicked.connect(self.importVideo)
-        self.bnt_importTestConfig.clicked.connect(self.importTestConfig)
         self.bnt_loadArea.clicked.connect(self.loadPrivateArea)
         self.btn_bind.clicked.connect(self.bindCam)
         self.bnt_dbTest.clicked.connect(self.DbTest)
@@ -146,6 +145,13 @@ class MainWindow(QMainWindow):
             self.stopWebcam()
         if hasattr(self, 'Worker_Test') and self.Worker_Test.isRunning():
             self.Worker_Test.stop()
+            return
+        fileName = self.getConfigFileName()
+        file = configGridFs.find_one({"filename": fileName})
+        if not file:
+            self.showMessageDialog("Config file not found","Error")
+            return
+        data = pickle.loads(file.read())
 
         if self.rab_cam.isChecked():
             global camIndex
@@ -153,12 +159,6 @@ class MainWindow(QMainWindow):
             if self.label_configPath.text() == '':
                 self.showMessageDialog("Please load or save the config file","Error")
                 return
-            fileName = self.getConfigFileName()
-            file = configGridFs.find_one({"filename": fileName})
-            if not file:
-                self.showMessageDialog("Config file not found","Error")
-                return
-            data = pickle.loads(file.read())
             self.Worker_Test = camTestThreadClass()
             self.Worker_Test.data = data
             self.Worker_Test.start()
@@ -167,10 +167,9 @@ class MainWindow(QMainWindow):
             global videoPath
             if videoPath == '':
                 return
-            if self.txt_testConfigPath.text() == '':
-                return
             self.Worker_Test = videoTestThreadClass()
-            self.Worker_Test.txt_testConfigPath = self.txt_testConfigPath
+            self.Worker_Test.data = data
+            self.Worker_Test.frame = int(self.txt_analysisFrame.text())
             self.Worker_Test.start()
             
             
@@ -246,8 +245,13 @@ class MainWindow(QMainWindow):
         if self.label_configPath.text() == '':
             return
         if self.cmb_areaType.currentText() == 'Private':
+            if self.rab_cam.isChecked():
+                configType = "camera"
+            else:
+                configType = "video"
+            
             fileName = self.getConfigFileName()
-            config = CamConfig.find_one({'name':fileName})
+            config = CamConfig.find_one({'name':fileName, "type": configType})
             if config:
                 lotIds = config.get("lotIds")
                 selectedIndex = self.label_seletedIndex.text()
@@ -255,8 +259,6 @@ class MainWindow(QMainWindow):
                     self.label_lotId.setText(lotIds[selectedIndex])
                 else:
                     self.label_lotId.setText('')
-        
-
 
     def saveConfig(self):
         polylines = []
@@ -271,70 +273,58 @@ class MainWindow(QMainWindow):
             polylines.append(np.array(points,np.int32))
             area_names.append(item.index)
         data={'polylines':polylines,'area_names':area_names}
+
         if self.rab_cam.isChecked():
-            areaType = self.cmb_areaType.currentText()
-            floor = self.cmb_floor.currentText()
-            fileName = self.getConfigFileName()
-            if fileName == None:
-                return
-            file = configGridFs.find_one({"filename": fileName})
-            if file:
-                configGridFs.delete(file._id)
-            configGridFs.put(pickle.dumps(data),filename=fileName)
-            self.label_configPath.setText(fileName)
-            if areaType == 'Private':
-                self.label_floor.setText(floor)
-                self.showMessageDialog("Config file saved successfully","Success")
-            else:
-                cameraName = self.txt_cameraName.text()
-                areaName = self.cmb_areaName.currentText()
-                camDeviceName = self.online_cam[self.camlist.currentIndex()].deviceName()
-                config = CamConfig.find_one({'name':fileName})
-                area = publicArea.find_one({'ParkingSpot':areaName})
-                myDict = {"name": fileName,
-                          "displayName": cameraName,
-                          "areaType": areaType,
-                          "areaId": area.get('_id'),
-                          "camDeviceName": camDeviceName}
-                if config:
-                    CamConfig.find_one_and_update({'name':fileName},{'$set':myDict})
-                    self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
-                else:
-                    CamConfig.insert_one(myDict)
-                    self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
+            configType = "camera"
         else:
-            name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
-            if name[0] == '':
-                return
-            with open(name[0],"wb") as f:
-                pickle.dump(data,f)
-            self.label_configPath.setText(name[0])
+            configType = "video"
+
+        areaType = self.cmb_areaType.currentText()
+        floor = self.cmb_floor.currentText()
+        fileName = self.getConfigFileName()
+        if fileName == None:
+            return
+        file = configGridFs.find_one({"filename": fileName})
+        if file:
+            configGridFs.delete(file._id)
+        configGridFs.put(pickle.dumps(data),filename=fileName)
+        self.label_configPath.setText(fileName)
+        if areaType == 'Private':
+            self.label_floor.setText(floor)
             self.showMessageDialog("Config file saved successfully","Success")
+        else:
+            cameraName = self.txt_cameraName.text()
+            areaName = self.cmb_areaName.currentText()
+            camDeviceName = self.online_cam[self.camlist.currentIndex()].deviceName()
+            config = CamConfig.find_one({'name':fileName, "type": configType})
+            area = publicArea.find_one({'ParkingSpot':areaName})
+            myDict = {"name": fileName,
+                      "type": configType,
+                      "displayName": cameraName,
+                      "areaType": areaType,
+                      "areaId": area.get('_id'),
+                      "camDeviceName": camDeviceName}
+            if config:
+                CamConfig.find_one_and_update({'name':fileName, "type": configType},{'$set':myDict})
+                self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
+            else:
+                CamConfig.insert_one(myDict)
+                self.showMessageDialog("Camera(" + cameraName +") is set to area(" + areaName + ")successfully","Success")
             
     def loadConfig(self):
         data = None
-        if self.rab_cam.isChecked():
-            areaType = self.cmb_areaType.currentText()
-            fileName = self.getConfigFileName()
-            file = configGridFs.find_one({"filename": fileName})
-            if not file:
-                self.showMessageDialog("Config file not found","Error")
-                return
-            data = pickle.loads(file.read())
-            self.label_configPath.setText(fileName)
-            if areaType == 'Private':
-                floor = self.cmb_floor.currentText()
-                self.label_floor.setText(floor)
-        else:
-            name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
-            if name[0] == '':
-                return
-            with open(name[0],"rb") as f:
-                for item in self.m_scene.items():
-                    if isinstance(item, PolygonAnnotation) or isinstance(item, GripItem):
-                        self.m_scene.removeItem(item)
-                data = pickle.load(f)
-            self.label_configPath.setText(name[0])
+        areaType = self.cmb_areaType.currentText()
+        fileName = self.getConfigFileName()
+        file = configGridFs.find_one({"filename": fileName})
+        if not file:
+            self.showMessageDialog("Config file not found","Error")
+            return
+        data = pickle.loads(file.read())
+        self.label_configPath.setText(fileName)
+        if areaType == 'Private':
+            floor = self.cmb_floor.currentText()
+            self.label_floor.setText(floor)
+      
         self.m_scene.clearPolygons()
         polylines = data['polylines']
         area_names = data['area_names']
@@ -422,9 +412,15 @@ class MainWindow(QMainWindow):
         if areaType == 'Private':
             floor = self.cmb_floor.currentText()
             fileName = fileName + "_" + floor
-        config = CamConfig.find_one({'name':fileName})
-       
-        
+
+            
+        if self.rab_cam.isChecked():
+            configType = "camera"
+        else:
+            configType = "video"
+
+        config = CamConfig.find_one({'name':fileName, "type": configType})
+      
         area = privateArea.find_one({'CompanyName':areaName})
         lotId = self.cmb_lotId.currentText()
         selectedIndex = self.label_seletedIndex.text()
@@ -434,16 +430,18 @@ class MainWindow(QMainWindow):
             lotIds[selectedIndex] = lotId
             mydict = {"name": fileName,
                   "displayName": cameraName,
+                  "type": configType,
                   "areaType": areaType,
                   "areaId": area.get('_id'),
                   "camDeviceName": camDeviceName,
                   "lotIds": lotIds}
-            CamConfig.find_one_and_update({'name':fileName},{'$set':mydict})
+            CamConfig.find_one_and_update({'name':fileName, "type": configType},{'$set':mydict})
             self.showMessageDialog("Camera(" + cameraName +") updated successfully","Success")
         else:
             lotIds = {selectedIndex: lotId}
             mydict = {"name": fileName, 
              "displayName": cameraName,
+             "type": configType,
              "areaType": areaType,
              "areaId": area.get('_id'),
              "camDeviceName": camDeviceName,
@@ -467,10 +465,9 @@ class MainWindow(QMainWindow):
             global videoPath
             if videoPath == '':
                 return
-            if self.txt_testConfigPath.text() == '':
-                return
             self.Worker_Test = videoDbTestThreadClass()
-            self.Worker_Test.txt_testConfigPath = self.txt_testConfigPath
+            self.Worker_Test.label_configPath = self.label_configPath
+            self.Worker_Test.frame = int(self.txt_analysisFrame.text())
             self.Worker_Test.start()
 
     def showMessageDialog(self, msg, title):
@@ -556,14 +553,16 @@ class camTestThreadClass(QThread):
         parkingLot_detect_cam(camIndex,self.data)
     def stop(self):
         self.ThreadActive = False
+        stopTesting()
         self.quit()
 
 class videoTestThreadClass(QThread):
     def run(self):
         self.ThreadActive = True
-        parkingLot_detect_video(videoPath,self.txt_testConfigPath.text())
+        parkingLot_detect_video(videoPath,self.data,self.frame)
     def stop(self):
         self.ThreadActive = False
+        stopTesting()
         self.quit()
 
 class cameraDbTestThreadClass(QThread):
@@ -578,8 +577,7 @@ class cameraDbTestThreadClass(QThread):
 class videoDbTestThreadClass(QThread):
     def run(self):
         self.ThreadActive = True
-        cmd = f'start cmd /k python -c "import yolo; yolo.start_detect_video(\'{videoPath}\', \'{self.txt_testConfigPath.text()}\', \'Private\', \'666763d4d2c61b754e32a094\')"'
-        subprocess.Popen(cmd, shell=True)
+        start_detect_video_db_test(videoPath,self.label_configPath.text(),self.frame)
     def stop(self):
         self.ThreadActive = False
         stopTesting()
