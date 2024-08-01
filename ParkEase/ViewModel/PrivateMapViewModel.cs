@@ -269,12 +269,12 @@ namespace ParkEase.ViewModel
             }
         }
 
-        /*partial void OnSelectedFloorNameChanged(string? value)
+        partial void OnSelectedFloorNameChanged(string? value)
         {
-            _ = ShowSelectedMap();
-        }*/
+            ImgSourceData = null;
+        }
 
-        
+
 
         public async Task Run(CancellationToken token)
         {
