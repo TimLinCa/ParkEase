@@ -348,11 +348,18 @@ namespace ParkEase.ViewModel
                 currentEndDate = IsCurrentDayCheck ? DateOnly.FromDateTime(DateTime.Now) : DateOnly.FromDateTime(SelectedDateRange.EndDate.Value);
                 currentStartTime = IsAllDayCheck ? TimeOnly.MinValue : new TimeOnly(StartTime.Hours, StartTime.Minutes, 0);
                 currentEndTime = IsAllDayCheck ? TimeOnly.MaxValue : new TimeOnly(EndTime.Hours, EndTime.Minutes, 0);
-
+                if(AreaNameText == null || AreaNameText == string.Empty)
+                {
+                    throw new Exception("Please select an area name");
+                }
                 switch(AreaTypeSelected)
                 {
                     case "Public":
                         ParkingData parkingData = parkingDatas.FirstOrDefault(pd => pd.ParkingSpot == AreaNameText);
+                        if (parkingData == null)
+                        {
+                            throw new Exception($"The data for area {AreaNameText}.");
+                        }
                         parkingLogs = (await mongoDBService.GetData<PublicLog>(CollectionName.PublicLogs)).Cast<ParkingLog>().ToList();
                         parkingLogs = parkingLogs.Where(pl => pl.AreaId.Equals(parkingData.Id) &&
                         pl.Timestamp >= currentStartDate.ToDateTime(TimeOnly.MinValue) &&
@@ -363,7 +370,10 @@ namespace ParkEase.ViewModel
                         string areaName = strings[0];
                         string address = strings[1].Replace(")", "");
                         PrivateParking privateParking = privateParkings.FirstOrDefault(pp => pp.CompanyName == areaName && pp.Address == address);
-
+                        if (privateParking == null)
+                        {
+                            throw new Exception($"The data for area {areaName}.");
+                        }
                         List<PrivateLog> privateLogs = await mongoDBService.GetData<PrivateLog>(CollectionName.PrivateLogs);
                         if (!IsAllFloorCheck)
                         {

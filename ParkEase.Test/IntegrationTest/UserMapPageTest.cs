@@ -555,5 +555,25 @@ namespace ParkEase.Test.IntergartionTest
             DismissBottomSheetAsyncCalled = true;
             return Task.CompletedTask;
         }
+
+        public Task<bool> ShowConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No")
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<MyBottomSheet> ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng, bool isLocationSaved = false)
+        {
+            return Task.FromResult(new MyBottomSheet());
+        }
+
+        public void UpdateBottomSheetAvailability(string availability)
+        {
+            return;
+        }
+
+        public Task OpenGoogleMap(string Lat, string Lng, TravelMode travelMode)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

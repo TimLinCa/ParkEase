@@ -65,21 +65,20 @@ namespace ParkEase.Test.UnitTest
             // Arrange
             viewModel.StartTime = new TimeSpan(10, 0, 0);
             viewModel.EndTime = new TimeSpan(9, 0, 0);
-
             // Act
             await viewModel.ApplyCommand.ExecuteAsync(null);
 
             // Assert
-            dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "End time should be greater than start time", "OK"), Times.Once);
+            dialogServiceMock.Verify(d => d.ShowAlertAsync("Error", "End time should be greater than start time 1 hour", "OK"), Times.Once);
         }
 
         [Fact]
         public async Task ApplyCommand_NoDateRangeSelected_ShowsErrorDialog()
         {
             // Arrange
+            viewModel.IsAllDayCheck = true;
             viewModel.IsCurrentDayCheck = false;
             viewModel.SelectedDateRange = null;
-
             // Act
             await viewModel.ApplyCommand.ExecuteAsync(null);
 
@@ -130,7 +129,7 @@ namespace ParkEase.Test.UnitTest
             viewModel.IsCurrentDayCheck = true;
             viewModel.AreaTypeSelected = "Public";
             viewModel.AreaNameSelected = "ParkingSpot1";
-
+            viewModel.AreaNameText = "ParkingSpot1";
             // Act
             viewModel.ApplyCommand.Execute(null);
 
@@ -162,10 +161,11 @@ namespace ParkEase.Test.UnitTest
             viewModel.IsCurrentDayCheck = true;
             viewModel.AreaTypeSelected = "Private";
             viewModel.AreaNameSelected = "Company(Address)";
+            viewModel.AreaNameText = "Company(Address)";
             viewModel.IsAllFloorCheck = true;
 
             // Act
-            viewModel.ApplyCommand.Execute(null);
+            await viewModel.ApplyCommand.ExecuteAsync(null);
 
             // Assert
             Assert.NotNull(viewModel.UsageSeriesCollection);
@@ -196,9 +196,9 @@ namespace ParkEase.Test.UnitTest
             viewModel.SelectedDateRange = new CalendarDateRange(DateTime.Now.AddDays(-7), DateTime.Now);
             viewModel.AreaTypeSelected = "Public";
             viewModel.AreaNameSelected = "ParkingSpot1";
-
+            viewModel.AreaNameText = "ParkingSpot1";
             // Act
-            viewModel.ApplyCommand.Execute(null);
+            await viewModel.ApplyCommand.ExecuteAsync(null);
 
             // Assert
             Assert.NotNull(viewModel.UsageSeriesCollection);
@@ -221,9 +221,9 @@ namespace ParkEase.Test.UnitTest
             viewModel.IsCurrentDayCheck = true;
             viewModel.AreaTypeSelected = "Public";
             viewModel.AreaNameSelected = "ParkingSpot1";
-
+            viewModel.AreaNameText = "ParkingSpot1";
             // Act
-            viewModel.ApplyCommand.Execute(null);
+            await viewModel.ApplyCommand.ExecuteAsync(null);
 
             // Assert
             dialogServiceMock.Verify(d => d.ShowAlertAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);

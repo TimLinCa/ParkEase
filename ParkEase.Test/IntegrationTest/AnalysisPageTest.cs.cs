@@ -9,6 +9,7 @@ using ParkEase.Controls;
 using ParkEase.ViewModel;
 using The49.Maui.BottomSheet;
 using CollectionName = ParkEase.Core.Services.CollectionName;
+using ParkEase.Test.IntegrationTest.Services;
 namespace ParkEase.Test.IntergartionTest
 {
     public class TestDatabaseFixture : IAsyncLifetime
@@ -17,6 +18,8 @@ namespace ParkEase.Test.IntergartionTest
         public MongoDBService MongoDBService { get; private set; }
         public ParkEaseModel Model { get; private set; }
         public IAWSService AWSService { get; private set; }
+
+        public IDialogService DialogService { get; private set; }
 
         public async Task InitializeAsync()
         {
@@ -32,6 +35,8 @@ namespace ParkEase.Test.IntergartionTest
             Model = new ParkEaseModel(true);
             Model.User = new User();
             Model.User.Role = Roles.Administrator;
+
+            DialogService = new TestDialogService();
             // Seed test data
             await SeedTestDataAsync();
         }
@@ -215,52 +220,6 @@ namespace ParkEase.Test.IntergartionTest
             Assert.NotNull(_viewModel.ParkingTimeSeriesCollection);
             Assert.NotEmpty(_viewModel.AverageUsage);
             Assert.NotEmpty(_viewModel.AverageParkingTime);
-        }
-
-        public class TestDialogService : IDialogService
-        {
-            private List<(string Title, string Message, string Cancel)> _shownAlerts = new List<(string, string, string)>();
-            private List<(string Address, string ParkingFee, string LimitHour, string Availability, bool ShowButton, string Lat, string Lng)> _shownBottomSheets = new List<(string, string, string, string, bool, string, string)>();
-            private int _dismissBottomSheetCount = 0;
-
-            public Task ShowAlertAsync(string title, string message, string cancel = "OK")
-            {
-                _shownAlerts.Add((title, message, cancel));
-                return Task.CompletedTask;
-            }
-
-            public Task ShowBottomSheet(string address, string parkingFee, string limitHour, string availability, bool ShowButton, string lat, string lng)
-            {
-                _shownBottomSheets.Add((address, parkingFee, limitHour, availability, ShowButton, lat, lng));
-                return Task.CompletedTask;
-            }
-
-            public Task<MyBottomSheet> DismissBottomSheetAsync()
-            {
-                _dismissBottomSheetCount++;
-                return Task.FromResult<MyBottomSheet>(null);
-            }
-
-            // Methods to retrieve shown messages for testing
-            public List<(string Title, string Message, string Cancel)> GetShownAlerts()
-            {
-                return _shownAlerts;
-            }
-
-            public List<(string Address, string ParkingFee, string LimitHour, string Availability, bool ShowButton, string Lat, string Lng)> GetShownBottomSheets()
-            {
-                return _shownBottomSheets;
-            }
-
-            public int GetDismissBottomSheetCount()
-            {
-                return _dismissBottomSheetCount;
-            }
-
-            public Task<bool> ShowConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No")
-            {
-                return Task.FromResult(true);
-            }
         }
     }
 }

@@ -8,15 +8,15 @@ namespace ParkEase.PerformanceTest
     {
         public static void Main(string[] args)
         {
-            bool analysispage = true;
-            bool privateSearchPage = true;
-            bool SignUpPage = true;
-            bool LogInPage = true;
-            bool MapPage = true;
-            bool PrivateMapPage = true;
-            bool createMapPage = true;
+            bool analysisPage = true;
+            bool privateSearchPage = false;
+            bool SignUpPage = false;
+            bool LogInPage = false;
+            bool MapPage = false;
+            bool PrivateMapPage = false;
+            bool createMapPage = false;
 
-            if (analysispage) BenchmarkRunner.Run<AnalysisViewModelBenchmarks>();
+            if (analysisPage) BenchmarkRunner.Run<AnalysisViewModelBenchmarks>();
             if (privateSearchPage) BenchmarkRunner.Run<PrivateSearchPageViewModelBenchmarks>();
             if (SignUpPage) BenchmarkRunner.Run<SignUpViewModelBenchmarks>();
             if (LogInPage) BenchmarkRunner.Run<LogInViewModelBenchmarks>();

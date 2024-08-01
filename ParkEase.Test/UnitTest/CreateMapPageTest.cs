@@ -128,8 +128,7 @@ namespace ParkEase.Test.UnitTest
                          .Returns(Task.CompletedTask);
 
             // Act
-            var command = (RelayCommand)viewModel.AddNewFloorCommand;
-            command.Execute(null);
+            await viewModel.AddNewFloorCommand.ExecuteAsync(null);
 
             // Wait for any asynchronous operations to complete
             await Task.Delay(500);
@@ -159,8 +158,7 @@ namespace ParkEase.Test.UnitTest
             // Set addNewFloorClicked to true
             viewModel.SetPrivate<bool>("addNewFloorClicked", true);
             // Try to save without clicking Add button
-            var command = (RelayCommand)viewModel.SaveFloorInfoCommand;
-            command.Execute(null);
+            await viewModel.SaveFloorInfoCommand.ExecuteAsync(null);
 
             // Wait for any asynchronous operations to complete
             await Task.Delay(500);
@@ -206,8 +204,7 @@ namespace ParkEase.Test.UnitTest
             // Set addNewFloorClicked to true
             viewModel.SetPrivate<bool>("addNewFloorClicked", false);
             // Try to save without clicking Add button
-            var command = (RelayCommand)viewModel.SaveFloorInfoCommand;
-            command.Execute(null);
+            await viewModel.SaveFloorInfoCommand.ExecuteAsync(null);
 
             // Wait for any asynchronous operations to complete
             await Task.Delay(500);
@@ -234,8 +231,7 @@ namespace ParkEase.Test.UnitTest
             viewModel.SetPrivate<bool>("addNewFloorClicked", true);
 
             // Act
-            var command = (RelayCommand)viewModel.SaveFloorInfoCommand;
-            command.Execute(null);
+            await viewModel.SaveFloorInfoCommand.ExecuteAsync(null);
 
             // Wait for any asynchronous operations to complete
             await Task.Delay(500);
@@ -259,7 +255,7 @@ namespace ParkEase.Test.UnitTest
         }
 
         [Fact]
-        public void EmptyFieldTest()
+        public async void EmptyFieldTest()
         {
             // Arrange
             viewModel.CompanyName = "Test Company";
@@ -280,8 +276,7 @@ namespace ParkEase.Test.UnitTest
                          .Returns(Task.CompletedTask);
 
             // Act
-            var command = (RelayCommand)viewModel.SubmitCommand;
-            command.Execute(null);
+            await viewModel.SubmitCommand.ExecuteAsync(null);
 
             // Assert
             Assert.Equal("Please check if all fields is filled up.", capturedMessage);
@@ -311,8 +306,7 @@ namespace ParkEase.Test.UnitTest
             viewModel.SetPrivate<byte[]>("imageData", updatedImageData);
 
             // Act
-            var command = (RelayCommand)viewModel.SaveFloorInfoCommand;
-            command.Execute(null);
+            await viewModel.SaveFloorInfoCommand.ExecuteAsync(null);
 
             // Wait for any asynchronous operations to complete
             await Task.Delay(500);
@@ -382,8 +376,7 @@ namespace ParkEase.Test.UnitTest
                 .ReturnsAsync(new List<PrivateParking> { privateParking });
 
             // Act
-            var command = (RelayCommand)viewModel.SubmitCommand;
-            command.Execute(null);
+            await viewModel.SaveFloorInfoCommand.ExecuteAsync(null);
 
             // Wait for any asynchronous operations to complete
             await Task.Delay(500);
@@ -619,7 +612,8 @@ namespace ParkEase.Test.UnitTest
 
             // Act: Trigger the LoadParkingInfoCommand
             viewModel.SelectedAddress = "Address"; // Set the selected address to trigger command execution
-            viewModel.LoadParkingInfoCommand.Execute(null);
+
+            await Task.Delay(1000);
 
             // Assert: Check that listFloorInfos and FloorNames are populated correctly
             Assert.Collection(viewModel.FloorNames,

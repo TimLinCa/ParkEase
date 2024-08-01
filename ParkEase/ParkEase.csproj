@@ -97,7 +97,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="appsettings.json" />
+	  <EmbeddedResource Include="appsettings.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
