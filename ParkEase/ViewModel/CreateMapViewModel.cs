@@ -559,7 +559,7 @@ namespace ParkEase.ViewModel
                         await mongoDBService.UpdateData(CollectionName.PrivateParking, filter, update);
                         await dialogService.ShowAlertAsync("Success", "Your data is updated.", "OK");
 
-                        RefreshPage();
+                        //RefreshPage();
                         _ = GetUserDataFromDatabase();
                     }
                     // if INSERT new data

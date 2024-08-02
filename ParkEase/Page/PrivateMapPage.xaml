@@ -70,7 +70,6 @@
                 HorizontalOptions="FillAndExpand"
                 ImageSource="{Binding ImgSourceData}"
                 ListRectangleFill="{Binding ListRectangleFill}"
-                MapImage="{Binding MapImageData}"
                 VerticalOptions="FillAndExpand"
                 ZIndex="0">
                 <controls:RecGraphicsView.Drawable>
@@ -79,108 +78,6 @@
             </controls:RecGraphicsView>
         </Grid>
 
-
-        <!--<Grid Grid.Row="1" Background="White">
-            <controls:RecGraphicsView
-        x:Name="GraphicsViewMobile"
-        HorizontalOptions="FillAndExpand"
-        ImageSource="{Binding ImgSourceData}"
-        ListRectangleFill="{Binding ListRectangleFill}"
-        MapImage="{Binding MapImageData}"
-        VerticalOptions="FillAndExpand"
-        ZIndex="0">
-                <controls:RecGraphicsView.Drawable>
-                    <controls:RectDrawable />
-                </controls:RecGraphicsView.Drawable>
-                <controls:RecGraphicsView.GestureRecognizers>
-                    <TapGestureRecognizer Buttons="Primary" Tapped="OnTapGestureRecognizerTapped" />
-                </controls:RecGraphicsView.GestureRecognizers>
-            </controls:RecGraphicsView>
-        </Grid>-->
-
-
-        <!--<Image
-            x:Name="testImage"
-            Grid.Column="2"
-            AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
-            AbsoluteLayout.LayoutFlags="All"
-            Aspect="AspectFit"
-            BackgroundColor="Black"
-            Source="{Binding MapImageData}" />-->
-
     </Grid>
-
-
-
-
-
-    <!--<Grid>
-            <controls:RecGraphicsView
-            x:Name="RectangleDrawableViewMobile"
-            MinimumHeightRequest="650"
-            MinimumWidthRequest="100"
-            ImageSource="{Binding ImgSourceData}"
-            ListRectangle="{Binding ListRectangle}">
-                <controls:RecGraphicsView.GestureRecognizers>
-                    <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
-                    <PanGestureRecognizer PanUpdated="OnPanUpdated" />
-                </controls:RecGraphicsView.GestureRecognizers>
-                <controls:RecGraphicsView.Drawable>
-                    <controls:RectDrawable/>
-                </controls:RecGraphicsView.Drawable>
-            </controls:RecGraphicsView>
-        </Grid>-->
-
-
-
-    <!--<Grid>
-            <controls:RecGraphicsView
-            x:Name="RectangleDrawableViewMobile"
-            MinimumHeightRequest="650"
-            MinimumWidthRequest="100"
-            ImageSource="{Binding ImgSourceData}"
-            ListRectangle="{Binding ListRectangle}">
-
-                <controls:RecGraphicsView.Behaviors>
-                    <behaviors:PinchGestureBehavior Command="{Binding OnPinchUpdated}" />
-                    <behaviors:PanGestureBehavior Command="{Binding OnPanUpdated}" />
-                </controls:RecGraphicsView.Behaviors>
-
-                <controls:RecGraphicsView.Drawable>
-                    <controls:RectDrawable />
-                </controls:RecGraphicsView.Drawable>
-            </controls:RecGraphicsView>
-        </Grid>-->
-
-    <!--<Grid>
-            <BoxView Color="Blue" WidthRequest="100" HeightRequest="300">
-                <BoxView.Behaviors>
-                    <behaviors:PinchGestureBehavior Command="{Binding OnPinchUpdated}" />
-                    <behaviors:PanGestureBehavior Command="{Binding OnPanUpdated}" />
-                </BoxView.Behaviors>
-            </BoxView>
-        </Grid>-->
-
-    <!--<Grid>
-            <controls:PanContainer>
-                <controls:RecGraphicsView
-                    x:Name="RectangleDrawableViewMobile"
-                    ImageSource="{Binding ImgSourceData}"
-                    ListRectangle="{Binding ListRectangle}"
-                    MinimumHeightRequest="650"
-                    MinimumWidthRequest="100">
-                    <controls:RecGraphicsView.Drawable>
-                        <controls:RectDrawable />
-                    </controls:RecGraphicsView.Drawable>
-                </controls:RecGraphicsView>
-            </controls:PanContainer>
-        </Grid>-->
-
-
-    <!--<Grid>
-            <controls:PanContainer>
-                <BoxView Color="Blue" WidthRequest="100" HeightRequest="300" />
-            </controls:PanContainer>
-        </Grid>-->
 
 </ContentPage>
