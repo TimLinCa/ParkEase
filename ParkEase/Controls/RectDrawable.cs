@@ -26,9 +26,9 @@ namespace ParkEase.Controls
 
         public ObservableCollection<Rectangle>? ListRectangleFill { get; set; }
 
-        public float RectWidth { get; set; } = 100;
+        //public float RectWidth { get; set; } = 100;
 
-        public float RectHeight { get; set; } = 50;
+        //public float RectHeight { get; set; } = 50;
 
         public float DrawingImageWidth { get; set; }
         public float DrawingImageHeight { get; set; }

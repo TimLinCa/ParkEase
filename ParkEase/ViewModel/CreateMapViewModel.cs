@@ -136,8 +136,8 @@ namespace ParkEase.ViewModel
             address = string.Empty;
             fee = 0;
             limitHour = 0;
-            rectWidth = 100;
-            rectHeight = 50;
+            rectWidth = 196;
+            rectHeight = 75;
             ListRectangle = new ObservableCollection<Rectangle>();
             listFloorInfos = new List<FloorInfo>();
             FloorNames = new ObservableCollection<string>();
@@ -156,6 +156,7 @@ namespace ParkEase.ViewModel
         #region OnPropertyChangedEvent
         partial void OnSelectedAddressChanged(string propertyName)
         {
+            ResetFloorInfo();
             _ = LoadParkingInfo();
         }
 
@@ -663,12 +664,13 @@ namespace ParkEase.ViewModel
                         {
                             // Update the PrivateParking object in MongoDB
                             var filter = Builders<PrivateParking>.Filter.Eq(p => p.Id, deletedFloorAddressSelected.Id);
+                            deletedFloorAddressSelected.FloorInfo.Remove(floorToRemove);
                             var update = Builders<PrivateParking>.Update.Set(p => p.FloorInfo, deletedFloorAddressSelected.FloorInfo);
 
                             await mongoDBService.UpdateData(CollectionName.PrivateParking, filter, update);
 
                             // Remove the floor from selected address, listFloorInfos (if users loaded it) and ListFloorsToDelete
-                            deletedFloorAddressSelected.FloorInfo.Remove(floorToRemove);
+                            //deletedFloorAddressSelected.FloorInfo.Remove(floorToRemove);
                             listFloorInfos.Remove(floorToRemove);
                             ListFloorsToDelete.Remove(FloorToDelete);
                             FloorToDelete = null;
@@ -785,8 +787,8 @@ namespace ParkEase.ViewModel
         {
             Floor = "";
             ImgSourceData = null;
-            RectWidth = 100;
-            RectHeight = 50;
+            rectWidth = 196;
+            rectHeight = 75;
             ListRectangle.Clear();
             addNewFloorClicked = false;
         }
