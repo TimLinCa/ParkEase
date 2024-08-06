@@ -136,8 +136,8 @@ namespace ParkEase.ViewModel
             address = string.Empty;
             fee = 0;
             limitHour = 0;
-            rectWidth = 196;
-            rectHeight = 75;
+            rectWidth = 100;
+            rectHeight = 50;
             ListRectangle = new ObservableCollection<Rectangle>();
             listFloorInfos = new List<FloorInfo>();
             FloorNames = new ObservableCollection<string>();
@@ -787,8 +787,8 @@ namespace ParkEase.ViewModel
         {
             Floor = "";
             ImgSourceData = null;
-            rectWidth = 196;
-            rectHeight = 75;
+            rectWidth = 100;
+            rectHeight = 50;
             ListRectangle.Clear();
             addNewFloorClicked = false;
         }

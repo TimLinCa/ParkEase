@@ -26,10 +26,6 @@ namespace ParkEase.Controls
 
         public ObservableCollection<Rectangle>? ListRectangleFill { get; set; }
 
-        //public float RectWidth { get; set; } = 100;
-
-        //public float RectHeight { get; set; } = 50;
-
         public float DrawingImageWidth { get; set; }
         public float DrawingImageHeight { get; set; }
 
@@ -46,27 +42,6 @@ namespace ParkEase.Controls
                     {
                         //Calculate image width and height to show
                         //https://stackoverflow.com/questions/63541099/how-do-you-get-the-aspect-fit-size-of-a-uiimage-in-a-uimageview
-
-                        /*float viewRatio = dirtyRect.Width / dirtyRect.Height;
-                        float imageRatio = image.Width / image.Height;
-                        float offsetX, offsetY, drawWidth, drawHeight;
-
-                        if (imageRatio <= viewRatio)
-                        {
-                            drawHeight = dirtyRect.Height;
-                            drawWidth = drawHeight / imageRatio;
-
-                            offsetY = 0;
-                            offsetX = (dirtyRect.Width - drawWidth) / 2;
-                        }
-                        else
-                        {
-                            drawWidth = dirtyRect.Width;
-                            drawHeight = drawWidth / imageRatio;
-
-                            offsetX = 0;
-                            offsetY = (dirtyRect.Height - drawHeight) / 2;
-                        }*/
 
                         float viewRatio = 1134 / 830;
                         float imageRatio = image.Width / image.Height;
